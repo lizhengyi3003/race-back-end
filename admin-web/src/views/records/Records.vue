@@ -1,0 +1,194 @@
+<script setup lang="ts">
+import { onMounted, reactive, ref } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { listRecords, deleteRecord, getRecord, type AssessmentRecord } from '@/api/admin'
+import { exportRecords } from '@/api/data'
+
+const loading = ref(false)
+const records = ref<AssessmentRecord[]>([])
+const total = ref(0)
+const query = reactive({ page: 1, size: 10, keyword: '', level: '', businessType: '' })
+const detailVisible = ref(false)
+const detail = ref<any>(null)
+
+async function load() {
+  loading.value = true
+  try {
+    const res = await listRecords(query)
+    records.value = res.items
+    total.value = res.total
+  } finally {
+    loading.value = false
+  }
+}
+
+function search() {
+  query.page = 1
+  load()
+}
+
+function levelTag(level: string) {
+  return level === '低风险' ? 'success' : level === '中等风险' ? 'warning' : 'danger'
+}
+
+async function showDetail(row: AssessmentRecord) {
+  try {
+    detail.value = await getRecord(row.id)
+    detailVisible.value = true
+  } catch {
+    // 忽略
+  }
+}
+
+async function remove(row: AssessmentRecord) {
+  await ElMessageBox.confirm(`确定删除「${row.enterpriseName}」的评估记录吗？`, '提示', { type: 'warning' })
+  await deleteRecord(row.id)
+  ElMessage.success('已删除')
+  load()
+}
+
+onMounted(load)
+</script>
+
+<template>
+  <div class="page-container">
+    <div class="page-header">
+      <h1>评估记录</h1>
+      <p>涉农主体信贷风险评估历史记录管理</p>
+    </div>
+
+    <div class="info-card">
+      <div class="toolbar">
+        <el-input
+          v-model="query.keyword"
+          placeholder="搜索企业名称/主营产品"
+          clearable
+          style="width: 240px"
+          @keyup.enter="search"
+        />
+        <el-select v-model="query.level" placeholder="风险等级" clearable style="width: 140px">
+          <el-option label="低风险" value="低风险" />
+          <el-option label="中等风险" value="中等风险" />
+          <el-option label="高风险" value="高风险" />
+        </el-select>
+        <el-select v-model="query.businessType" placeholder="经营类型" clearable style="width: 140px">
+          <el-option label="种植" value="种植" />
+          <el-option label="养殖" value="养殖" />
+          <el-option label="加工" value="加工" />
+          <el-option label="混合" value="混合" />
+        </el-select>
+        <el-button type="primary" @click="search">查询</el-button>
+        <div style="flex: 1" />
+        <el-button type="success" plain @click="exportRecords">导出 CSV</el-button>
+      </div>
+
+      <el-table v-loading="loading" :data="records" stripe>
+        <el-table-column prop="id" label="ID" width="70" />
+        <el-table-column prop="enterpriseName" label="企业名称" min-width="170" show-overflow-tooltip />
+        <el-table-column prop="businessType" label="经营类型" width="90" />
+        <el-table-column prop="productType" label="主营产品" width="110" show-overflow-tooltip />
+        <el-table-column label="信用评分" width="110">
+          <template #default="{ row }">
+            <span
+              :style="{
+                color: row.score >= 700 ? '#67c23a' : row.score >= 500 ? '#e6a23c' : '#f56c6c',
+                fontWeight: 600,
+              }"
+              >{{ row.score }}</span
+            >
+          </template>
+        </el-table-column>
+        <el-table-column label="风险等级" width="100">
+          <template #default="{ row }">
+            <el-tag :type="levelTag(row.level)" size="small">{{ row.level }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="suggestedAmount" label="建议额度(万)" width="110" />
+        <el-table-column prop="suggestedRate" label="建议利率(%)" width="100" />
+        <el-table-column prop="assessorName" label="评估人" width="100" />
+        <el-table-column prop="createdAt" label="时间" width="170">
+          <template #default="{ row }">{{ row.createdAt?.replace('T', ' ').slice(0, 19) }}</template>
+        </el-table-column>
+        <el-table-column label="操作" width="130" fixed="right">
+          <template #default="{ row }">
+            <el-button link type="primary" size="small" @click="showDetail(row)">详情</el-button>
+            <el-button link type="danger" size="small" @click="remove(row)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <el-pagination
+        v-model:current-page="query.page"
+        v-model:page-size="query.size"
+        :total="total"
+        layout="total, sizes, prev, pager, next"
+        :page-sizes="[10, 20, 50]"
+        style="margin-top: 16px; justify-content: flex-end"
+        @change="load"
+      />
+    </div>
+
+    <!-- 详情抽屉 -->
+    <el-drawer v-model="detailVisible" title="评估详情" size="560px">
+      <template v-if="detail">
+        <el-descriptions :column="2" border>
+          <el-descriptions-item label="企业名称">{{ detail.enterpriseName }}</el-descriptions-item>
+          <el-descriptions-item label="经营类型">{{ detail.businessType || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="信用评分" :span="2">
+            <span
+              :style="{
+                color: detail.score >= 700 ? '#67c23a' : detail.score >= 500 ? '#e6a23c' : '#f56c6c',
+                fontWeight: 700,
+                fontSize: 18,
+              }"
+              >{{ detail.score }}</span
+            >
+          </el-descriptions-item>
+          <el-descriptions-item label="违约概率">{{ (detail.probability * 100).toFixed(2) }}%</el-descriptions-item>
+          <el-descriptions-item label="风险等级">
+            <el-tag :type="levelTag(detail.level)" size="small">{{ detail.level }}</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="建议额度">{{ detail.suggestedAmount }} 万元</el-descriptions-item>
+          <el-descriptions-item label="建议利率">{{ detail.suggestedRate }}%</el-descriptions-item>
+        </el-descriptions>
+
+        <h4 style="margin: 18px 0 10px">风险输入指标</h4>
+        <el-descriptions :column="2" border size="small">
+          <el-descriptions-item label="年龄">{{ detail.age ?? '-' }} 岁</el-descriptions-item>
+          <el-descriptions-item label="受教育程度">{{ detail.education || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="家庭成员数量">{{ detail.familyMembers ?? '-' }} 人</el-descriptions-item>
+          <el-descriptions-item label="土地确权面积">{{ detail.landConfirmedArea ?? '-' }} 亩</el-descriptions-item>
+          <el-descriptions-item label="土地流转年限">{{ detail.landTransferYears ?? '-' }} 年</el-descriptions-item>
+          <el-descriptions-item label="种植结构">{{ detail.plantingStructure || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="土地规模利用率">{{ detail.landUtilization ?? '-' }}%</el-descriptions-item>
+          <el-descriptions-item label="粮食直补">{{ detail.grainSubsidy ?? '-' }} 元</el-descriptions-item>
+          <el-descriptions-item label="农机补贴">{{ detail.machinerySubsidy ?? '-' }} 元</el-descriptions-item>
+          <el-descriptions-item label="其他补贴">{{ detail.otherSubsidy ?? '-' }} 元</el-descriptions-item>
+          <el-descriptions-item label="保险覆盖率">{{ detail.insuranceCoverage ?? '-' }}%</el-descriptions-item>
+          <el-descriptions-item label="理赔次数">{{ detail.claimCount ?? '-' }} 次</el-descriptions-item>
+          <el-descriptions-item label="理赔金额">{{ detail.claimAmount ?? '-' }} 元</el-descriptions-item>
+          <el-descriptions-item label="理赔金额占比">{{ detail.claimRatio ?? '-' }}%</el-descriptions-item>
+          <el-descriptions-item label="经营年限">{{ detail.yearsOperating ?? '-' }} 年</el-descriptions-item>
+          <el-descriptions-item label="经营范围集中度">{{ detail.businessConcentration ?? '-' }}%</el-descriptions-item>
+          <el-descriptions-item label="年销售收入">{{ detail.annualRevenue ?? '-' }} 万元</el-descriptions-item>
+          <el-descriptions-item label="收入稳定性">{{ detail.revenueStability || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="经营者征信">{{ detail.creditStatus || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="历史贷款记录">{{ detail.loanHistory ?? '-' }} 次</el-descriptions-item>
+          <el-descriptions-item label="历史逾期记录">{{ detail.loanOverdueHistory ?? '-' }} 次</el-descriptions-item>
+        </el-descriptions>
+
+        <template v-if="detail.result?.deductions?.length">
+          <h4 style="margin: 18px 0 10px">主要扣分项</h4>
+          <el-table :data="detail.result.deductions" size="small">
+            <el-table-column prop="factor" label="指标" />
+            <el-table-column prop="score" label="得分" width="80" />
+            <el-table-column prop="reason" label="原因" />
+          </el-table>
+        </template>
+
+        <h4 style="margin: 18px 0 10px">信贷建议</h4>
+        <el-alert :title="detail.result?.advice || '-'" type="info" :closable="false" />
+      </template>
+    </el-drawer>
+  </div>
+</template>

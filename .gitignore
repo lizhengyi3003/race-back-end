@@ -1,0 +1,33 @@
+# ===== Python =====
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# ===== 数据与模型（保留目录结构）=====
+data/*.db
+data/*.db-journal
+data/models/*
+!data/models/.gitkeep
+data/samples/*
+!data/samples/.gitkeep
+
+# ===== Node / 前端构建 =====
+node_modules/
+dist/
+admin-web/dist/
+admin-web/node_modules/
+*.local
+
+# ===== IDE / 系统 =====
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.log
+.DS_Store
+Thumbs.db

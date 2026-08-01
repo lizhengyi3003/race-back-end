@@ -1,0 +1,20 @@
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+src = ["app", "scripts", "tests"]
+
+[tool.ruff.lint]
+# E: pycodestyle 错误, F: pyflakes(未使用/未定义), I: isort(导入排序),
+# UP: pyupgrade(现代语法), B: bugbear(常见陷阱)
+select = ["E", "F", "I", "UP", "B"]
+# B008: 允许 FastAPI Depends 作为默认参数
+# UP046/UP047: 保持 Generic[T] 写法（pydantic 兼容性更好）
+ignore = ["B008", "UP046", "UP047"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"

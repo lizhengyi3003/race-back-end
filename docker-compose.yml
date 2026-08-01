@@ -1,0 +1,45 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: race-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: race123456
+      MYSQL_DATABASE: race
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-prace123456"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  backend:
+    build: .
+    container_name: race-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      # 使用容器内 MySQL（连接串中主机名为 mysql 服务名）
+      DATABASE_URL: mysql+pymysql://root:race123456@mysql:3306/race?charset=utf8mb4
+      JWT_SECRET_KEY: please-change-me-in-production
+      JWT_EXPIRE_MINUTES: 1440
+      CORS_ORIGINS: "*"
+      AUTO_TRAIN_ON_STARTUP: "true"
+      SEED_SAMPLES: "3000"
+    ports:
+      - "8000:8000"
+    volumes:
+      - model_data:/app/data/models
+      - sample_data:/app/data/samples
+
+volumes:
+  mysql_data:
+  model_data:
+  sample_data:
