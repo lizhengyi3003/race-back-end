@@ -27,12 +27,13 @@ services:
         condition: service_healthy
     environment:
       # 使用容器内 MySQL（连接串中主机名为 mysql 服务名）
-      DATABASE_URL: mysql+pymysql://root:race123456@mysql:3306/race?charset=utf8mb4
-      JWT_SECRET_KEY: please-change-me-in-production
-      JWT_EXPIRE_MINUTES: 1440
-      CORS_ORIGINS: "*"
-      AUTO_TRAIN_ON_STARTUP: "true"
-      SEED_SAMPLES: "3000"
+      # 以下变量均可通过同目录 .env 覆盖（如 JWT_SECRET_KEY=xxx、CORS_ORIGINS=https://xx.pages.dev）
+      DATABASE_URL: ${DATABASE_URL:-mysql+pymysql://root:race123456@mysql:3306/race?charset=utf8mb4}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-please-change-me-in-production}
+      JWT_EXPIRE_MINUTES: ${JWT_EXPIRE_MINUTES:-1440}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+      AUTO_TRAIN_ON_STARTUP: ${AUTO_TRAIN_ON_STARTUP:-true}
+      SEED_SAMPLES: ${SEED_SAMPLES:-3000}
     ports:
       - "8000:8000"
     volumes:
