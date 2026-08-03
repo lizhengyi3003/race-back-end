@@ -152,12 +152,24 @@ def health(db: Session) -> HealthStatus:
     except Exception:
         db_ok = False
 
-    path = model_artifact.latest_artifact()
-    model_exists = path is not None
-    version = None
-    if model_exists:
-        model = model_artifact.load_scorecard(path)
-        version = model.version if model else None
+    # 模型：优先 DB active 版本（与实际生效模型一致），其次磁盘最新文件
+    from app.models.model_version import ModelVersion
+
+    model = None
+    mv = (
+        db.query(ModelVersion)
+        .filter(ModelVersion.status == "active")
+        .order_by(ModelVersion.id.desc())
+        .first()
+    )
+    if mv and mv.artifact_path:
+        model = model_artifact.load_scorecard(mv.artifact_path)
+    if model is None:
+        path = model_artifact.latest_artifact()
+        if path:
+            model = model_artifact.load_scorecard(path)
+    model_exists = model is not None
+    version = model.version if model else None
 
     status = (
         "healthy" if (service_ok and db_ok and model_exists) else ("degraded" if (service_ok and db_ok) else "down")
