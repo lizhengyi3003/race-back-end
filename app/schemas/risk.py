@@ -4,45 +4,35 @@ from pydantic import BaseModel
 
 
 class RiskInput(BaseModel):
-    """涉农企业风险录入数据（六大类21项替代数据指标体系）"""
+    """涉农企业风险录入数据（文档 3.3.2 四大维度 15 项替代数据指标体系）"""
 
     # 基本信息
     enterpriseName: str = ""
     businessType: str = ""  # 经营类型：种植/养殖/加工/混合
     productType: str = ""  # 主营产品
 
-    # === 户主特征类 ===
-    age: float | None = None  # 年龄（岁）
-    education: str = ""  # 受教育程度：小学及以下/初中/高中/大专及以上
-    familyMembers: float | None = None  # 家庭成员数量（人）
+    # === 维度一：土地经营类 ===
+    landConfirmedArea: float | None = None  # 确权耕地总面积（亩）
+    landTransferYears: float | None = None  # 土地流转合同年限（年）
+    landTransferStability: str = ""  # 稳定/小幅调整/频繁变更
+    blackSoilProtection: float | None = None  # 黑土地保护性耕作面积（亩）
 
-    # === 第一类：土地经营类 ===
-    landConfirmedArea: float | None = None  # 土地确权面积（亩）
-    landTransferYears: float | None = None  # 土地流转年限（年）
-    plantingStructure: str = ""  # 种植结构：主粮/经济作物/混合/设施农业
-    landUtilization: float | None = None  # 土地规模利用率（%）
+    # === 维度二：农业补贴类 ===
+    grainSubsidy: float | None = None  # 耕地地力保护补贴（元）
+    machinerySubsidy: float | None = None  # 大型农机购置补贴（元）
+    grainScaleSubsidy: float | None = None  # 粮食规模种植专项补贴（元）
+    specialtyCropSubsidy: float | None = None  # 特色经济作物补贴（元）
 
-    # === 第二类：农业补贴类 ===
-    grainSubsidy: float | None = None  # 粮食直补金额（元）
-    machinerySubsidy: float | None = None  # 农机购置补贴（元）
-    otherSubsidy: float | None = None  # 其他涉农补贴（元）
+    # === 维度三：农业保险类 ===
+    insuranceYears: float | None = None  # 农业保险连续投保年限（年）
+    claimCount: float | None = None  # 历史保险理赔频次（次）
+    facilityInsurance: str = ""  # 完整投保/仅基础险/未投保
 
-    # === 第三类：农业保险类 ===
-    insuranceCoverage: float | None = None  # 农业保险覆盖率（%）
-    claimCount: float | None = None  # 历年理赔次数（次）
-    claimAmount: float | None = None  # 历年理赔金额（元）
-    claimRatio: float | None = None  # 理赔金额占比（%）
-
-    # === 第四类：经营稳定性类 ===
-    yearsOperating: float | None = None  # 经营年限（年）
-    businessConcentration: float | None = None  # 经营范围集中度（%）
-    annualRevenue: float | None = None  # 年销售收入（万元）
-    revenueStability: str = ""  # 销售收入稳定性
-    creditStatus: str = ""  # 经营者征信状况
-
-    # === 第五类：贷款历史类 ===
-    loanHistory: float | None = None  # 历史贷款记录（次，0=无）
-    loanOverdueHistory: float | None = None  # 历史逾期记录（次，0=无）
+    # === 维度四：产销经营类 ===
+    yearsOperating: float | None = None  # 主体持续经营年限（年）
+    purchaseOrder: str = ""  # 年度订单/零散收购/无稳定渠道
+    annualRevenue: float | None = None  # 农产品年稳定营收（万元）
+    creditRecord: str = ""  # 无逾期/有逾期
 
 
 class FactorContribution(BaseModel):

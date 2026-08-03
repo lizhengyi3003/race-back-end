@@ -3,7 +3,8 @@
 对齐商业计划书 3.3.1 技术路线。评分卡刻度公式：
     B = PDO / ln(2)（PDO=50 → B≈72.13）
     Score = base_score + Σ(-B · coef_i · (WOE_i - WOE_mean_i))
-其中 base_score 默认 550（评分中心），每指标贡献分 = -B·coef_i·(WOE_i - WOE_mean_i)。
+其中 base_score 默认 600（评分中心，对齐行业惯例 A=600），每指标贡献分 = -B·coef_i·(WOE_i - WOE_mean_i)。
+SMOTE 在原始特征空间、分箱之前进行（仅训练集），避免对 WOE 编码后数据插值影响边界稳定性。
 """
 
 from __future__ import annotations
@@ -26,7 +27,7 @@ class Scorecard:
         min_iv: float = 0.02,
         vif_threshold: float = 10.0,
         pdo: float = 50.0,
-        base_score: float = 550.0,
+        base_score: float = 600.0,
         random_state: int = 42,
         use_smote: bool = True,
     ):
@@ -60,7 +61,33 @@ class Scorecard:
         self.n_samples = n
         total_bad = int(df[target_col].sum())
 
-        # 1) 全量分箱
+        # 1) 训练 / 测试划分（原始特征，分层，防数据泄漏）
+        y_all = df[target_col].values.astype(int)
+        df_train, df_test = train_test_split(df, test_size=0.2, random_state=self.random_state, stratify=y_all)
+        y_train = df_train[target_col].values.astype(int)
+        y_test = df_test[target_col].values.astype(int)
+        # 保存 SMOTE 前训练集（PSI 基线：真实客群分布，避免失衡失真）
+        df_train_orig = df_train.copy()
+
+        # 2) SMOTE（原始特征空间、分箱之前，仅训练集）
+        #    分类列 ordinal 编码 → 插值后取最近类别，避免对 WOE 后数据插值影响边界稳定性
+        smote_applied = False
+        n_bad_train = int(y_train.sum())
+        n_good_train = int((y_train == 0).sum())
+        if self.use_smote and 0 < n_bad_train < n_good_train:
+            try:
+                from imblearn.over_sampling import SMOTE
+
+                X_enc, cat_maps = self._encode_categorical(df_train[INDICATOR_ORDER])
+                smote = SMOTE(random_state=self.random_state)
+                X_res, y_train = smote.fit_resample(X_enc, y_train)
+                df_train = self._decode_categorical(X_res, cat_maps)
+                df_train[target_col] = y_train
+                smote_applied = True
+            except Exception:
+                smote_applied = False
+
+        # 3) 分箱（仅训练集）
         for field in INDICATOR_ORDER:
             binner = WOEBinner(
                 field,
@@ -68,10 +95,10 @@ class Scorecard:
                 max_bins=self.max_bins,
                 min_bin_pct=self.min_bin_pct,
             )
-            binner.fit(df[field], df[target_col])
+            binner.fit(df_train[field], df_train[target_col])
             self.binners[field] = binner
 
-        # 2) IV 值特征筛选（IV < min_iv 剔除）
+        # 4) IV 值特征筛选（IV < min_iv 剔除）
         iv_scores = {f: b.iv_ for f, b in self.binners.items()}
         self.iv_table = [
             {"factor": f, "iv": round(iv_scores[f], 6), "nBins": len(self.binners[f].bins_)} for f in INDICATOR_ORDER
@@ -81,39 +108,16 @@ class Scorecard:
             # 极端兜底：全部 IV 过低时保留 IV 最高的 3 个
             keep = sorted(INDICATOR_ORDER, key=lambda f: iv_scores[f], reverse=True)[:3]
 
-        # 3) WOE 转换
-        woe_df = pd.DataFrame(index=df.index)
-        for f in keep:
-            woe_df[f] = df[f].apply(self.binners[f].transform)
+        # 5) WOE 转换（训练集）
+        woe_train = self._woe_frame(df_train, keep)
+        X_train = woe_train[keep].values
 
-        # 4) VIF 共线性诊断（逐步剔除 VIF > 阈值）
-        selected = self._vif_selection(woe_df, keep)
+        # 6) VIF 共线性诊断（逐步剔除 VIF > 阈值）
+        selected = self._vif_selection(woe_train, keep)
         self.feature_names = selected
+        X_train = woe_train[selected].values
 
-        # 5) 训练 / 测试划分
-        X = woe_df[selected].values
-        y = df[target_col].values.astype(int)
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=0.2, random_state=self.random_state, stratify=y
-        )
-        # 保留 SMOTE 前原始训练集（用于 PSI 群体稳定性对比，避免失衡失真）
-        X_train_orig = X_train.copy()
-
-        # 5.1) SMOTE 过采样（仅训练集，避免数据泄漏；违约样本合成扩增）
-        smote_applied = False
-        n_bad_train = int((y_train == 1).sum())
-        n_good_train = int((y_train == 0).sum())
-        if self.use_smote and 0 < n_bad_train < n_good_train:
-            try:
-                from imblearn.over_sampling import SMOTE
-
-                smote = SMOTE(random_state=self.random_state)
-                X_train, y_train = smote.fit_resample(X_train, y_train)
-                smote_applied = True
-            except Exception:
-                smote_applied = False
-
-        # 6) Logistic 回归（类别平衡 + 正则化）
+        # 7) Logistic 回归（类别平衡 + 正则化）
         lr = LogisticRegression(
             class_weight="balanced",
             C=1.0,
@@ -124,16 +128,17 @@ class Scorecard:
         self.coef = lr.coef_[0]
         self.intercept = float(lr.intercept_[0])
 
-        # 7) 评分刻度
+        # 8) 评分刻度
         for i, f in enumerate(selected):
             self.woe_means[f] = float(X_train[:, i].mean())
         self.A = self.base_score + self.B * sum(float(self.coef[i]) * self.woe_means[f] for i, f in enumerate(selected))
 
-        # 8) 评估指标（测试集）
+        # 9) 评估指标（测试集：用训练集分箱器转换，防泄漏）
         from app.core.config import settings
         from app.ml.evaluate import evaluate_binary
 
-        y_prob = lr.predict_proba(X_test)[:, 1]
+        woe_test = self._woe_frame(df_test, selected)
+        y_prob = lr.predict_proba(woe_test[selected].values)[:, 1]
         # 业务判定阈值：评分 < 高风险阈值（默认500）视为预测违约，映射回违约概率阈值。
         # 信用评分场景用业务阈值而非 bestThreshold，避免类不平衡下精确率失真。
         high_risk_th = int(settings.HIGH_RISK_THRESHOLD)
@@ -155,23 +160,56 @@ class Scorecard:
         ]
         self.metrics["featureNames"] = selected
 
-        # 9) 5 折交叉验证
+        # 10) 5 折交叉验证（全量 WOE）
         cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=self.random_state)
-        cv_scores = cross_val_score(lr, X, y, cv=cv, scoring="roc_auc")
+        X_all = self._woe_frame(df, selected)[selected].values
+        cv_scores = cross_val_score(lr, X_all, y_all, cv=cv, scoring="roc_auc")
         self.metrics["cvScores"] = [round(float(s), 4) for s in cv_scores]
 
-        # 10) PSI（SMOTE 前原始训练集 vs 测试集评分分布）
+        # 11) PSI（SMOTE 前训练集 vs 测试集评分分布）
         try:
             from app.ml.evaluate import compute_psi
 
-            orig_train_logit = self.intercept + X_train_orig @ self.coef
-            train_score = self.score_from_logit(orig_train_logit)
-            test_score = self.score_from_logit(self.intercept + X_test @ self.coef)
+            woe_orig = self._woe_frame(df_train_orig, selected)
+            train_score = self.score_from_logit(self.intercept + woe_orig[selected].values @ self.coef)
+            test_score = self.score_from_logit(self.intercept + woe_test[selected].values @ self.coef)
             self.metrics["psi"] = round(compute_psi(train_score, test_score), 6)
         except Exception:
             self.metrics["psi"] = None
 
         return self
+
+    # ---------------------------------------------------------------
+    def _encode_categorical(self, df_feat: pd.DataFrame) -> tuple[np.ndarray, dict[int, tuple[list, dict]]]:
+        """分类列 ordinal 编码为数值矩阵（SMOTE 前）"""
+        cat_maps: dict[int, tuple[list, dict]] = {}
+        X = np.zeros((len(df_feat), len(INDICATOR_ORDER)))
+        for j, f in enumerate(INDICATOR_ORDER):
+            if f in CATEGORICAL_FIELDS:
+                cats = sorted(df_feat[f].dropna().unique().tolist())
+                mapping = {c: i for i, c in enumerate(cats)}
+                cat_maps[j] = (cats, mapping)
+                X[:, j] = [mapping.get(v, 0) for v in df_feat[f]]
+            else:
+                X[:, j] = pd.to_numeric(df_feat[f], errors="coerce").fillna(0).values.astype(float)
+        return X, cat_maps
+
+    def _decode_categorical(self, X_res: np.ndarray, cat_maps: dict[int, tuple[list, dict]]) -> pd.DataFrame:
+        """SMOTE 插值后：分类列取最近类别，数值列还原"""
+        df_res = pd.DataFrame(X_res, columns=INDICATOR_ORDER)
+        for j, f in enumerate(INDICATOR_ORDER):
+            if f in CATEGORICAL_FIELDS:
+                cats, _ = cat_maps[j]
+                idx = np.clip(np.rint(df_res[f].values).astype(int), 0, len(cats) - 1)
+                df_res[f] = [cats[i] for i in idx]
+        return df_res
+
+    def _woe_frame(self, df: pd.DataFrame, fields: list[str]) -> pd.DataFrame:
+        """用已拟合分箱器将原始特征转为 WOE 矩阵"""
+        woe = pd.DataFrame(index=df.index)
+        for f in fields:
+            woe[f] = df[f].apply(self.binners[f].transform)
+        return woe
 
     # ---------------------------------------------------------------
     def _vif_selection(self, woe_df: pd.DataFrame, keep: list[str]) -> list[str]:

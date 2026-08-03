@@ -154,27 +154,21 @@ onMounted(load)
 
         <h4 style="margin: 18px 0 10px">风险输入指标</h4>
         <el-descriptions :column="2" border size="small">
-          <el-descriptions-item label="年龄">{{ detail.age ?? '-' }} 岁</el-descriptions-item>
-          <el-descriptions-item label="受教育程度">{{ detail.education || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="家庭成员数量">{{ detail.familyMembers ?? '-' }} 人</el-descriptions-item>
-          <el-descriptions-item label="土地确权面积">{{ detail.landConfirmedArea ?? '-' }} 亩</el-descriptions-item>
-          <el-descriptions-item label="土地流转年限">{{ detail.landTransferYears ?? '-' }} 年</el-descriptions-item>
-          <el-descriptions-item label="种植结构">{{ detail.plantingStructure || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="土地规模利用率">{{ detail.landUtilization ?? '-' }}%</el-descriptions-item>
-          <el-descriptions-item label="粮食直补">{{ detail.grainSubsidy ?? '-' }} 元</el-descriptions-item>
-          <el-descriptions-item label="农机补贴">{{ detail.machinerySubsidy ?? '-' }} 元</el-descriptions-item>
-          <el-descriptions-item label="其他补贴">{{ detail.otherSubsidy ?? '-' }} 元</el-descriptions-item>
-          <el-descriptions-item label="保险覆盖率">{{ detail.insuranceCoverage ?? '-' }}%</el-descriptions-item>
-          <el-descriptions-item label="理赔次数">{{ detail.claimCount ?? '-' }} 次</el-descriptions-item>
-          <el-descriptions-item label="理赔金额">{{ detail.claimAmount ?? '-' }} 元</el-descriptions-item>
-          <el-descriptions-item label="理赔金额占比">{{ detail.claimRatio ?? '-' }}%</el-descriptions-item>
-          <el-descriptions-item label="经营年限">{{ detail.yearsOperating ?? '-' }} 年</el-descriptions-item>
-          <el-descriptions-item label="经营范围集中度">{{ detail.businessConcentration ?? '-' }}%</el-descriptions-item>
-          <el-descriptions-item label="年销售收入">{{ detail.annualRevenue ?? '-' }} 万元</el-descriptions-item>
-          <el-descriptions-item label="收入稳定性">{{ detail.revenueStability || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="经营者征信">{{ detail.creditStatus || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="历史贷款记录">{{ detail.loanHistory ?? '-' }} 次</el-descriptions-item>
-          <el-descriptions-item label="历史逾期记录">{{ detail.loanOverdueHistory ?? '-' }} 次</el-descriptions-item>
+          <el-descriptions-item label="确权耕地总面积">{{ detail.landConfirmedArea ?? '-' }} 亩</el-descriptions-item>
+          <el-descriptions-item label="土地流转合同年限">{{ detail.landTransferYears ?? '-' }} 年</el-descriptions-item>
+          <el-descriptions-item label="土地流转稳定性">{{ detail.landTransferStability || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="黑土地保护耕作面积">{{ detail.blackSoilProtection ?? '-' }} 亩</el-descriptions-item>
+          <el-descriptions-item label="耕地地力保护补贴">{{ detail.grainSubsidy ?? '-' }} 元</el-descriptions-item>
+          <el-descriptions-item label="大型农机购置补贴">{{ detail.machinerySubsidy ?? '-' }} 元</el-descriptions-item>
+          <el-descriptions-item label="粮食规模种植补贴">{{ detail.grainScaleSubsidy ?? '-' }} 元</el-descriptions-item>
+          <el-descriptions-item label="特色经济作物补贴">{{ detail.specialtyCropSubsidy ?? '-' }} 元</el-descriptions-item>
+          <el-descriptions-item label="农业保险连续投保年限">{{ detail.insuranceYears ?? '-' }} 年</el-descriptions-item>
+          <el-descriptions-item label="历史保险理赔频次">{{ detail.claimCount ?? '-' }} 次</el-descriptions-item>
+          <el-descriptions-item label="设施农业附加保险">{{ detail.facilityInsurance || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="主体持续经营年限">{{ detail.yearsOperating ?? '-' }} 年</el-descriptions-item>
+          <el-descriptions-item label="长期收购订单">{{ detail.purchaseOrder || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="农产品年稳定营收">{{ detail.annualRevenue ?? '-' }} 万元</el-descriptions-item>
+          <el-descriptions-item label="历年信贷履约记录">{{ detail.creditRecord || '-' }}</el-descriptions-item>
         </el-descriptions>
 
         <template v-if="detail.result?.deductions?.length">

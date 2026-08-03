@@ -16,7 +16,7 @@ def test_assess_contract(client):
     assert data["level"] in ("低风险", "中等风险", "高风险")
     assert data["suggestedAmount"] >= 0
     assert data["suggestedRate"] > 0
-    assert len(data["contributions"]) == 21
+    assert len(data["contributions"]) == 15
     assert len(data["deductions"]) == 3
     assert data["advice"]
 
@@ -36,22 +36,21 @@ def test_assess_discriminates(client):
     bad_input = dict(SAMPLE_INPUT)
     bad_input.update(
         {
-            "age": 70,
-            "education": "小学及以下",
-            "familyMembers": 1,
             "landConfirmedArea": 30,
             "landTransferYears": 0,
-            "plantingStructure": "",
-            "insuranceCoverage": 10,
+            "landTransferStability": "频繁变更",
+            "blackSoilProtection": 0,
+            "grainSubsidy": 800,
+            "machinerySubsidy": 0,
+            "grainScaleSubsidy": 0,
+            "specialtyCropSubsidy": 0,
+            "insuranceYears": 0,
             "claimCount": 6,
-            "claimAmount": 120000,
-            "claimRatio": 55,
+            "facilityInsurance": "未投保",
             "yearsOperating": 1,
-            "annualRevenue": 8,
-            "revenueStability": "大幅波动",
-            "creditStatus": "严重失信",
-            "loanHistory": 8,
-            "loanOverdueHistory": 5,
+            "purchaseOrder": "无稳定渠道",
+            "annualRevenue": 5,
+            "creditRecord": "有逾期",
         }
     )
     bad = client.post("/api/v1/risk/assess", json=bad_input).json()["data"]
@@ -90,12 +89,11 @@ def test_override_rules_extreme(client):
     extreme = {
         "enterpriseName": "灾损户",
         "landConfirmedArea": 300,
-        "landUtilization": 20,
-        "insuranceCoverage": 15,
+        "blackSoilProtection": 0,
+        "insuranceYears": 0,
         "claimCount": 6,
-        "claimRatio": 80,
         "annualRevenue": 20,
-        "creditStatus": "轻微逾期",
+        "creditRecord": "有逾期",
     }
     r = client.post("/api/v1/risk/assess", json=extreme)
     body = r.json()

@@ -1,6 +1,6 @@
-"""21 项涉农替代数据指标定义 + 规则评分卡（评分卡刻度 0-1000）。
+"""15 项涉农替代数据指标定义 + 规则评分卡（评分卡刻度 0-1000）。
 
-六大类：户主特征 / 土地经营 / 农业补贴 / 农业保险 / 经营稳定性 / 贷款历史。
+四大维度：土地经营 / 农业补贴 / 农业保险 / 产销经营（文档 3.3.2）。
 对齐前端 fore-end/src/utils/riskModel.ts 的分箱与权重逻辑，
 用于：1) 无训练模型时的兜底评估；2) 模型未选中指标的可解释展示。
 """
@@ -10,149 +10,117 @@ from __future__ import annotations
 from typing import Any
 
 # ---------------------------------------------------------------
-# 指标元数据（顺序即展示顺序）
+# 指标元数据（顺序即展示顺序；权重 = 文档维度权重 × 维度内分值比例）
 # ---------------------------------------------------------------
 INDICATOR_META: dict[str, dict[str, Any]] = {
-    # 第一类：户主特征类
-    "age": {"name": "年龄", "category": "户主特征类", "weight": 0.04, "unit": "岁", "type": "continuous"},
-    "education": {"name": "受教育程度", "category": "户主特征类", "weight": 0.05, "unit": "", "type": "categorical"},
-    "family_members": {
-        "name": "家庭成员数量",
-        "category": "户主特征类",
-        "weight": 0.03,
-        "unit": "人",
-        "type": "continuous",
-    },
-    # 第二类：土地经营类
+    # 维度一：土地经营类（38%）
     "land_confirmed_area": {
-        "name": "土地确权面积",
+        "name": "确权耕地总面积",
         "category": "土地经营类",
-        "weight": 0.06,
+        "weight": 0.136,
         "unit": "亩",
         "type": "continuous",
     },
     "land_transfer_years": {
-        "name": "土地流转年限",
+        "name": "土地流转合同年限",
         "category": "土地经营类",
-        "weight": 0.04,
+        "weight": 0.109,
         "unit": "年",
         "type": "continuous",
     },
-    "planting_structure": {
-        "name": "种植结构",
+    "land_transfer_stability": {
+        "name": "土地流转稳定性",
         "category": "土地经营类",
-        "weight": 0.04,
+        "weight": 0.081,
         "unit": "",
         "type": "categorical",
     },
-    "land_utilization": {
-        "name": "土地规模利用率",
+    "black_soil_protection": {
+        "name": "黑土地保护性耕作面积",
         "category": "土地经营类",
-        "weight": 0.05,
-        "unit": "%",
+        "weight": 0.054,
+        "unit": "亩",
         "type": "continuous",
     },
-    # 第三类：农业补贴类
+    # 维度二：农业补贴类（27%）
     "grain_subsidy": {
-        "name": "粮食直补金额",
+        "name": "耕地地力保护补贴",
         "category": "农业补贴类",
-        "weight": 0.04,
+        "weight": 0.088,
         "unit": "元",
         "type": "continuous",
     },
     "machinery_subsidy": {
-        "name": "农机购置补贴",
+        "name": "大型农机购置补贴",
         "category": "农业补贴类",
-        "weight": 0.04,
+        "weight": 0.074,
         "unit": "元",
         "type": "continuous",
     },
-    "other_subsidy": {
-        "name": "其他涉农补贴",
+    "grain_scale_subsidy": {
+        "name": "粮食规模种植专项补贴",
         "category": "农业补贴类",
-        "weight": 0.03,
+        "weight": 0.059,
         "unit": "元",
         "type": "continuous",
     },
-    # 第四类：农业保险类
-    "insurance_coverage": {
-        "name": "农业保险覆盖率",
-        "category": "农业保险类",
-        "weight": 0.08,
-        "unit": "%",
-        "type": "continuous",
-    },
-    "claim_count": {
-        "name": "历年理赔次数",
-        "category": "农业保险类",
-        "weight": 0.04,
-        "unit": "次",
-        "type": "continuous",
-    },
-    "claim_amount": {
-        "name": "历年理赔金额",
-        "category": "农业保险类",
-        "weight": 0.05,
+    "specialty_crop_subsidy": {
+        "name": "特色经济作物补贴",
+        "category": "农业补贴类",
+        "weight": 0.049,
         "unit": "元",
         "type": "continuous",
     },
-    "claim_ratio": {
-        "name": "理赔金额占比",
+    # 维度三：农业保险类（20%）
+    "insurance_years": {
+        "name": "农业保险连续投保年限",
         "category": "农业保险类",
-        "weight": 0.05,
-        "unit": "%",
-        "type": "continuous",
-    },
-    # 第五类：经营稳定性类
-    "years_operating": {
-        "name": "经营年限",
-        "category": "经营稳定性类",
-        "weight": 0.07,
+        "weight": 0.089,
         "unit": "年",
         "type": "continuous",
     },
-    "business_concentration": {
-        "name": "经营范围集中度",
-        "category": "经营稳定性类",
-        "weight": 0.05,
-        "unit": "%",
+    "claim_count": {
+        "name": "历史保险理赔频次",
+        "category": "农业保险类",
+        "weight": 0.067,
+        "unit": "次",
         "type": "continuous",
     },
+    "facility_insurance": {
+        "name": "设施农业附加保险",
+        "category": "农业保险类",
+        "weight": 0.044,
+        "unit": "",
+        "type": "categorical",
+    },
+    # 维度四：产销经营类（15%）
+    "years_operating": {
+        "name": "主体持续经营年限",
+        "category": "产销经营类",
+        "weight": 0.044,
+        "unit": "年",
+        "type": "continuous",
+    },
+    "purchase_order": {
+        "name": "长期农产品收购订单",
+        "category": "产销经营类",
+        "weight": 0.037,
+        "unit": "",
+        "type": "categorical",
+    },
     "annual_revenue": {
-        "name": "年销售收入",
-        "category": "经营稳定性类",
-        "weight": 0.06,
+        "name": "农产品年稳定营收",
+        "category": "产销经营类",
+        "weight": 0.031,
         "unit": "万元",
         "type": "continuous",
     },
-    "revenue_stability": {
-        "name": "销售收入稳定性",
-        "category": "经营稳定性类",
-        "weight": 0.05,
+    "credit_record": {
+        "name": "历年涉农信贷履约记录",
+        "category": "产销经营类",
+        "weight": 0.037,
         "unit": "",
         "type": "categorical",
-    },
-    "credit_status": {
-        "name": "经营者征信",
-        "category": "经营稳定性类",
-        "weight": 0.06,
-        "unit": "",
-        "type": "categorical",
-    },
-    # 第六类：贷款历史类
-    "loan_history": {
-        "name": "历史贷款记录",
-        "category": "贷款历史类",
-        "weight": 0.03,
-        "unit": "次",
-        "type": "continuous",
-    },
-    "loan_overdue_history": {
-        "name": "历史逾期记录",
-        "category": "贷款历史类",
-        "weight": 0.04,
-        "unit": "次",
-        "type": "continuous",
     },
 }
 
@@ -160,27 +128,21 @@ INDICATOR_ORDER: list[str] = list(INDICATOR_META.keys())
 
 # camelCase（前端契约）→ snake_case（模型字段）映射
 CAMEL_TO_SNAKE: dict[str, str] = {
-    "age": "age",
-    "education": "education",
-    "familyMembers": "family_members",
     "landConfirmedArea": "land_confirmed_area",
     "landTransferYears": "land_transfer_years",
-    "plantingStructure": "planting_structure",
-    "landUtilization": "land_utilization",
+    "landTransferStability": "land_transfer_stability",
+    "blackSoilProtection": "black_soil_protection",
     "grainSubsidy": "grain_subsidy",
     "machinerySubsidy": "machinery_subsidy",
-    "otherSubsidy": "other_subsidy",
-    "insuranceCoverage": "insurance_coverage",
+    "grainScaleSubsidy": "grain_scale_subsidy",
+    "specialtyCropSubsidy": "specialty_crop_subsidy",
+    "insuranceYears": "insurance_years",
     "claimCount": "claim_count",
-    "claimAmount": "claim_amount",
-    "claimRatio": "claim_ratio",
+    "facilityInsurance": "facility_insurance",
     "yearsOperating": "years_operating",
-    "businessConcentration": "business_concentration",
+    "purchaseOrder": "purchase_order",
     "annualRevenue": "annual_revenue",
-    "revenueStability": "revenue_stability",
-    "creditStatus": "credit_status",
-    "loanHistory": "loan_history",
-    "loanOverdueHistory": "loan_overdue_history",
+    "creditRecord": "credit_record",
 }
 SNAKE_TO_CAMEL: dict[str, str] = {v: k for k, v in CAMEL_TO_SNAKE.items()}
 
@@ -203,132 +165,101 @@ def _bin_score(value: float, bins: list[tuple[float, float, float]]) -> float:
     return 10.0
 
 
-def _score_land_area(v: float) -> float:
-    return _bin_score(v, [(0, 50, 20), (50, 200, 55), (200, 500, 80), (500, 1e18, 95)])
+def _score_land_confirmed_area(v: float) -> float:
+    # 文档：>300亩25分；200-300-20；50-200-12；<50-5（归一化 0-100）
+    return _bin_score(v, [(0, 50, 20), (50, 200, 48), (200, 300, 80), (300, 1e18, 100)])
 
 
-def _score_transfer_years(v: float) -> float:
-    return _bin_score(v, [(0, 1, 20), (1, 3, 50), (3, 5, 75), (5, 1e18, 95)])
+def _score_land_transfer_years(v: float) -> float:
+    # 文档：≥3年书面20分；1年书面10；口头2（归一化 0-100）
+    return _bin_score(v, [(0, 1, 10), (1, 3, 50), (3, 1e18, 100)])
 
 
-def _score_planting(v: str) -> float:
-    return {"主粮种植": 70, "经济作物": 85, "混合经营": 92, "设施农业": 82}.get(v, 50)
+def _score_land_transfer_stability(v: str) -> float:
+    # 文档：稳定15分；小幅调整6；频繁变更0
+    return {"稳定": 100, "小幅调整": 40, "频繁变更": 0}.get(v, 40)
 
 
-def _score_utilization(v: float) -> float:
-    return _bin_score(v, [(0, 50, 40), (50, 70, 60), (70, 90, 85), (90, 1e18, 98)])
+def _score_black_soil_protection(v: float) -> float:
+    # 黑土地保护性耕作覆盖比例（0-100%）：全覆盖10分；部分4；无0
+    return _bin_score(v, [(0, 40, 0), (40, 80, 40), (80, 1e18, 100)])
 
 
-def _score_subsidy(v: float, ceiling: float) -> float:
-    if v <= 0:
-        return 30.0
-    return _clamp(round(v / ceiling * 90 + 10), 10, 100)
+def _score_grain_subsidy(v: float) -> float:
+    # 地力补贴：>1万18分；5千-1万12；1千-5千6；<1千2（归一化 0-100）
+    return _bin_score(v, [(0, 1000, 11), (1000, 5000, 33), (5000, 10000, 67), (10000, 1e18, 100)])
 
 
-def _score_insurance(v: float) -> float:
-    return _bin_score(v, [(0, 30, 30), (30, 60, 60), (60, 80, 82), (80, 1e18, 98)])
+def _score_machinery_subsidy(v: float) -> float:
+    # 农机补贴：近3年申领大型15分；小型6；无0
+    return _bin_score(v, [(0, 10000, 0), (10000, 50000, 40), (50000, 1e18, 100)])
+
+
+def _score_grain_scale_subsidy(v: float) -> float:
+    # 规模种植补贴：连续2年12分；单次5；无0
+    return _bin_score(v, [(0, 5000, 0), (5000, 20000, 42), (20000, 1e18, 100)])
+
+
+def _score_specialty_crop_subsidy(v: float) -> float:
+    # 特色作物补贴：常年10分；无0
+    return _bin_score(v, [(0, 1000, 0), (1000, 1e18, 100)])
+
+
+def _score_insurance_years(v: float) -> float:
+    # 投保年限：≥3年16分；1-2年8；无0
+    return _bin_score(v, [(0, 1, 0), (1, 3, 50), (3, 1e18, 100)])
 
 
 def _score_claim_count(v: float) -> float:
+    # 理赔频次：无12分；1次6；≥2次1
     if v <= 0:
         return 100.0
-    if v <= 2:
-        return 60.0
-    if v <= 5:
-        return 35.0
-    return 15.0
-
-
-def _score_claim_ratio(v: float) -> float:
-    return _bin_score(v, [(0, 10, 90), (10, 30, 70), (30, 60, 45), (60, 1e18, 20)])
-
-
-def _score_operating_years(v: float) -> float:
-    return _bin_score(v, [(0, 2, 30), (2, 5, 60), (5, 10, 85), (10, 1e18, 98)])
-
-
-def _score_concentration(v: float) -> float:
-    if 70 <= v <= 90:
-        return 95.0
-    if 50 <= v < 70:
-        return 75.0
-    if v > 90:
-        return 80.0
-    if 30 <= v < 50:
-        return 55.0
-    return 35.0
-
-
-def _score_revenue(v: float) -> float:
-    return _bin_score(v, [(0, 20, 25), (20, 60, 55), (60, 150, 80), (150, 1e18, 95)])
-
-
-def _score_revenue_stability(v: str) -> float:
-    return {"稳定": 98, "基本稳定": 80, "波动较大": 50, "大幅波动": 25}.get(v, 50)
-
-
-def _score_credit_status(v: str) -> float:
-    return {"无不良记录": 98, "轻微逾期": 70, "多次逾期": 35, "严重失信": 10}.get(v, 50)
-
-
-def _score_age(v: float) -> float:
-    # 务农主体：25-55 岁壮年为黄金还款期，年轻经验不足 / 年迈经营能力下降
-    return _bin_score(v, [(0, 25, 60), (25, 35, 85), (35, 55, 95), (55, 65, 80), (65, 1e18, 55)])
-
-
-def _score_education(v: str) -> float:
-    # 受教育程度 = 金融素养代理变量，学历越高信用越好
-    return {"小学及以下": 40, "初中": 65, "高中": 85, "大专及以上": 95}.get(v, 50)
-
-
-def _score_family_members(v: float) -> float:
-    # 家庭成员 3-5 人（劳动力充足且负担适中）评分最高
-    return _bin_score(v, [(0, 1, 40), (1, 3, 75), (3, 5, 95), (5, 7, 80), (7, 1e18, 60)])
-
-
-def _score_claim_amount(v: float) -> float:
-    # 历年理赔金额（元）越高，风险越大
-    return _bin_score(v, [(0, 1, 100), (1, 10000, 80), (10000, 50000, 60), (50000, 100000, 40), (100000, 1e18, 20)])
-
-
-def _score_loan_history(v: float) -> float:
-    # 有 1-5 次贷款记录（且逾期少）说明信用历史良好；无记录信息不足为中性
-    return _bin_score(v, [(0, 1, 55), (1, 3, 80), (3, 5, 90), (5, 1e18, 75)])
-
-
-def _score_loan_overdue_history(v: float) -> float:
-    # 历史逾期次数越多，信用越差（强负面信号）
-    if v <= 0:
-        return 98.0
     if v <= 1:
-        return 60.0
-    if v <= 3:
-        return 35.0
-    return 15.0
+        return 50.0
+    return 8.0
+
+
+def _score_facility_insurance(v: str) -> float:
+    # 设施附加险：完整8分；仅基础3；无0
+    return {"完整投保": 100, "仅基础险": 37, "未投保": 0}.get(v, 37)
+
+
+def _score_years_operating(v: float) -> float:
+    # 经营年限：≥5年14分；2-5年7；<2年2
+    return _bin_score(v, [(0, 2, 14), (2, 5, 50), (5, 1e18, 100)])
+
+
+def _score_purchase_order(v: str) -> float:
+    # 收购订单：年度12分；零散4；无0
+    return {"年度订单": 100, "零散收购": 33, "无稳定渠道": 0}.get(v, 33)
+
+
+def _score_annual_revenue(v: float) -> float:
+    # 营收（万元）：>50万10分；10-50万5；<10万1
+    return _bin_score(v, [(0, 10, 10), (10, 50, 50), (50, 1e18, 100)])
+
+
+def _score_credit_record(v: str) -> float:
+    # 信贷履约：无逾期12分；有逾期扣10（记0）
+    return {"无逾期": 100, "有逾期": 0}.get(v, 50)
 
 
 RULE_SCORERS: dict[str, Any] = {
-    "age": _score_age,
-    "education": _score_education,
-    "family_members": _score_family_members,
-    "land_confirmed_area": _score_land_area,
-    "land_transfer_years": _score_transfer_years,
-    "planting_structure": _score_planting,
-    "land_utilization": _score_utilization,
-    "grain_subsidy": lambda v: _score_subsidy(v or 0, 5000),
-    "machinery_subsidy": lambda v: _score_subsidy(v or 0, 30000),
-    "other_subsidy": lambda v: _score_subsidy(v or 0, 5000),
-    "insurance_coverage": _score_insurance,
+    "land_confirmed_area": _score_land_confirmed_area,
+    "land_transfer_years": _score_land_transfer_years,
+    "land_transfer_stability": _score_land_transfer_stability,
+    "black_soil_protection": _score_black_soil_protection,
+    "grain_subsidy": _score_grain_subsidy,
+    "machinery_subsidy": _score_machinery_subsidy,
+    "grain_scale_subsidy": _score_grain_scale_subsidy,
+    "specialty_crop_subsidy": _score_specialty_crop_subsidy,
+    "insurance_years": _score_insurance_years,
     "claim_count": _score_claim_count,
-    "claim_amount": _score_claim_amount,
-    "claim_ratio": _score_claim_ratio,
-    "years_operating": _score_operating_years,
-    "business_concentration": _score_concentration,
-    "annual_revenue": _score_revenue,
-    "revenue_stability": _score_revenue_stability,
-    "credit_status": _score_credit_status,
-    "loan_history": _score_loan_history,
-    "loan_overdue_history": _score_loan_overdue_history,
+    "facility_insurance": _score_facility_insurance,
+    "years_operating": _score_years_operating,
+    "purchase_order": _score_purchase_order,
+    "annual_revenue": _score_annual_revenue,
+    "credit_record": _score_credit_record,
 }
 
 

@@ -14,32 +14,31 @@ from app.ml.indicators import INDICATOR_ORDER
 from app.ml.predictor import assess
 from app.ml.scorecard import Scorecard
 
-# 收入稳定性档位降档映射
-_STABILITY_DOWN = {
-    "稳定": "基本稳定",
-    "基本稳定": "波动较大",
-    "波动较大": "大幅波动",
-    "大幅波动": "大幅波动",
+# 收购订单档位降级映射（产销经营冲击）
+_PURCHASE_DOWN = {
+    "年度订单": "零散收购",
+    "零散收购": "无稳定渠道",
+    "无稳定渠道": "无稳定渠道",
 }
 
 _SCENARIO_DEFS: dict[str, dict] = {
     "干旱减产": {
-        "desc": "模拟严重干旱导致大面积减产：理赔次数与理赔占比上升、收入下滑、收入稳定性降档",
+        "desc": "模拟严重干旱导致大面积减产：理赔频次上升、营收下滑、收购订单降级",
         "icon": "Sunny",
         "color": "#e76f51",
     },
     "粮价下跌": {
-        "desc": "模拟粮食价格大幅下跌：年销售收入下降约 30%、收入稳定性降档",
+        "desc": "模拟粮食价格大幅下跌：年营收下降约 30%、收购订单降级",
         "icon": "TrendCharts",
         "color": "#e6a23c",
     },
     "补贴退坡": {
-        "desc": "模拟农业补贴政策退坡：粮食直补、农机购置补贴、其他涉农补贴均下降",
+        "desc": "模拟农业补贴政策退坡：地力/农机/规模/特色四类补贴均下降，收入承压",
         "icon": "Money",
         "color": "#9b5de5",
     },
     "突发灾情": {
-        "desc": "模拟重大自然灾害：理赔次数激增、理赔占比攀升、保险覆盖不足、收入大幅下滑",
+        "desc": "模拟重大自然灾害：理赔频次激增、投保中断、营收大幅下滑",
         "icon": "Warning",
         "color": "#f56c6c",
     },
@@ -51,27 +50,23 @@ def apply_scenario(inputs: dict, scenario: str) -> dict:
     out = dict(inputs)
     if scenario == "干旱减产":
         out["claim_count"] = min((out.get("claim_count") or 0) + 3, 8)
-        out["claim_ratio"] = min((out.get("claim_ratio") or 0) + 30, 90)
-        out["claim_amount"] = round((out.get("claim_amount") or 0) * 1.8)
         out["annual_revenue"] = round((out.get("annual_revenue") or 0) * 0.7, 1)
-        out["revenue_stability"] = _STABILITY_DOWN.get(out.get("revenue_stability") or "基本稳定", "大幅波动")
+        out["purchase_order"] = _PURCHASE_DOWN.get(out.get("purchase_order") or "零散收购", "无稳定渠道")
     elif scenario == "粮价下跌":
         out["annual_revenue"] = round((out.get("annual_revenue") or 0) * 0.7, 1)
-        out["revenue_stability"] = _STABILITY_DOWN.get(out.get("revenue_stability") or "基本稳定", "大幅波动")
+        out["purchase_order"] = _PURCHASE_DOWN.get(out.get("purchase_order") or "零散收购", "无稳定渠道")
     elif scenario == "补贴退坡":
-        # 补贴是收入底线：退坡后收入下滑、稳定性降档（业务联动冲击）
+        # 补贴是收入底线：四类补贴退坡后收入下滑（业务联动冲击）
         out["grain_subsidy"] = round((out.get("grain_subsidy") or 0) * 0.3)
         out["machinery_subsidy"] = round((out.get("machinery_subsidy") or 0) * 0.2)
-        out["other_subsidy"] = round((out.get("other_subsidy") or 0) * 0.3)
+        out["grain_scale_subsidy"] = round((out.get("grain_scale_subsidy") or 0) * 0.3)
+        out["specialty_crop_subsidy"] = round((out.get("specialty_crop_subsidy") or 0) * 0.3)
         out["annual_revenue"] = round((out.get("annual_revenue") or 0) * 0.85, 1)
-        out["revenue_stability"] = _STABILITY_DOWN.get(out.get("revenue_stability") or "基本稳定", "大幅波动")
     elif scenario == "突发灾情":
         out["claim_count"] = min((out.get("claim_count") or 0) + 4, 10)
-        out["claim_ratio"] = min((out.get("claim_ratio") or 0) + 40, 95)
-        out["claim_amount"] = round((out.get("claim_amount") or 0) * 2.5)
         out["annual_revenue"] = round((out.get("annual_revenue") or 0) * 0.5, 1)
-        out["revenue_stability"] = "大幅波动"
-        out["insurance_coverage"] = min((out.get("insurance_coverage") or 0), 25)
+        out["insurance_years"] = 0
+        out["purchase_order"] = "无稳定渠道"
     return out
 
 

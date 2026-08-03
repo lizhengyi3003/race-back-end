@@ -20,33 +20,31 @@ from app.ml.binning import WOEBinner
 from app.ml.evaluate import evaluate_binary
 from app.ml.indicators import CATEGORICAL_FIELDS, INDICATOR_ORDER
 
-# 传统信用数据（户主特征 + 近似财报/征信类指标）与替代数据分组
+# 传统信用数据（产销经营类中偏财报/征信指标）与替代数据分组
 TRADITIONAL_FIELDS = [
-    "age",
-    "education",
-    "family_members",
     "years_operating",
-    "business_concentration",
     "annual_revenue",
-    "revenue_stability",
-    "credit_status",
+    "credit_record",
+    "purchase_order",
 ]
 ALTERNATIVE_FIELDS = [f for f in INDICATOR_ORDER if f not in TRADITIONAL_FIELDS]
 
-# 业务类别分组（用于分组 PCA，六大类全量）
+# 业务类别分组（用于分组 PCA，四大维度全量）
 CATEGORY_GROUPS = {
-    "户主特征类": ["age", "education", "family_members"],
-    "土地经营类": ["land_confirmed_area", "land_transfer_years", "planting_structure", "land_utilization"],
-    "农业补贴类": ["grain_subsidy", "machinery_subsidy", "other_subsidy"],
-    "农业保险类": ["insurance_coverage", "claim_count", "claim_amount", "claim_ratio"],
-    "经营稳定性类": [
-        "years_operating",
-        "business_concentration",
-        "annual_revenue",
-        "revenue_stability",
-        "credit_status",
+    "土地经营类": [
+        "land_confirmed_area",
+        "land_transfer_years",
+        "land_transfer_stability",
+        "black_soil_protection",
     ],
-    "贷款历史类": ["loan_history", "loan_overdue_history"],
+    "农业补贴类": [
+        "grain_subsidy",
+        "machinery_subsidy",
+        "grain_scale_subsidy",
+        "specialty_crop_subsidy",
+    ],
+    "农业保险类": ["insurance_years", "claim_count", "facility_insurance"],
+    "产销经营类": ["years_operating", "purchase_order", "annual_revenue", "credit_record"],
 }
 
 

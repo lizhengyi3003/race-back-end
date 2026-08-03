@@ -1,9 +1,9 @@
-"""合成样本生成器：模拟东北涉农经营主体数据（含违约标签）。
+"""合成样本生成器：模拟黑龙江涉农经营主体数据（含违约标签）。
 
-依据业务规则构建数据生成过程：
-- 土地面积/补贴/营收正相关（规模越大经营越规范）
-- 保险覆盖率、经营年限、收入稳定性、征信状况显著影响违约概率
-- 整体违约率控制在 3%-5%（对齐涉农信贷实际水平）
+依据文档 3.3.2 四大维度 15 项指标构建数据生成过程（校赛通用方案）：
+- 真实分布：确权面积/营收右偏、投保年限左偏、流转年限离散
+- 违约率挂钩指标：信用好的样本各指标整体优于信用差的
+- 固定种子 42，确保跨环境数据完全可复现；违约率 3%-5%
 """
 
 from __future__ import annotations
@@ -19,113 +19,83 @@ def _std(x: np.ndarray) -> np.ndarray:
     return (x - x.mean()) / s if s > 1e-9 else x * 0.0
 
 
+def _transfer_probs() -> np.ndarray:
+    """流转年限概率（离散 0-20）：未流转较少，3-10 年规范流转为主"""
+    p = np.full(21, 0.03)
+    p[0] = 0.08  # 未流转（口头/无）
+    p[3:11] = 0.08  # 3-10 年规范流转主力
+    return p / p.sum()
+
+
 def generate_samples(n: int = 2000, default_rate: float = 0.04, seed: int = 42) -> pd.DataFrame:
     rng = np.random.default_rng(seed)
 
-    # ---------- 指标生成 ----------
-    # 土地确权面积（亩）：对数正态，20-3000
-    land_area = np.clip(rng.lognormal(mean=np.log(150), sigma=0.9, size=n), 20, 3000)
-    # 土地流转年限（年）：0-20
-    transfer_years = np.clip(rng.exponential(3, n), 0, 20).round(1)
-    # 种植结构
-    planting = rng.choice(["主粮种植", "经济作物", "混合经营", "设施农业"], n, p=[0.45, 0.2, 0.25, 0.1])
-    # 土地规模利用率（%）
-    land_util = np.clip(60 + 8 * rng.standard_normal(n) + transfer_years * 0.5, 40, 100)
-    # 补贴（与面积相关）
-    grain_subsidy = np.clip(land_area * rng.uniform(30, 60, n) + rng.normal(0, 3000, n), 0, None)
-    mach_subsidy = np.clip(land_area * rng.uniform(0, 40, n) + rng.normal(0, 6000, n), 0, 150000)
-    other_subsidy = np.clip(rng.uniform(0, 20000, n) + land_area * rng.uniform(0, 5, n), 0, 50000)
-    # 农业保险覆盖率（%）
-    insurance = np.clip(50 + 20 * rng.standard_normal(n) + transfer_years * 1.2, 0, 100)
-    # 理赔次数 / 理赔金额占比
-    claim_count = rng.poisson(1.5, n).astype(float)
-    claim_ratio = np.clip(rng.lognormal(np.log(12), 0.7, n), 0, 80)
-    # 经营年限（年）
-    years = np.clip(rng.exponential(6, n), 0, 30).round(0)
-    # 经营范围集中度（%）
-    concentration = np.clip(rng.normal(70, 15, n), 30, 95)
-    # 年销售收入（万元）
-    revenue = np.clip(land_area * rng.uniform(0.05, 0.2, n) + rng.normal(0, 30, n), 5, 800)
-    # 收入稳定性（与经营年限正相关）
-    p_stable = np.clip(0.2 + years * 0.02, 0.1, 0.6)
-    revenue_stability = np.array(
-        [
-            rng.choice(
-                ["稳定", "基本稳定", "波动较大", "大幅波动"],
-                p=[ps, 0.6 - ps, 0.25, 0.15],
-            )
-            for ps in p_stable
-        ]
+    # ---------- 指标生成（黑龙江通用，按真实分布）----------
+    # 确权耕地总面积（亩）：右偏（对数正态），黑土地规模化，20-3000
+    land_area = np.clip(rng.lognormal(mean=np.log(200), sigma=0.8, size=n), 20, 3000)
+    # 土地流转合同年限（年）：离散整数 0-20，3-10 年为主
+    transfer_years = rng.choice(np.arange(0, 21), n, p=_transfer_probs()).astype(float)
+    # 土地流转稳定性：稳定 / 小幅调整 / 频繁变更
+    stability = rng.choice(["稳定", "小幅调整", "频繁变更"], n, p=[0.7, 0.2, 0.1])
+    # 黑土地保护性耕作面积（亩）：与确权面积相关，黑龙江推广良好
+    black_soil = np.clip(land_area * rng.uniform(0.5, 1.0, n), 0, None)
+    # 耕地地力保护补贴（元）：与面积相关，稳定现金流（右偏）
+    grain_subsidy = np.clip(land_area * rng.uniform(35, 70, n) + rng.normal(0, 3000, n), 0, None)
+    # 大型农机购置补贴（元）：规模化经营才有（右偏）
+    mach_subsidy = np.clip(land_area * rng.uniform(0, 30, n) + rng.normal(0, 6000, n), 0, 150000)
+    # 粮食规模种植专项补贴（元）：千亩连片种植主体
+    grain_scale = np.where(land_area > 100, np.clip(land_area * rng.uniform(5, 15, n), 0, 80000), 0.0)
+    # 特色经济作物补贴（元）：黑龙江较少，约 20% 主体
+    specialty = np.where(
+        rng.random(n) < 0.2, np.clip(rng.lognormal(np.log(15000), 0.8, n), 0, 60000), 0.0
     )
-    # 征信状况（多数良好）
-    credit_status = rng.choice(["无不良记录", "轻微逾期", "多次逾期", "严重失信"], n, p=[0.8, 0.12, 0.05, 0.03])
-    # 年龄（岁）：务农主体偏中老年，18-75
-    age = np.clip(rng.normal(48, 10, n), 18, 75).round(0)
-    # 受教育程度：农村地区小学/初中占比偏高
-    education = rng.choice(["小学及以下", "初中", "高中", "大专及以上"], n, p=[0.22, 0.38, 0.25, 0.15])
-    # 家庭成员数量（人）：均值约 3-4 口，1-10
-    family_members = np.clip(rng.poisson(3.5, n), 1, 10).astype(float)
-    # 历年理赔金额（元）：与理赔次数正相关，无理赔则为 0
-    claim_amount = np.where(
-        claim_count > 0,
-        np.clip(rng.lognormal(np.log(2500), 1.0, n) * claim_count, 0, 300000),
-        0.0,
-    )
-    # 历史贷款记录（次）：农村信贷普及，多数 1-5 次
-    loan_history = np.clip(rng.poisson(2.0, n), 0, 15).astype(float)
-    # 历史逾期记录（次）：整体逾期率低，与贷款次数相关（约 12%）+ 少量随机
-    loan_overdue = np.clip(rng.binomial(loan_history.astype(int), 0.12, n) + rng.poisson(0.05, n), 0, 8).astype(float)
+    # 农业保险连续投保年限（年）：左偏（beta(2,1)，多数 3-10 年），0-10
+    insurance_years = np.clip(rng.beta(2, 1, n) * 10, 0, 10).round(0)
+    # 历史保险理赔频次（次）：泊松，多数 0-1 次
+    claim_count = rng.poisson(1.2, n).astype(float)
+    # 设施农业附加保险：完整投保 / 仅基础险 / 未投保
+    facility_ins = rng.choice(["完整投保", "仅基础险", "未投保"], n, p=[0.3, 0.5, 0.2])
+    # 主体持续经营年限（年）：右偏，0-30
+    years = np.clip(rng.exponential(8, n), 0, 30).round(0)
+    # 长期农产品收购订单：年度订单 / 零散收购 / 无稳定渠道
+    purchase = rng.choice(["年度订单", "零散收购", "无稳定渠道"], n, p=[0.4, 0.4, 0.2])
+    # 农产品年稳定营收（万元）：右偏，与面积相关，5-800
+    revenue = np.clip(land_area * rng.uniform(0.05, 0.18, n) + rng.normal(0, 30, n), 5, 800)
+    # 历年涉农信贷履约记录：多数无逾期
+    credit = rng.choice(["无逾期", "有逾期"], n, p=[0.88, 0.12])
 
-    # ---------- 违约概率（数据生成过程）----------
-    planting_score = np.array(
-        [{"主粮种植": 0.5, "经济作物": 1.2, "混合经营": 1.5, "设施农业": 1.0}[p] for p in planting]
-    )
-    stability_score = np.array(
-        [{"稳定": 2.0, "基本稳定": 1.0, "波动较大": 0.0, "大幅波动": -1.0}[s] for s in revenue_stability]
-    )
-    credit_score = np.array(
-        [{"无不良记录": 1.5, "轻微逾期": 0.5, "多次逾期": -1.0, "严重失信": -2.0}[c] for c in credit_status]
-    )
-    education_score = np.array([{"小学及以下": 0.5, "初中": 1.0, "高中": 1.5, "大专及以上": 2.0}[e] for e in education])
-    # 年龄效应：偏离 45 岁壮年期越远，信用越差（倒U型，与规则分档 _score_age 一致）
-    age_signal = -((age - 45) ** 2) / 100.0
+    # ---------- 违约概率（数据生成过程：信用好样本指标整体更优）----------
+    stability_score = np.array([{"稳定": 2.0, "小幅调整": 1.0, "频繁变更": -1.0}[s] for s in stability])
+    facility_score = np.array([{"完整投保": 1.0, "仅基础险": 0.3, "未投保": -1.0}[s] for s in facility_ins])
+    purchase_score = np.array([{"年度订单": 1.5, "零散收购": 0.5, "无稳定渠道": -1.0}[s] for s in purchase])
+    credit_score = np.array([{"无逾期": 2.0, "有逾期": -2.0}[c] for c in credit])
 
     z = (
-        0.50 * _std(land_area)  # 土地规模：替代数据核心
-        + 0.15 * _std(transfer_years)
-        + 0.20 * _std(land_util)
-        + 0.30 * _std(grain_subsidy)  # 补贴类（政策保障=收入底线，增强信号）
-        + 0.20 * _std(mach_subsidy)
-        + 0.10 * _std(other_subsidy)
-        + 0.40 * _std(insurance)  # 保险类
-        - 0.35 * _std(claim_count)
-        - 0.20 * _std(claim_amount)  # 理赔金额越高风险越大
-        - 0.32 * _std(claim_ratio)
-        + 0.20 * _std(years)  # 传统类（弱化，体现“无财报/无征信”场景下替代数据仍可识别）
-        + 0.15 * _std(concentration)
-        + 0.20 * _std(revenue)
-        + 0.20 * _std(planting_score)
-        + 0.20 * _std(stability_score)
-        + 0.25 * _std(credit_score)
-        + 0.30 * _std(age_signal)  # 户主特征：年龄倒U型（青壮年最佳）
-        + 0.20 * _std(education_score)  # 学历=金融素养代理
-        + 0.05 * _std(family_members)  # 家庭劳动力充足
-        + 0.12 * _std(loan_history)  # 有信贷记录=信息充分，中性偏正
-        - 0.45 * _std(loan_overdue)  # 历史逾期=强负面信号
-        + 0.10 * rng.standard_normal(n)  # 噪声项
+        0.45 * _std(land_area)  # 确权面积：核心资产
+        + 0.18 * _std(transfer_years)  # 流转年限：长期经营意愿
+        + 0.22 * _std(stability_score)  # 流转稳定性
+        + 0.15 * _std(black_soil)  # 黑土地保护
+        + 0.32 * _std(grain_subsidy)  # 地力补贴：稳定现金流
+        + 0.18 * _std(mach_subsidy)  # 农机补贴：投入意愿
+        + 0.15 * _std(grain_scale)  # 规模种植补贴
+        + 0.10 * _std(specialty)  # 特色补贴
+        + 0.38 * _std(insurance_years)  # 投保年限：风险意识
+        - 0.40 * _std(claim_count)  # 理赔频次：强负面
+        + 0.15 * _std(facility_score)  # 设施险
+        + 0.20 * _std(years)  # 经营年限
+        + 0.22 * _std(purchase_score)  # 收购订单
+        + 0.28 * _std(revenue)  # 营收
+        + 0.40 * _std(credit_score)  # 信贷履约
+        + 0.08 * rng.standard_normal(n)  # 噪声
     )
     z_std = (z - z.mean()) / max(z.std(), 1e-9)
 
-    # 校准：p_default = sigmoid(-(alpha * z_std + beta))
-    # z 越大代表信用越好（面积大/保险足/征信优），违约概率越低；
-    # beta 通过二分搜索使整体违约率 ≈ default_rate，同时保持概率展布（alpha 控制判别强度）
-    # alpha=2.0：增强违约组/正常组概率分离度，提升模型 AUC 与精确率
-    alpha = 2.0
+    # 校准：p_default = sigmoid(-(alpha * z_std + beta))，违约率 ≈ default_rate
+    alpha = 2.6
     lo, hi = -10.0, 10.0
     for _ in range(60):
         mid = (lo + hi) / 2
         p_tmp = 1.0 / (1.0 + np.exp(alpha * z_std + mid))
-        # p_tmp 随 mid 增大而减小；若均值仍高于目标率，需增大 mid
         if p_tmp.mean() > default_rate:
             lo = mid
         else:
@@ -137,30 +107,24 @@ def generate_samples(n: int = 2000, default_rate: float = 0.04, seed: int = 42) 
 
     df = pd.DataFrame(
         {
-            "age": age,
-            "education": education,
-            "family_members": family_members,
             "land_confirmed_area": land_area.round(1),
             "land_transfer_years": transfer_years,
-            "planting_structure": planting,
-            "land_utilization": land_util.round(1),
+            "land_transfer_stability": stability,
+            "black_soil_protection": black_soil.round(1),
             "grain_subsidy": grain_subsidy.round(0),
             "machinery_subsidy": mach_subsidy.round(0),
-            "other_subsidy": other_subsidy.round(0),
-            "insurance_coverage": insurance.round(1),
+            "grain_scale_subsidy": grain_scale.round(0),
+            "specialty_crop_subsidy": specialty.round(0),
+            "insurance_years": insurance_years,
             "claim_count": claim_count,
-            "claim_amount": claim_amount.round(0),
-            "claim_ratio": claim_ratio.round(1),
+            "facility_insurance": facility_ins,
             "years_operating": years,
-            "business_concentration": concentration.round(1),
+            "purchase_order": purchase,
             "annual_revenue": revenue.round(1),
-            "revenue_stability": revenue_stability,
-            "credit_status": credit_status,
-            "loan_history": loan_history,
-            "loan_overdue_history": loan_overdue,
+            "credit_record": credit,
             "default": default,
         }
     )
-    # 轻微扰动，保持列顺序与 INDICATOR_ORDER 一致
+    # 保持列顺序与 INDICATOR_ORDER 一致
     df = df[INDICATOR_ORDER + ["default"]]
     return df

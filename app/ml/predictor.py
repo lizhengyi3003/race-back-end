@@ -79,34 +79,32 @@ def _build_advice(score: float, prob: float, level: str, amount: float, rate: fl
 # ---------------------------------------------------------------
 def _build_override_rules(thresholds: dict | None = None) -> list[dict]:
     t = thresholds or {}
-    claim_ratio_th = float(t.get("overrideClaimRatio", 70.0))
     claim_count_th = int(t.get("overrideClaimCount", 2))
-    insurance_low = float(t.get("overrideInsuranceLow", 40.0))
-    util_low = float(t.get("overrideUtilizationLow", 35.0))
+    insurance_low = float(t.get("overrideInsuranceLow", 2.0))  # 投保年限 < 此值
+    black_soil_ratio = float(t.get("overrideBlackSoilRatio", 0.4))  # 黑土地保护占比 < 此值
     area_min = float(t.get("overrideAreaMin", 100.0))
     catastrophe_claims = int(t.get("overrideCatastropheClaims", 5))
-    catastrophe_insurance = float(t.get("overrideCatastropheInsurance", 30.0))
 
     return [
         {
-            "name": "连续两年绝收（理赔占比极高 + 高频理赔 + 低保险覆盖）",
+            "name": "连续两年绝收（高频理赔 + 投保年限不足）",
             "check": lambda i: (
-                (i.get("claim_ratio") or 0) >= claim_ratio_th
-                and (i.get("claim_count") or 0) >= claim_count_th
-                and (i.get("insurance_coverage") or 100) < insurance_low
+                (i.get("claim_count") or 0) >= claim_count_th
+                and (i.get("insurance_years") or 10) < insurance_low
             ),
         },
         {
-            "name": "土地大面积荒芜（规模利用率极低）",
+            "name": "黑土地保护缺失（保护面积占比极低 + 经营面积大）",
             "check": lambda i: (
-                (i.get("land_utilization") or 100) < util_low and (i.get("land_confirmed_area") or 0) >= area_min
+                (i.get("black_soil_protection") or 0) < (i.get("land_confirmed_area") or 0) * black_soil_ratio
+                and (i.get("land_confirmed_area") or 0) >= area_min
             ),
         },
         {
-            "name": "重大自然灾害（高频理赔 + 低保险覆盖）",
+            "name": "重大自然灾害（高频理赔 + 投保年限不足）",
             "check": lambda i: (
                 (i.get("claim_count") or 0) >= catastrophe_claims
-                and (i.get("insurance_coverage") or 100) < catastrophe_insurance
+                and (i.get("insurance_years") or 10) < insurance_low
             ),
         },
     ]

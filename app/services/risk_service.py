@@ -9,27 +9,21 @@ from app.services.model_service import get_thresholds
 
 # 前端 camelCase 字段 → ORM 列名映射（供 assess 落库与 CSV 导入共用）
 _COLUMN_MAP = {
-    "age": "age",
-    "education": "education",
-    "familyMembers": "family_members",
     "landConfirmedArea": "land_confirmed_area",
     "landTransferYears": "land_transfer_years",
-    "plantingStructure": "planting_structure",
-    "landUtilization": "land_utilization",
+    "landTransferStability": "land_transfer_stability",
+    "blackSoilProtection": "black_soil_protection",
     "grainSubsidy": "grain_subsidy",
     "machinerySubsidy": "machinery_subsidy",
-    "otherSubsidy": "other_subsidy",
-    "insuranceCoverage": "insurance_coverage",
+    "grainScaleSubsidy": "grain_scale_subsidy",
+    "specialtyCropSubsidy": "specialty_crop_subsidy",
+    "insuranceYears": "insurance_years",
     "claimCount": "claim_count",
-    "claimAmount": "claim_amount",
-    "claimRatio": "claim_ratio",
+    "facilityInsurance": "facility_insurance",
     "yearsOperating": "years_operating",
-    "businessConcentration": "business_concentration",
+    "purchaseOrder": "purchase_order",
     "annualRevenue": "annual_revenue",
-    "revenueStability": "revenue_stability",
-    "creditStatus": "credit_status",
-    "loanHistory": "loan_history",
-    "loanOverdueHistory": "loan_overdue_history",
+    "creditRecord": "credit_record",
 }
 
 

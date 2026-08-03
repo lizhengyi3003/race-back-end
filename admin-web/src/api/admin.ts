@@ -12,27 +12,21 @@ export interface AssessmentRecord {
   enterpriseName: string
   businessType: string
   productType: string
-  age?: number
-  education?: string
-  familyMembers?: number
   landConfirmedArea?: number
   landTransferYears?: number
-  plantingStructure?: string
-  landUtilization?: number
+  landTransferStability?: string
+  blackSoilProtection?: number
   grainSubsidy?: number
   machinerySubsidy?: number
-  otherSubsidy?: number
-  insuranceCoverage?: number
+  grainScaleSubsidy?: number
+  specialtyCropSubsidy?: number
+  insuranceYears?: number
   claimCount?: number
-  claimAmount?: number
-  claimRatio?: number
+  facilityInsurance?: string
   yearsOperating?: number
-  businessConcentration?: number
+  purchaseOrder?: string
   annualRevenue?: number
-  revenueStability?: string
-  creditStatus?: string
-  loanHistory?: number
-  loanOverdueHistory?: number
+  creditRecord?: string
   score: number
   probability: number
   level: string

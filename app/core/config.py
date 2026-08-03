@@ -42,13 +42,11 @@ class Settings(BaseSettings):
     SMOTE_ENABLED: bool = True
 
     # ---------- 兜底规则阈值（触发后强制高风险，供人工复核）----------
-    OVERRIDE_CLAIM_RATIO: float = 70.0  # 理赔金额占比 ≥ 此值
-    OVERRIDE_CLAIM_COUNT: int = 2  # 理赔次数 ≥ 此值
-    OVERRIDE_INSURANCE_LOW: float = 40.0  # 保险覆盖率 < 此值
-    OVERRIDE_UTILIZATION_LOW: float = 35.0  # 土地规模利用率 < 此值
-    OVERRIDE_AREA_MIN: float = 100.0  # 土地面积 ≥ 此值（配合利用率规则）
-    OVERRIDE_CATASTROPHE_CLAIMS: int = 5  # 重大灾害规则：理赔次数 ≥ 此值
-    OVERRIDE_CATASTROPHE_INSURANCE: float = 30.0  # 重大灾害规则：保险覆盖率 < 此值
+    OVERRIDE_CLAIM_COUNT: int = 2  # 理赔频次 ≥ 此值
+    OVERRIDE_INSURANCE_LOW: float = 2.0  # 投保年限 < 此值（年）
+    OVERRIDE_BLACK_SOIL_RATIO: float = 0.4  # 黑土地保护占比 < 此值
+    OVERRIDE_AREA_MIN: float = 100.0  # 土地面积 ≥ 此值（配合黑土地保护规则）
+    OVERRIDE_CATASTROPHE_CLAIMS: int = 5  # 重大灾害规则：理赔频次 ≥ 此值
 
     # ---------- 评分卡业务阈值（管理平台可在线调整）----------
     LOW_RISK_THRESHOLD: int = 700
