@@ -43,6 +43,21 @@ back-end/
 - Python 3.13+（Docker 镜像 `python:3.13-slim`）
 - Node.js 20.19+（构建管理前端，Vite 8 要求，Docker 镜像 `node:22-alpine`）
 
+### 1.5 本地 Docker 一键启动（推荐）
+
+与线上服务器一致，后端 + MySQL 均在 Docker 中运行，一条命令启动：
+
+```bash
+cd back-end
+docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build
+```
+
+- 端口：后端 `8000`；MySQL 容器映射宿主 `3307`（本机 3306 可能被本机 MySQL 占用，故用 3307；backend 容器内部仍走 `mysql:3306`，逻辑与服务器一致）
+- 数据：MySQL 数据、模型文件、样本文件分别持久化在命名卷 `back-end_mysql_data / back-end_model_data / back-end_sample_data`
+- 首次启动前若需迁移本机 MySQL 数据：`mysqldump --databases race > race_dump.sql` 后 `docker exec -i race-mysql mysql -uroot -prace123456 < race_dump.sql`，并将 `data/models/*.pkl`、`data/samples/synthetic_samples.csv` 拷入对应卷（避免启动时自动训练覆盖）
+- 停止：`docker compose -f docker-compose.yml -f docker-compose.local.yml down`
+- 使用本机 `.venv` 直连方式时，需把 `.env` 的 `DATABASE_URL` 改回 `localhost:3306`
+
 ### 2. 后端启动
 
 ```bash
