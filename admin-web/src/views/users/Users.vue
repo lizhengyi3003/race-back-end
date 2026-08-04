@@ -102,17 +102,11 @@ onMounted(load)
           placeholder="搜索用户名/姓名"
           clearable
           style="width: 240px"
-          @keyup.enter="
-            query.page = 1
-            load()
-          "
+          @keyup.enter="query.page = 1; load()"
         />
         <el-button
           type="primary"
-          @click="
-            query.page = 1
-            load()
-          "
+          @click="query.page = 1; load()"
           >查询</el-button
         >
         <div style="flex: 1" />
