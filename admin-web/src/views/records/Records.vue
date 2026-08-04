@@ -157,12 +157,18 @@ onMounted(load)
           <el-descriptions-item label="确权耕地总面积">{{ detail.landConfirmedArea ?? '-' }} 亩</el-descriptions-item>
           <el-descriptions-item label="土地流转合同年限">{{ detail.landTransferYears ?? '-' }} 年</el-descriptions-item>
           <el-descriptions-item label="土地流转稳定性">{{ detail.landTransferStability || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="黑土地保护耕作面积">{{ detail.blackSoilProtection ?? '-' }} 亩</el-descriptions-item>
+          <el-descriptions-item label="黑土地保护耕作面积"
+            >{{ detail.blackSoilProtection ?? '-' }} 亩</el-descriptions-item
+          >
           <el-descriptions-item label="耕地地力保护补贴">{{ detail.grainSubsidy ?? '-' }} 元</el-descriptions-item>
           <el-descriptions-item label="大型农机购置补贴">{{ detail.machinerySubsidy ?? '-' }} 元</el-descriptions-item>
           <el-descriptions-item label="粮食规模种植补贴">{{ detail.grainScaleSubsidy ?? '-' }} 元</el-descriptions-item>
-          <el-descriptions-item label="特色经济作物补贴">{{ detail.specialtyCropSubsidy ?? '-' }} 元</el-descriptions-item>
-          <el-descriptions-item label="农业保险连续投保年限">{{ detail.insuranceYears ?? '-' }} 年</el-descriptions-item>
+          <el-descriptions-item label="特色经济作物补贴"
+            >{{ detail.specialtyCropSubsidy ?? '-' }} 元</el-descriptions-item
+          >
+          <el-descriptions-item label="农业保险连续投保年限"
+            >{{ detail.insuranceYears ?? '-' }} 年</el-descriptions-item
+          >
           <el-descriptions-item label="历史保险理赔频次">{{ detail.claimCount ?? '-' }} 次</el-descriptions-item>
           <el-descriptions-item label="设施农业附加保险">{{ detail.facilityInsurance || '-' }}</el-descriptions-item>
           <el-descriptions-item label="主体持续经营年限">{{ detail.yearsOperating ?? '-' }} 年</el-descriptions-item>

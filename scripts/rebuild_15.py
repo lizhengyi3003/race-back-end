@@ -1,4 +1,5 @@
 """校赛 15 项体系：生成 10000 条模拟数据 + 正式训练并注册模型"""
+
 import sys
 from pathlib import Path
 
@@ -34,6 +35,8 @@ try:
     print("      版本:", res["version"])
     print("      AUC:", m["auc"], "KS:", m["ks"], "准确率:", m["accuracy"], "召回率:", m["recall"])
     print("      入模特征数:", res["nFeatures"], "违约率:", m["defaultRate"], "PSI:", m["psi"])
-    print("      businessThreshold:", m["businessThreshold"], "评分中心 A:", round(res.get("metrics", {}).get("A", 0), 2))
+    print(
+        "      businessThreshold:", m["businessThreshold"], "评分中心 A:", round(res.get("metrics", {}).get("A", 0), 2)
+    )
 finally:
     db.close()
