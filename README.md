@@ -181,7 +181,7 @@ DATABASE_URL=mysql+pymysql://root:你的密码@localhost:3306/race?charset=utf8m
 | 风险评估 | `POST /risk/assess` | 提交评估（评分卡输出） | 公开 |
 | 评估记录 | `GET /risk/records` `GET/DELETE /risk/records/{id}` | 记录管理 | 需登录 |
 | 数据看板 | `GET /dashboard/stats` `/industry-distribution` `/score-distribution` `/trend` | 统计 | 公开 |
-| 模型管理 | `GET /model/info` `POST /model/train` `GET /model/metrics` `GET/PUT /model/thresholds` `GET /model/monitor` `GET /model/simulate` | 训练/监控/仿真与配置 | 需登录 |
+| 模型管理 | `GET /model/info` `POST /model/train` `GET /model/versions` `GET /model/metrics` `GET /model/thresholds` `GET /model/monitor` `GET /model/simulate` | 信息/训练/版本/监控/仿真与阈值 | 需登录 |
 | 数据管理 | `GET /data/template` `POST /data/import` `GET /data/export` | 导入导出 | 需登录 |
 | 管理平台 | `GET /admin/stats` `/users` `/api-logs` `/api-spec` `/configs` | 系统管理 | 需登录 |
 | 系统监控 | `GET /monitor/server` `/database` `/health` | 服务器/数据库/健康 | 需登录 |
@@ -224,9 +224,36 @@ docker compose up -d --build
 - 访问 http://<服务器IP>:8000/admin
 
 服务器部署步骤：
-1. 修改 `.env`：`DATABASE_URL` 指向服务器 MySQL、`JWT_SECRET_KEY` 换随机串、`CORS_ORIGINS` 填入 Cloudflare Pages 域名
+1. 修改 `.env`：`DATABASE_URL` 指向服务器 MySQL、`JWT_SECRET_KEY` 换随机串、`CORS_ORIGINS` 填入前端域名
 2. `docker compose up -d --build`
 3. （可选）配置 Nginx/Caddy 反代 HTTPS，并将域名解析到服务器
+
+**线上环境**：
+
+| 服务 | 地址 |
+|---|---|
+| 竞赛前端（fore-end） | https://intellicoretech.cn （Cloudflare Pages，Hash 路由） |
+| 后端 API | https://api.intellicoretech.cn （Cloudflare 回源到服务器 8000） |
+| 管理平台 | https://backend.intellicoretech.cn/admin |
+
+### 3. CI/CD 自动部署（GitHub Actions）
+
+`git push` 到 `main` 后自动部署服务器（仅后端相关文件变化触发）：
+
+```mermaid
+graph LR
+  A[本地 git push] --> B[GitHub Actions: Deploy to Server]
+  B --> C[SSH 受限密钥连服务器]
+  C --> D[git reset --hard origin/main]
+  D --> E[docker compose build backend]
+  E --> F[docker compose up -d backend]
+```
+
+- 触发范围：`app/**`、`scripts/**`、`admin-web/**`、`Dockerfile`、`docker-compose.yml`、`requirements*.txt`、workflow 文件
+- 服务器部署脚本：`/root/deploy-backend.sh`（git 对齐远端 → 构建镜像 → 重启 backend）
+- 安全：部署专用密钥在服务器 `authorized_keys` 中带 `command=` 限制，**只能执行部署脚本，无法登录 shell**
+- GitHub Secrets：`SERVER_HOST` / `SERVER_USER` / `DEPLOY_SSH_KEY`（Settings → Secrets and variables → Actions）
+- 服务器 `.env` 等未跟踪文件不受影响；模型/样本在持久卷中，重启不会触发 AUTO_TRAIN 覆盖
 
 ---
 
