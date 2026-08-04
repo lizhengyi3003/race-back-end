@@ -22,6 +22,7 @@ dist/
 admin-web/dist/
 admin-web/node_modules/
 *.local
+docker-compose.local.yml
 
 # ===== IDE / 系统 =====
 .vscode/*
