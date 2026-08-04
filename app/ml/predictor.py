@@ -118,9 +118,17 @@ def apply_overrides(input_data: dict, result: dict, thresholds: dict | None = No
         result["suggestedAmount"] = int(result["suggestedAmount"] * 0.4)
         result["overrides"] = triggered
         extra = "；".join(f"触发兜底规则：{t}" for t in triggered)
+        # 用覆盖后的评分/概率/等级/额度重新生成建议，避免与结构化字段自相矛盾
+        overridden_advice = _build_advice(
+            result["score"],
+            result["probability"],
+            result["level"],
+            result["suggestedAmount"],
+            result["suggestedRate"],
+        )
         result["advice"] = (
             f"【人工复核】{extra}。系统已将风险等级强制标记为高风险，"
-            f"建议信贷员实地尽调并核实受灾/经营状况后复核授信。{result['advice']}"
+            f"建议信贷员实地尽调并核实受灾/经营状况后复核授信。{overridden_advice}"
         )
     else:
         result["overrides"] = []
