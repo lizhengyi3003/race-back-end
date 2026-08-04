@@ -97,47 +97,17 @@ def database_status(db: Session) -> DatabaseStatus:
 
 
 def _table_size(table: str, rows: int = 0) -> float:
-    """估算表容量（MB）：
-    - MySQL：information_schema 直接取 data_length + index_length
-    - SQLite：无 dbstat 虚拟表时，按列类型估算（数值 8B/行，文本按实际长度），
-      保证各表容量占比相对真实、可用
-    """
+    """估算表容量（MB）：MySQL information_schema 直接取 data_length + index_length"""
     try:
         with engine.connect() as conn:
-            if not settings.is_sqlite:
-                row = conn.execute(
-                    text(
-                        "SELECT (data_length + index_length) / 1024 / 1024 "
-                        "FROM information_schema.TABLES WHERE table_schema = DATABASE() AND table_name = :t"
-                    ),
-                    {"t": table},
-                ).scalar()
-                return float(row or 0)
-
-            # ---------- SQLite：优先 dbstat，不可用则按列类型估算 ----------
-            try:
-                row = conn.execute(text(f'SELECT SUM(pgsize) FROM dbstat WHERE name = "{table}"')).scalar()
-                if row:
-                    return float(row) / 1024 / 1024
-            except Exception:
-                pass
-
-            # 降级估算：数值列 8B/行，文本列按 SUM(LENGTH()) 累加
-            cols = conn.execute(text(f'PRAGMA table_info("{table}")')).fetchall()
-            text_cols = [
-                c[1] for c in cols if c[2] and any(k in c[2].upper() for k in ("CHAR", "TEXT", "CLOB", "BLOB", "JSON"))
-            ]
-            num_cols = len(cols) - len(text_cols)
-            if rows <= 0:
-                rows = conn.execute(text(f'SELECT COUNT(*) FROM "{table}"')).scalar() or 0
-            if text_cols:
-                sum_expr = ", ".join(f'COALESCE(SUM(LENGTH("{c}")), 0)' for c in text_cols)
-                text_bytes = conn.execute(text(f'SELECT {sum_expr} FROM "{table}"')).fetchone()
-                text_total = sum(float(v or 0) for v in text_bytes)
-            else:
-                text_total = 0.0
-            num_total = rows * num_cols * 8.0
-            return (num_total + text_total) / 1024 / 1024
+            row = conn.execute(
+                text(
+                    "SELECT (data_length + index_length) / 1024 / 1024 "
+                    "FROM information_schema.TABLES WHERE table_schema = DATABASE() AND table_name = :t"
+                ),
+                {"t": table},
+            ).scalar()
+            return float(row or 0)
     except Exception:
         return 0.0
 
@@ -156,12 +126,7 @@ def health(db: Session) -> HealthStatus:
     from app.models.model_version import ModelVersion
 
     model = None
-    mv = (
-        db.query(ModelVersion)
-        .filter(ModelVersion.status == "active")
-        .order_by(ModelVersion.id.desc())
-        .first()
-    )
+    mv = db.query(ModelVersion).filter(ModelVersion.status == "active").order_by(ModelVersion.id.desc()).first()
     if mv and mv.artifact_path:
         model = model_artifact.load_scorecard(mv.artifact_path)
     if model is None:

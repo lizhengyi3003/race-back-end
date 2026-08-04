@@ -1,13 +1,45 @@
-"""pytest 全局配置：使用独立临时 SQLite 数据库，避免污染开发数据"""
+"""pytest 全局配置：使用独立 MySQL 测试库（race_test），避免污染开发数据。
+
+前置条件：本地 Docker MySQL 已启动
+  docker compose -f docker-compose.yml -f docker-compose.local.yml up -d mysql
+（映射 127.0.0.1:3307，root/race123456）
+"""
 
 import os
 import sys
 import tempfile
 from pathlib import Path
 
-# 必须在导入 app 模块前设置环境变量
+import pymysql
+
+# 必须在导入 app 模块前：创建独立测试库并设置环境变量
+_MYSQL_HOST = "127.0.0.1"
+_MYSQL_PORT = 3307
+_MYSQL_USER = "root"
+_MYSQL_PASS = "race123456"
+_TEST_DB = "race_test"
+
+try:
+    _conn = pymysql.connect(
+        host=_MYSQL_HOST, port=_MYSQL_PORT, user=_MYSQL_USER, password=_MYSQL_PASS, charset="utf8mb4"
+    )
+except Exception as exc:  # noqa: BLE001
+    raise RuntimeError(
+        "无法连接本地 Docker MySQL（127.0.0.1:3307），请先启动：\n"
+        "  docker compose -f docker-compose.yml -f docker-compose.local.yml up -d mysql"
+    ) from exc
+try:
+    with _conn.cursor() as cur:
+        cur.execute(f"DROP DATABASE IF EXISTS {_TEST_DB}")
+        cur.execute(f"CREATE DATABASE {_TEST_DB} DEFAULT CHARACTER SET utf8mb4")
+    _conn.commit()
+finally:
+    _conn.close()
+
 _tmpdir = tempfile.mkdtemp(prefix="race_test_")
-os.environ["DATABASE_URL"] = f"sqlite:///{_tmpdir}/test.db"
+os.environ["DATABASE_URL"] = (
+    f"mysql+pymysql://{_MYSQL_USER}:{_MYSQL_PASS}@{_MYSQL_HOST}:{_MYSQL_PORT}/{_TEST_DB}?charset=utf8mb4"
+)
 os.environ["AUTO_TRAIN_ON_STARTUP"] = "false"
 os.environ["MODEL_DIR"] = f"{_tmpdir}/models"
 os.environ["SAMPLE_DIR"] = f"{_tmpdir}/samples"

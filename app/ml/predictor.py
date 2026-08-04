@@ -89,8 +89,7 @@ def _build_override_rules(thresholds: dict | None = None) -> list[dict]:
         {
             "name": "连续两年绝收（高频理赔 + 投保年限不足）",
             "check": lambda i: (
-                (i.get("claim_count") or 0) >= claim_count_th
-                and (i.get("insurance_years") or 10) < insurance_low
+                (i.get("claim_count") or 0) >= claim_count_th and (i.get("insurance_years") or 10) < insurance_low
             ),
         },
         {
@@ -103,8 +102,7 @@ def _build_override_rules(thresholds: dict | None = None) -> list[dict]:
         {
             "name": "重大自然灾害（高频理赔 + 投保年限不足）",
             "check": lambda i: (
-                (i.get("claim_count") or 0) >= catastrophe_claims
-                and (i.get("insurance_years") or 10) < insurance_low
+                (i.get("claim_count") or 0) >= catastrophe_claims and (i.get("insurance_years") or 10) < insurance_low
             ),
         },
     ]

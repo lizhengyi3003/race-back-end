@@ -46,9 +46,7 @@ def generate_samples(n: int = 2000, default_rate: float = 0.04, seed: int = 42) 
     # 粮食规模种植专项补贴（元）：千亩连片种植主体
     grain_scale = np.where(land_area > 100, np.clip(land_area * rng.uniform(5, 15, n), 0, 80000), 0.0)
     # 特色经济作物补贴（元）：黑龙江较少，约 20% 主体
-    specialty = np.where(
-        rng.random(n) < 0.2, np.clip(rng.lognormal(np.log(15000), 0.8, n), 0, 60000), 0.0
-    )
+    specialty = np.where(rng.random(n) < 0.2, np.clip(rng.lognormal(np.log(15000), 0.8, n), 0, 60000), 0.0)
     # 农业保险连续投保年限（年）：左偏（beta(2,1)，多数 3-10 年），0-10
     insurance_years = np.clip(rng.beta(2, 1, n) * 10, 0, 10).round(0)
     # 历史保险理赔频次（次）：泊松，多数 0-1 次

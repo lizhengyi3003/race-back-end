@@ -141,7 +141,7 @@ def system_overview(db: Session) -> SystemOverview:
         models=models,
         apiLogs=api_logs,
         apiLogsToday=api_today,
-        database="MySQL" if not settings.is_sqlite else "SQLite",
+        database="MySQL",
         version=settings.APP_VERSION,
         serverTime=datetime.now(),
     )

@@ -6,7 +6,7 @@
 本仓库为项目**后端 + 完整可视化后台管理平台**，包含：
 
 - **信用评分卡引擎**：IV 特征筛选 → WOE 编码 → VIF 共线性诊断 → Logistic 回归 → 0-1000 分评分卡（参考 `toad`/`optbinning`/`scorecardpy` 方法自研实现，Python 开源生态）
-- **后端 API 服务**：FastAPI + SQLAlchemy 2.0 + MySQL 8.0（可选 SQLite 轻量演示）
+- **后端 API 服务**：FastAPI + SQLAlchemy 2.0 + MySQL 8.0
 - **后台管理平台**（`admin-web/`，Vue3 + Element Plus）：登录、系统概览、数据管理、模型训练与评估、API 管理（列表/日志/测试控制台）、系统监控（服务器/数据库/健康检查）、数据导入导出
 - **竞赛前端对接**：`fore-end/`（同级目录）已从模拟模型切换为调用本后端真实 API
 
@@ -115,9 +115,9 @@ npm run dev          # http://localhost:5174（已代理 /api → localhost:8000
 
 ---
 
-## 数据库配置（MySQL / SQLite）
+## 数据库配置（MySQL）
 
-项目默认使用 **MySQL 8.0**（生产部署推荐），SQLite 可用于轻量演示：
+项目使用 **MySQL 8.0**：
 
 1. 复制 `.env.example` 为 `.env`，修改 `DATABASE_URL` 中的账号密码：
 
@@ -127,8 +127,6 @@ DATABASE_URL=mysql+pymysql://root:你的密码@localhost:3306/race?charset=utf8m
 
 2. 先创建数据库：`CREATE DATABASE race DEFAULT CHARACTER SET utf8mb4;`
 3. 重新 `python scripts/init_db.py`
-
-> 代码完全兼容两种数据库（SQLAlchemy 方言自动适配），切换仅需改一行配置。
 
 ---
 

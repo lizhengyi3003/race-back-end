@@ -13,10 +13,9 @@ class Settings(BaseSettings):
     APP_VERSION: str = "1.0.0"
     API_PREFIX: str = "/api/v1"
 
-    # ---------- 数据库 ----------
-    # 默认 SQLite（零配置）；切换 MySQL 只需修改 DATABASE_URL：
-    # mysql+pymysql://user:pass@host:3306/dbname?charset=utf8mb4
-    DATABASE_URL: str = "sqlite:///./data/race.db"
+    # ---------- 数据库（MySQL）----------
+    # 默认连接本机 MySQL（Docker 或本机安装均可），通过 .env 的 DATABASE_URL 覆盖
+    DATABASE_URL: str = "mysql+pymysql://root:race123456@127.0.0.1:3306/race?charset=utf8mb4"
 
     # ---------- JWT ----------
     JWT_SECRET_KEY: str = "race-dev-secret-key-change-me-in-production"
@@ -62,10 +61,6 @@ class Settings(BaseSettings):
         if self.CORS_ORIGINS.strip() == "*":
             return ["*"]
         return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
-
-    @property
-    def is_sqlite(self) -> bool:
-        return self.DATABASE_URL.startswith("sqlite")
 
 
 @lru_cache
