@@ -53,11 +53,40 @@ def assess_and_store(db: Session, payload: dict, assessor_name: str | None = Non
     return result
 
 
-def _combine_mixed(sub_results: dict[str, tuple[float, dict]]) -> dict:
-    """混合经营：按子类型比例加权合并专家评估结果。"""
+def _combine_mixed(sub_results: dict[str, tuple[float, dict]], db: Session | None = None) -> dict:
+    """混合经营：按子类型比例加权合并专家评估结果 + 叠加协同因子。
+
+    协同因子（business_type_config.MIXED.synergy_factors，如 "01+02": {factor:1.06}）：
+    当所选业务组合命中已知协同组合时，评分加成 factor（种养结合/产销一体等）。
+    """
     total_ratio = sum(r for r, _ in sub_results.values()) or 1.0
     score = round(sum(ratio * res["score"] for ratio, res in sub_results.values()) / total_ratio)
     probability = sum(ratio * res["probability"] for ratio, res in sub_results.values()) / total_ratio
+
+    # ---- 协同因子叠加 ----
+    overrides: list[str] = []
+    if db is not None:
+        from app.models.indicator import BusinessTypeConfig
+
+        cfg = (
+            db.query(BusinessTypeConfig)
+            .filter(BusinessTypeConfig.business_type_code == "MIXED", BusinessTypeConfig.active.is_(True))
+            .first()
+        )
+        factors = (cfg.synergy_factors or {}) if cfg else {}
+        codes = sorted(sub_results.keys())
+        synergy_hits = []
+        for i in range(len(codes)):
+            for j in range(i + 1, len(codes)):
+                key = f"{codes[i]}+{codes[j]}"
+                if key in factors:
+                    synergy_hits.append((key, float(factors[key]["factor"]), factors[key].get("name", key)))
+        if synergy_hits:
+            # 取最大协同加成（v1：不叠加多个因子，避免过度乐观）
+            key, factor, name = max(synergy_hits, key=lambda x: x[1])
+            score = max(0, min(1000, round(score * factor)))
+            overrides.append(f"synergy:{key}:{factor:.2f}({name})")
+
     level = "低风险" if score >= 700 else ("中等风险" if score >= 500 else "高风险")
 
     contributions = []
@@ -85,7 +114,7 @@ def _combine_mixed(sub_results: dict[str, tuple[float, dict]]) -> dict:
         "contributions": contributions,
         "deductions": deductions,
         "advice": advice,
-        "overrides": [],
+        "overrides": overrides,
         "veto": None,
         "completeness": next(iter(sub_results.values()))[1]["completeness"],
     }
@@ -115,7 +144,7 @@ def assess_dynamic_and_store(
             if ratio > 0:
                 sub_results[code] = (float(ratio), expert_assess(db, code, indicators))
         if sub_results:
-            result = _combine_mixed(sub_results)
+            result = _combine_mixed(sub_results, db)
         else:
             result = expert_assess(db, "", indicators)
     else:
