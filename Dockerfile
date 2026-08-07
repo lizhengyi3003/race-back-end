@@ -2,7 +2,8 @@
 FROM node:22-alpine AS admin-build
 WORKDIR /admin
 COPY admin-web/package*.json ./
-RUN npm install --no-audit --no-fund
+# 国内服务器访问 npmjs 慢，用 npmmirror 加速
+RUN npm config set registry https://registry.npmmirror.com && npm install --no-audit --no-fund
 COPY admin-web/ ./
 RUN npm run build
 
@@ -14,9 +15,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     TZ=Asia/Shanghai
 
-# 依赖
+# 依赖（国内服务器用清华 PyPI 镜像加速）
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 # 后端代码
 COPY app ./app
