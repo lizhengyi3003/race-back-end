@@ -2,7 +2,8 @@ name: Deploy to Server
 
 on:
   push:
-    branches: [main]
+    # main 与 dev 均自动部署；分支名经受限密钥传给 /root/deploy-backend.sh
+    branches: [main, dev]
     # 仅后端相关文件变化时触发部署（文档/无关改动不触发）
     paths:
       - 'app/**'
@@ -23,7 +24,8 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           # 服务器侧该密钥被 command= 限制为只执行 /root/deploy-backend.sh
+          # 分支名经 SSH_ORIGINAL_COMMAND 传入，脚本内解析并校验（仅 main/dev）
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           port: 22
           script: |
-            echo "GitHub Actions 已触发，受限密钥将自动执行 /root/deploy-backend.sh"
+            deploy-backend.sh ${{ github.ref_name }}
