@@ -53,7 +53,10 @@ def split_category(value: str) -> tuple[str, str]:
 
 
 def derive_parent(code: str, level: str) -> str | None:
-    """类别父编码：中类(3位)父=前2位；小类(4位)父=前3位；大类无父。"""
+    """类别父编码：中类(3位)父=前2位；小类(4位)父=前3位；
+    具体营业类型(小类码_行业码)父=小类码；大类无父。"""
+    if level == "具体营业类型":
+        return code.split("_")[0] if "_" in code else (code[:4] if len(code) >= 4 else None)
     if level == "中类" and len(code) >= 3:
         return code[:2]
     if level == "小类" and len(code) >= 4:
@@ -164,7 +167,8 @@ def main() -> None:
     print(f"  按层级: {dict(level_cnt)}")
     print(f"  特色指标: {feature_cnt}, 一票否决: {veto_cnt}")
     print(f"类别节点: {len(categories)} (大类 {sum(1 for c in categories if c['level']=='大类')} / "
-          f"中类 {sum(1 for c in categories if c['level']=='中类')} / 小类 {sum(1 for c in categories if c['level']=='小类')})")
+          f"中类 {sum(1 for c in categories if c['level']=='中类')} / 小类 {sum(1 for c in categories if c['level']=='小类')} / "
+          f"具体营业类型 {sum(1 for c in categories if c['level']=='具体营业类型')})")
 
     # 校验唯一性
     codes = [i["code"] for i in indicators]

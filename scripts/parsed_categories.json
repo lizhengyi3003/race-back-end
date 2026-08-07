@@ -1,0 +1,3733 @@
+[
+ {
+  "code": "01",
+  "name": "农林牧渔业",
+  "children": [
+   {
+    "code": "011",
+    "name": "农业生产",
+    "children": [
+     {
+      "code": "0111",
+      "name": "谷物种植",
+      "children": [
+       {
+        "code": "0111_0111",
+        "name": "稻谷种植",
+        "industry_code": "0111"
+       },
+       {
+        "code": "0111_0112",
+        "name": "小麦种植",
+        "industry_code": "0112"
+       },
+       {
+        "code": "0111_0113",
+        "name": "玉米种植",
+        "industry_code": "0113"
+       },
+       {
+        "code": "0111_0119",
+        "name": "其他谷物种植",
+        "industry_code": "0119"
+       }
+      ]
+     },
+     {
+      "code": "0112",
+      "name": "薯类、豆类和油料种植",
+      "children": [
+       {
+        "code": "0112_0121",
+        "name": "豆类种植",
+        "industry_code": "0121"
+       },
+       {
+        "code": "0112_0122",
+        "name": "油料种植",
+        "industry_code": "0122"
+       },
+       {
+        "code": "0112_0123",
+        "name": "薯类种植",
+        "industry_code": "0123"
+       }
+      ]
+     },
+     {
+      "code": "0113",
+      "name": "棉、麻、糖、烟草种植",
+      "children": [
+       {
+        "code": "0113_0131",
+        "name": "棉花种植",
+        "industry_code": "0131"
+       },
+       {
+        "code": "0113_0132",
+        "name": "麻类种植",
+        "industry_code": "0132"
+       },
+       {
+        "code": "0113_0133",
+        "name": "糖料种植",
+        "industry_code": "0133"
+       },
+       {
+        "code": "0113_0134",
+        "name": "烟草种植",
+        "industry_code": "0134"
+       }
+      ]
+     },
+     {
+      "code": "0114",
+      "name": "蔬菜、食用菌及园艺作物种植",
+      "children": [
+       {
+        "code": "0114_0141",
+        "name": "蔬菜种植",
+        "industry_code": "0141"
+       },
+       {
+        "code": "0114_0142",
+        "name": "食用菌种植",
+        "industry_code": "0142"
+       },
+       {
+        "code": "0114_0143",
+        "name": "花卉种植",
+        "industry_code": "0143"
+       },
+       {
+        "code": "0114_0149",
+        "name": "其他园艺作物种植",
+        "industry_code": "0149"
+       }
+      ]
+     },
+     {
+      "code": "0115",
+      "name": "水果种植",
+      "children": [
+       {
+        "code": "0115_0151",
+        "name": "仁果类和核果类水果种植",
+        "industry_code": "0151"
+       },
+       {
+        "code": "0115_0152",
+        "name": "葡萄种植",
+        "industry_code": "0152"
+       },
+       {
+        "code": "0115_0153",
+        "name": "柑橘类种植",
+        "industry_code": "0153"
+       },
+       {
+        "code": "0115_0154",
+        "name": "香蕉等亚热带水果种植",
+        "industry_code": "0154"
+       },
+       {
+        "code": "0115_0159",
+        "name": "其他水果种植",
+        "industry_code": "0159"
+       }
+      ]
+     },
+     {
+      "code": "0116",
+      "name": "坚果、含油果、香料和饮料作物种植",
+      "children": [
+       {
+        "code": "0116_0161",
+        "name": "坚果种植",
+        "industry_code": "0161"
+       },
+       {
+        "code": "0116_0162",
+        "name": "含油果种植",
+        "industry_code": "0162"
+       },
+       {
+        "code": "0116_0163",
+        "name": "香料作物种植",
+        "industry_code": "0163"
+       },
+       {
+        "code": "0116_0164",
+        "name": "茶叶种植",
+        "industry_code": "0164"
+       },
+       {
+        "code": "0116_0169",
+        "name": "其他饮料作物种植",
+        "industry_code": "0169"
+       }
+      ]
+     },
+     {
+      "code": "0117",
+      "name": "中药材种植",
+      "children": [
+       {
+        "code": "0117_0171",
+        "name": "中草药种植",
+        "industry_code": "0171"
+       },
+       {
+        "code": "0117_0179",
+        "name": "其他中药材种植",
+        "industry_code": "0179"
+       }
+      ]
+     },
+     {
+      "code": "0118",
+      "name": "草种植及割草",
+      "children": [
+       {
+        "code": "0118_0181",
+        "name": "草种植",
+        "industry_code": "0181"
+       },
+       {
+        "code": "0118_0182",
+        "name": "天然草原割草",
+        "industry_code": "0182"
+       }
+      ]
+     },
+     {
+      "code": "0119",
+      "name": "其他农业生产活动",
+      "children": [
+       {
+        "code": "0119_0190",
+        "name": "其他农业",
+        "industry_code": "0190"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "012",
+    "name": "林业生产",
+    "children": [
+     {
+      "code": "0121",
+      "name": "林木育种和育苗",
+      "children": [
+       {
+        "code": "0121_0211",
+        "name": "林木育种",
+        "industry_code": "0211"
+       },
+       {
+        "code": "0121_0212",
+        "name": "林木育苗",
+        "industry_code": "0212"
+       }
+      ]
+     },
+     {
+      "code": "0122",
+      "name": "造林和更新",
+      "children": [
+       {
+        "code": "0122_0220",
+        "name": "造林和更新",
+        "industry_code": "0220"
+       }
+      ]
+     },
+     {
+      "code": "0123",
+      "name": "森林经营、管护和改培",
+      "children": [
+       {
+        "code": "0123_0231",
+        "name": "森林经营和管护",
+        "industry_code": "0231"
+       },
+       {
+        "code": "0123_0232",
+        "name": "森林改培",
+        "industry_code": "0232"
+       }
+      ]
+     },
+     {
+      "code": "0124",
+      "name": "木材和竹材采运",
+      "children": [
+       {
+        "code": "0124_0241",
+        "name": "木材采运",
+        "industry_code": "0241"
+       },
+       {
+        "code": "0124_0242",
+        "name": "竹材采运",
+        "industry_code": "0242"
+       }
+      ]
+     },
+     {
+      "code": "0125",
+      "name": "林产品采集",
+      "children": [
+       {
+        "code": "0125_0251",
+        "name": "木竹材林产品采集",
+        "industry_code": "0251"
+       },
+       {
+        "code": "0125_0252",
+        "name": "非木竹材林产品采集",
+        "industry_code": "0252"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "013",
+    "name": "畜牧业生产",
+    "children": [
+     {
+      "code": "0131",
+      "name": "牲畜饲养",
+      "children": [
+       {
+        "code": "0131_0311",
+        "name": "牛的饲养",
+        "industry_code": "0311"
+       },
+       {
+        "code": "0131_0312",
+        "name": "马的饲养",
+        "industry_code": "0312"
+       },
+       {
+        "code": "0131_0313",
+        "name": "猪的饲养",
+        "industry_code": "0313"
+       },
+       {
+        "code": "0131_0314",
+        "name": "羊的饲养",
+        "industry_code": "0314"
+       },
+       {
+        "code": "0131_0315",
+        "name": "骆驼饲养",
+        "industry_code": "0315"
+       },
+       {
+        "code": "0131_0319",
+        "name": "其他牲畜饲养",
+        "industry_code": "0319"
+       }
+      ]
+     },
+     {
+      "code": "0132",
+      "name": "家禽饲养",
+      "children": [
+       {
+        "code": "0132_0321",
+        "name": "鸡的饲养",
+        "industry_code": "0321"
+       },
+       {
+        "code": "0132_0322",
+        "name": "鸭的饲养",
+        "industry_code": "0322"
+       },
+       {
+        "code": "0132_0323",
+        "name": "鹅的饲养",
+        "industry_code": "0323"
+       },
+       {
+        "code": "0132_0329",
+        "name": "其他家禽饲养",
+        "industry_code": "0329"
+       }
+      ]
+     },
+     {
+      "code": "0133",
+      "name": "狩猎和捕捉动物",
+      "children": [
+       {
+        "code": "0133_0330",
+        "name": "狩猎和捕捉动物",
+        "industry_code": "0330"
+       }
+      ]
+     },
+     {
+      "code": "0134",
+      "name": "其它畜牧业",
+      "children": [
+       {
+        "code": "0134_0391",
+        "name": "兔的饲养",
+        "industry_code": "0391"
+       },
+       {
+        "code": "0134_0392",
+        "name": "蜜蜂饲养",
+        "industry_code": "0392"
+       },
+       {
+        "code": "0134_0399",
+        "name": "其他未列明畜牧业",
+        "industry_code": "0399"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "014",
+    "name": "渔业生产",
+    "children": [
+     {
+      "code": "0141",
+      "name": "水产养殖",
+      "children": [
+       {
+        "code": "0141_0411",
+        "name": "海水养殖",
+        "industry_code": "0411"
+       },
+       {
+        "code": "0141_0412",
+        "name": "内陆养殖",
+        "industry_code": "0412"
+       }
+      ]
+     },
+     {
+      "code": "0142",
+      "name": "水产捕捞",
+      "children": [
+       {
+        "code": "0142_0421",
+        "name": "海水捕捞",
+        "industry_code": "0421"
+       },
+       {
+        "code": "0142_0422",
+        "name": "内陆捕捞",
+        "industry_code": "0422"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "015",
+    "name": "农林牧渔专业及辅助性活动",
+    "children": [
+     {
+      "code": "0151",
+      "name": "农业专业及辅助性活动",
+      "children": [
+       {
+        "code": "0151_0511",
+        "name": "种子种苗培育活动",
+        "industry_code": "0511"
+       },
+       {
+        "code": "0151_0512",
+        "name": "农业机械活动",
+        "industry_code": "0512"
+       },
+       {
+        "code": "0151_0513",
+        "name": "灌溉活动",
+        "industry_code": "0513"
+       },
+       {
+        "code": "0151_0514",
+        "name": "农产品初加工活动",
+        "industry_code": "0514"
+       },
+       {
+        "code": "0151_0515",
+        "name": "农作物病虫害防治活动",
+        "industry_code": "0515"
+       },
+       {
+        "code": "0151_0519",
+        "name": "其他农业专业及辅助性活动",
+        "industry_code": "0519"
+       }
+      ]
+     },
+     {
+      "code": "0152",
+      "name": "林业专业及辅助性活动",
+      "children": [
+       {
+        "code": "0152_0521",
+        "name": "林业有害生物防治活动",
+        "industry_code": "0521"
+       },
+       {
+        "code": "0152_0522",
+        "name": "森林防火活动",
+        "industry_code": "0522"
+       },
+       {
+        "code": "0152_0523",
+        "name": "林产品初级加工活动",
+        "industry_code": "0523"
+       },
+       {
+        "code": "0152_0529",
+        "name": "其他林业专业及辅助性活动",
+        "industry_code": "0529"
+       }
+      ]
+     },
+     {
+      "code": "0153",
+      "name": "畜牧专业及辅助性活动",
+      "children": [
+       {
+        "code": "0153_0531",
+        "name": "畜牧良种繁殖活动",
+        "industry_code": "0531"
+       },
+       {
+        "code": "0153_0539",
+        "name": "其他畜牧专业及辅助性活动",
+        "industry_code": "0539"
+       }
+      ]
+     },
+     {
+      "code": "0154",
+      "name": "渔业专业及辅助性活动",
+      "children": [
+       {
+        "code": "0154_0541",
+        "name": "鱼苗及鱼种场活动",
+        "industry_code": "0541"
+       },
+       {
+        "code": "0154_0549",
+        "name": "其他渔业专业及辅助性活动",
+        "industry_code": "0549"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "code": "02",
+  "name": "食用农林牧渔业产品加工与制造",
+  "children": [
+   {
+    "code": "021",
+    "name": "粮油加工及豆制品制造",
+    "children": [
+     {
+      "code": "0211",
+      "name": "谷物磨制",
+      "children": [
+       {
+        "code": "0211_1311",
+        "name": "稻谷加工",
+        "industry_code": "1311"
+       },
+       {
+        "code": "0211_1312",
+        "name": "小麦加工",
+        "industry_code": "1312"
+       },
+       {
+        "code": "0211_1313",
+        "name": "玉米加工",
+        "industry_code": "1313"
+       },
+       {
+        "code": "0211_1314",
+        "name": "杂粮加工",
+        "industry_code": "1314"
+       },
+       {
+        "code": "0211_1319",
+        "name": "其他谷物磨制",
+        "industry_code": "1319"
+       }
+      ]
+     },
+     {
+      "code": "0212",
+      "name": "淀粉及淀粉制品制造",
+      "children": [
+       {
+        "code": "0212_1391",
+        "name": "淀粉及淀粉制品制造",
+        "industry_code": "1391"
+       }
+      ]
+     },
+     {
+      "code": "0213",
+      "name": "豆制品制造",
+      "children": [
+       {
+        "code": "0213_1392",
+        "name": "豆制品制造",
+        "industry_code": "1392"
+       }
+      ]
+     },
+     {
+      "code": "0214",
+      "name": "食用植物油加工",
+      "children": [
+       {
+        "code": "0214_1331",
+        "name": "食用植物油加工",
+        "industry_code": "1331"
+       }
+      ]
+     },
+     {
+      "code": "0215",
+      "name": "饲料加工",
+      "children": [
+       {
+        "code": "0215_1321",
+        "name": "宠物饲料加工",
+        "industry_code": "1321"
+       },
+       {
+        "code": "0215_1329",
+        "name": "其他饲料加工",
+        "industry_code": "1329"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "022",
+    "name": "肉蛋奶加工",
+    "children": [
+     {
+      "code": "0221",
+      "name": "牲畜、禽类屠宰",
+      "children": [
+       {
+        "code": "0221_1351",
+        "name": "牲畜屠宰",
+        "industry_code": "1351"
+       },
+       {
+        "code": "0221_1352",
+        "name": "禽类屠宰",
+        "industry_code": "1352"
+       }
+      ]
+     },
+     {
+      "code": "0222",
+      "name": "肉类加工",
+      "children": [
+       {
+        "code": "0222_1353",
+        "name": "肉制品及副产品加工",
+        "industry_code": "1353"
+       }
+      ]
+     },
+     {
+      "code": "0223",
+      "name": "肉、禽类罐头制造",
+      "children": [
+       {
+        "code": "0223_1451",
+        "name": "肉、禽类罐头制造",
+        "industry_code": "1451"
+       }
+      ]
+     },
+     {
+      "code": "0224",
+      "name": "蛋品加工",
+      "children": [
+       {
+        "code": "0224_1393",
+        "name": "蛋品加工",
+        "industry_code": "1393"
+       }
+      ]
+     },
+     {
+      "code": "0225",
+      "name": "乳品加工",
+      "children": [
+       {
+        "code": "0225_1441",
+        "name": "液体乳制造",
+        "industry_code": "1441"
+       },
+       {
+        "code": "0225_1442",
+        "name": "乳粉制造",
+        "industry_code": "1442"
+       },
+       {
+        "code": "0225_1449",
+        "name": "其他乳制品制造",
+        "industry_code": "1449"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "023",
+    "name": "果蔬茶加工",
+    "children": [
+     {
+      "code": "0231",
+      "name": "蔬菜加工",
+      "children": [
+       {
+        "code": "0231_1371",
+        "name": "蔬菜加工",
+        "industry_code": "1371"
+       }
+      ]
+     },
+     {
+      "code": "0232",
+      "name": "食用菌加工",
+      "children": [
+       {
+        "code": "0232_1372",
+        "name": "食用菌加工",
+        "industry_code": "1372"
+       }
+      ]
+     },
+     {
+      "code": "0233",
+      "name": "水果、坚果加工",
+      "children": [
+       {
+        "code": "0233_1373",
+        "name": "水果和坚果加工",
+        "industry_code": "1373"
+       }
+      ]
+     },
+     {
+      "code": "0234",
+      "name": "蜜饯制作",
+      "children": [
+       {
+        "code": "0234_1422",
+        "name": "蜜饯制作",
+        "industry_code": "1422"
+       }
+      ]
+     },
+     {
+      "code": "0235",
+      "name": "蔬菜、水果罐头制造",
+      "children": [
+       {
+        "code": "0235_1453",
+        "name": "蔬菜、水果罐头制造",
+        "industry_code": "1453"
+       }
+      ]
+     },
+     {
+      "code": "0236",
+      "name": "精制茶加工",
+      "children": [
+       {
+        "code": "0236_1530",
+        "name": "精制茶加工",
+        "industry_code": "1530"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "024",
+    "name": "水产品加工",
+    "children": [
+     {
+      "code": "0241",
+      "name": "水产品冷冻加工",
+      "children": [
+       {
+        "code": "0241_1361",
+        "name": "水产品冷冻加工",
+        "industry_code": "1361"
+       }
+      ]
+     },
+     {
+      "code": "0242",
+      "name": "鱼糜制品及水产品干腌制加工",
+      "children": [
+       {
+        "code": "0242_1362",
+        "name": "鱼糜制品及水产品干腌制加工",
+        "industry_code": "1362"
+       }
+      ]
+     },
+     {
+      "code": "0243",
+      "name": "鱼油提取及制品制造",
+      "children": [
+       {
+        "code": "0243_1363",
+        "name": "鱼油提取及制品制造",
+        "industry_code": "1363"
+       }
+      ]
+     },
+     {
+      "code": "0244",
+      "name": "水产品罐头制造",
+      "children": [
+       {
+        "code": "0244_1452",
+        "name": "水产品罐头制造",
+        "industry_code": "1452"
+       }
+      ]
+     },
+     {
+      "code": "0245",
+      "name": "其他水产品加工",
+      "children": [
+       {
+        "code": "0245_1369",
+        "name": "其他水产品加工",
+        "industry_code": "1369"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "025",
+    "name": "焙烤食品制造",
+    "children": [
+     {
+      "code": "0251",
+      "name": "糕点、面包制造",
+      "children": [
+       {
+        "code": "0251_1411",
+        "name": "糕点、面包制造",
+        "industry_code": "1411"
+       }
+      ]
+     },
+     {
+      "code": "0252",
+      "name": "饼干及其他焙烤食品制造",
+      "children": [
+       {
+        "code": "0252_1419",
+        "name": "饼干及其他焙烤食品制造",
+        "industry_code": "1419"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "026",
+    "name": "方便食品制造",
+    "children": [
+     {
+      "code": "0261",
+      "name": "米、面制品制造",
+      "children": [
+       {
+        "code": "0261_1431",
+        "name": "米、面制品制造",
+        "industry_code": "1431"
+       }
+      ]
+     },
+     {
+      "code": "0262",
+      "name": "速冻食品制造",
+      "children": [
+       {
+        "code": "0262_1432",
+        "name": "速冻食品制造",
+        "industry_code": "1432"
+       }
+      ]
+     },
+     {
+      "code": "0263",
+      "name": "方便面制造",
+      "children": [
+       {
+        "code": "0263_1433",
+        "name": "方便面制造",
+        "industry_code": "1433"
+       }
+      ]
+     },
+     {
+      "code": "0264",
+      "name": "米面食品类罐头及其他方便食品制造",
+      "children": [
+       {
+        "code": "0264_1439",
+        "name": "其他方便食品制造",
+        "industry_code": "1439"
+       },
+       {
+        "code": "0264_1459",
+        "name": "其他罐头食品制造",
+        "industry_code": "1459"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "027",
+    "name": "食品添加剂及调味品制造",
+    "children": [
+     {
+      "code": "0271",
+      "name": "味精制造",
+      "children": [
+       {
+        "code": "0271_1461",
+        "name": "味精制造",
+        "industry_code": "1461"
+       }
+      ]
+     },
+     {
+      "code": "0272",
+      "name": "酱油、食醋及类似制品制造",
+      "children": [
+       {
+        "code": "0272_1462",
+        "name": "酱油、食醋及类似制品制造",
+        "industry_code": "1462"
+       }
+      ]
+     },
+     {
+      "code": "0273",
+      "name": "食品及饲料添加剂制造",
+      "children": [
+       {
+        "code": "0273_1495",
+        "name": "食品及饲料添加剂制造",
+        "industry_code": "1495"
+       }
+      ]
+     },
+     {
+      "code": "0274",
+      "name": "其他调味品、发酵制品制造",
+      "children": [
+       {
+        "code": "0274_1469",
+        "name": "其他调味品、发酵制品制造",
+        "industry_code": "1469"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "028",
+    "name": "烟酒糖及饮料制造",
+    "children": [
+     {
+      "code": "0281",
+      "name": "烟草制品业",
+      "children": [
+       {
+        "code": "0281_1610",
+        "name": "烟叶复烤",
+        "industry_code": "1610"
+       },
+       {
+        "code": "0281_1620",
+        "name": "卷烟制造",
+        "industry_code": "1620"
+       },
+       {
+        "code": "0281_1690",
+        "name": "其他烟草制品制造",
+        "industry_code": "1690"
+       }
+      ]
+     },
+     {
+      "code": "0282",
+      "name": "酒的制造",
+      "children": [
+       {
+        "code": "0282_1511",
+        "name": "酒精制造",
+        "industry_code": "1511"
+       },
+       {
+        "code": "0282_1512",
+        "name": "白酒制造",
+        "industry_code": "1512"
+       },
+       {
+        "code": "0282_1513",
+        "name": "啤酒制造",
+        "industry_code": "1513"
+       },
+       {
+        "code": "0282_1514",
+        "name": "黄酒制造",
+        "industry_code": "1514"
+       },
+       {
+        "code": "0282_1515",
+        "name": "葡萄酒制造",
+        "industry_code": "1515"
+       },
+       {
+        "code": "0282_1519",
+        "name": "其他酒制造",
+        "industry_code": "1519"
+       }
+      ]
+     },
+     {
+      "code": "0283",
+      "name": "制糖业",
+      "children": [
+       {
+        "code": "0283_1340",
+        "name": "制糖业",
+        "industry_code": "1340"
+       }
+      ]
+     },
+     {
+      "code": "0284",
+      "name": "饮料制造",
+      "children": [
+       {
+        "code": "0284_1523",
+        "name": "果菜汁及果菜汁饮料制造",
+        "industry_code": "1523"
+       },
+       {
+        "code": "0284_1524",
+        "name": "含乳饮料和植物蛋白饮料制造",
+        "industry_code": "1524"
+       },
+       {
+        "code": "0284_1525",
+        "name": "固体饮料制造",
+        "industry_code": "1525"
+       },
+       {
+        "code": "0284_1529",
+        "name": "茶饮料及其他饮料制造",
+        "industry_code": "1529"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "029",
+    "name": "中药及其他食品制造",
+    "children": [
+     {
+      "code": "0291",
+      "name": "中药制造",
+      "children": [
+       {
+        "code": "0291_2730",
+        "name": "中药饮片加工",
+        "industry_code": "2730"
+       },
+       {
+        "code": "0291_2740",
+        "name": "中成药生产",
+        "industry_code": "2740"
+       }
+      ]
+     },
+     {
+      "code": "0292",
+      "name": "糖果、巧克力制造",
+      "children": [
+       {
+        "code": "0292_1421",
+        "name": "糖果、巧克力制造",
+        "industry_code": "1421"
+       }
+      ]
+     },
+     {
+      "code": "0293",
+      "name": "营养保健食品制造",
+      "children": [
+       {
+        "code": "0293_1491",
+        "name": "营养食品制造",
+        "industry_code": "1491"
+       },
+       {
+        "code": "0293_1492",
+        "name": "保健食品制造",
+        "industry_code": "1492"
+       }
+      ]
+     },
+     {
+      "code": "0294",
+      "name": "冷冻饮品及食用冰制造",
+      "children": [
+       {
+        "code": "0294_1493",
+        "name": "冷冻饮品及食用冰制造",
+        "industry_code": "1493"
+       }
+      ]
+     },
+     {
+      "code": "0295",
+      "name": "其他未列明食用类产品加工和制造",
+      "children": [
+       {
+        "code": "0295_1399",
+        "name": "其他未列明农副食品加工",
+        "industry_code": "1399"
+       },
+       {
+        "code": "0295_1499",
+        "name": "其他未列明食品制造",
+        "industry_code": "1499"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "code": "03",
+  "name": "非食用农林牧渔业产品加工与制造",
+  "children": [
+   {
+    "code": "031",
+    "name": "非食用植物油加工",
+    "children": [
+     {
+      "code": "0310",
+      "name": "非食用植物油加工",
+      "children": [
+       {
+        "code": "0310_1332",
+        "name": "非食用植物油加工",
+        "industry_code": "1332"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "032",
+    "name": "棉麻加工",
+    "children": [
+     {
+      "code": "0320",
+      "name": "棉麻加工",
+      "children": [
+       {
+        "code": "0320_1711",
+        "name": "棉纺纱加工",
+        "industry_code": "1711"
+       },
+       {
+        "code": "0320_1712",
+        "name": "棉织造加工",
+        "industry_code": "1712"
+       },
+       {
+        "code": "0320_1731",
+        "name": "麻纤维纺前加工和纺纱",
+        "industry_code": "1731"
+       },
+       {
+        "code": "0320_1732",
+        "name": "麻织造加工",
+        "industry_code": "1732"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "033",
+    "name": "皮毛羽丝加工",
+    "children": [
+     {
+      "code": "0331",
+      "name": "皮革鞣制加工",
+      "children": [
+       {
+        "code": "0331_1910",
+        "name": "皮革鞣制加工",
+        "industry_code": "1910"
+       }
+      ]
+     },
+     {
+      "code": "0332",
+      "name": "皮革制品制造",
+      "children": [
+       {
+        "code": "0332_1921",
+        "name": "皮革服装制造",
+        "industry_code": "1921"
+       },
+       {
+        "code": "0332_1922",
+        "name": "皮箱、包（袋）制造",
+        "industry_code": "1922"
+       },
+       {
+        "code": "0332_1923",
+        "name": "皮手套及皮装饰制品制造",
+        "industry_code": "1923"
+       },
+       {
+        "code": "0332_1929",
+        "name": "其他皮革制品制造",
+        "industry_code": "1929"
+       },
+       {
+        "code": "0332_1952",
+        "name": "皮鞋制造",
+        "industry_code": "1952"
+       }
+      ]
+     },
+     {
+      "code": "0333",
+      "name": "毛皮鞣制及制品加工",
+      "children": [
+       {
+        "code": "0333_1931",
+        "name": "毛皮鞣制加工",
+        "industry_code": "1931"
+       },
+       {
+        "code": "0333_1932",
+        "name": "毛皮服装加工",
+        "industry_code": "1932"
+       },
+       {
+        "code": "0333_1939",
+        "name": "其他毛皮制品加工",
+        "industry_code": "1939"
+       }
+      ]
+     },
+     {
+      "code": "0334",
+      "name": "羽毛（绒）加工及制品制造",
+      "children": [
+       {
+        "code": "0334_1941",
+        "name": "羽毛（绒）加工",
+        "industry_code": "1941"
+       },
+       {
+        "code": "0334_1942",
+        "name": "羽毛（绒）制品加工",
+        "industry_code": "1942"
+       }
+      ]
+     },
+     {
+      "code": "0335",
+      "name": "毛条加工及制品制造",
+      "children": [
+       {
+        "code": "0335_1721",
+        "name": "毛条和毛纱线加工",
+        "industry_code": "1721"
+       },
+       {
+        "code": "0335_1722",
+        "name": "毛织造加工",
+        "industry_code": "1722"
+       }
+      ]
+     },
+     {
+      "code": "0336",
+      "name": "丝绢纺织加工",
+      "children": [
+       {
+        "code": "0336_1741",
+        "name": "缫丝加工",
+        "industry_code": "1741"
+       },
+       {
+        "code": "0336_1742",
+        "name": "绢纺和丝织加工",
+        "industry_code": "1742"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "034",
+    "name": "木竹藤棕草加工",
+    "children": [
+     {
+      "code": "0341",
+      "name": "木材加工",
+      "children": [
+       {
+        "code": "0341_2011",
+        "name": "锯材加工",
+        "industry_code": "2011"
+       },
+       {
+        "code": "0341_2012",
+        "name": "木片加工",
+        "industry_code": "2012"
+       },
+       {
+        "code": "0341_2013",
+        "name": "单板加工",
+        "industry_code": "2013"
+       },
+       {
+        "code": "0341_2019",
+        "name": "其他木材加工",
+        "industry_code": "2019"
+       }
+      ]
+     },
+     {
+      "code": "0342",
+      "name": "人造板制造",
+      "children": [
+       {
+        "code": "0342_2021",
+        "name": "胶合板制造",
+        "industry_code": "2021"
+       },
+       {
+        "code": "0342_2022",
+        "name": "纤维板制造",
+        "industry_code": "2022"
+       },
+       {
+        "code": "0342_2023",
+        "name": "刨花板制造",
+        "industry_code": "2023"
+       },
+       {
+        "code": "0342_2029",
+        "name": "其他人造板制造",
+        "industry_code": "2029"
+       }
+      ]
+     },
+     {
+      "code": "0343",
+      "name": "木质制品制造",
+      "children": [
+       {
+        "code": "0343_2031",
+        "name": "建筑用木料及木材组件加工",
+        "industry_code": "2031"
+       },
+       {
+        "code": "0343_2032",
+        "name": "木门窗制造",
+        "industry_code": "2032"
+       },
+       {
+        "code": "0343_2033",
+        "name": "木楼梯制造",
+        "industry_code": "2033"
+       },
+       {
+        "code": "0343_2034",
+        "name": "木地板制造",
+        "industry_code": "2034"
+       },
+       {
+        "code": "0343_2035",
+        "name": "木制容器制造",
+        "industry_code": "2035"
+       },
+       {
+        "code": "0343_2039",
+        "name": "软木制品及其他木制品制造",
+        "industry_code": "2039"
+       }
+      ]
+     },
+     {
+      "code": "0344",
+      "name": "竹、藤、棕、草等制品制造",
+      "children": [
+       {
+        "code": "0344_2041",
+        "name": "竹制品制造",
+        "industry_code": "2041"
+       },
+       {
+        "code": "0344_2042",
+        "name": "藤制品制造",
+        "industry_code": "2042"
+       },
+       {
+        "code": "0344_2043",
+        "name": "棕制品制造",
+        "industry_code": "2043"
+       },
+       {
+        "code": "0344_2049",
+        "name": "草及其他制品制造",
+        "industry_code": "2049"
+       }
+      ]
+     },
+     {
+      "code": "0345",
+      "name": "木竹浆制造",
+      "children": [
+       {
+        "code": "0345_2211",
+        "name": "木竹浆制造",
+        "industry_code": "2211"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "035",
+    "name": "文具、玩具和工艺品制造",
+    "children": [
+     {
+      "code": "0351",
+      "name": "木、竹制教学用品制造",
+      "children": [
+       {
+        "code": "0351_2411",
+        "name": "文具制造",
+        "industry_code": "2411"
+       },
+       {
+        "code": "0351_2412",
+        "name": "笔的制造",
+        "industry_code": "2412"
+       },
+       {
+        "code": "0351_2413",
+        "name": "教学用模型及教具制造",
+        "industry_code": "2413"
+       },
+       {
+        "code": "0351_2419",
+        "name": "其他文教办公用品制造",
+        "industry_code": "2419"
+       }
+      ]
+     },
+     {
+      "code": "0352",
+      "name": "木、竹、丝、皮乐器制造",
+      "children": [
+       {
+        "code": "0352_2421",
+        "name": "中乐器制造",
+        "industry_code": "2421"
+       },
+       {
+        "code": "0352_2422",
+        "name": "西乐器制造",
+        "industry_code": "2422"
+       },
+       {
+        "code": "0352_2429",
+        "name": "其他乐器及零件制造",
+        "industry_code": "2429"
+       }
+      ]
+     },
+     {
+      "code": "0353",
+      "name": "木、竹制玩具制造",
+      "children": [
+       {
+        "code": "0353_2459",
+        "name": "其他玩具制造",
+        "industry_code": "2459"
+       }
+      ]
+     },
+     {
+      "code": "0354",
+      "name": "木、竹、树根等雕塑工艺品制造",
+      "children": [
+       {
+        "code": "0354_2431",
+        "name": "雕塑工艺品制造",
+        "industry_code": "2431"
+       }
+      ]
+     },
+     {
+      "code": "0355",
+      "name": "其他木、竹制工艺美术及礼仪用品制造",
+      "children": [
+       {
+        "code": "0355_2439",
+        "name": "其他工艺美术及礼仪用品制造",
+        "industry_code": "2439"
+       }
+      ]
+     },
+     {
+      "code": "0356",
+      "name": "麦秆、羽毛、粮食等花画工艺品",
+      "children": [
+       {
+        "code": "0356_2434",
+        "name": "花画工艺品制造",
+        "industry_code": "2434"
+       }
+      ]
+     },
+     {
+      "code": "0357",
+      "name": "编织、刺绣类工艺美术及礼仪用品制造",
+      "children": [
+       {
+        "code": "0357_2435",
+        "name": "天然植物纤维编织工艺品制造",
+        "industry_code": "2435"
+       },
+       {
+        "code": "0357_2436",
+        "name": "抽纱刺绣工艺品制造",
+        "industry_code": "2436"
+       },
+       {
+        "code": "0357_2437",
+        "name": "地毯、挂毯制造",
+        "industry_code": "2437"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "036",
+    "name": "生物质能开发利用",
+    "children": [
+     {
+      "code": "0361",
+      "name": "生物质液体燃料生产",
+      "children": [
+       {
+        "code": "0361_2541",
+        "name": "生物质液体燃料生产",
+        "industry_code": "2541"
+       }
+      ]
+     },
+     {
+      "code": "0362",
+      "name": "秸杆、林木等致密成型燃料加工",
+      "children": [
+       {
+        "code": "0362_2542",
+        "name": "生物质致密成型燃料加工",
+        "industry_code": "2542"
+       }
+      ]
+     },
+     {
+      "code": "0363",
+      "name": "生物质能发电",
+      "children": [
+       {
+        "code": "0363_4417",
+        "name": "生物质能发电",
+        "industry_code": "4417"
+       }
+      ]
+     },
+     {
+      "code": "0364",
+      "name": "生物质能供热",
+      "children": [
+       {
+        "code": "0364_4430",
+        "name": "热力生产和供应",
+        "industry_code": "4430"
+       }
+      ]
+     },
+     {
+      "code": "0365",
+      "name": "生物质能热电联产",
+      "children": [
+       {
+        "code": "0365_4412",
+        "name": "热电联产",
+        "industry_code": "4412"
+       }
+      ]
+     },
+     {
+      "code": "0366",
+      "name": "生物质燃气生产和供应业",
+      "children": [
+       {
+        "code": "0366_4520",
+        "name": "生物质燃气生产和供应业",
+        "industry_code": "4520"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "037",
+    "name": "天然橡胶原料制品制造",
+    "children": [
+     {
+      "code": "0371",
+      "name": "天然橡胶原料制轮胎",
+      "children": [
+       {
+        "code": "0371_2911",
+        "name": "轮胎制造",
+        "industry_code": "2911"
+       }
+      ]
+     },
+     {
+      "code": "0372",
+      "name": "天然橡胶原料制板、管、带",
+      "children": [
+       {
+        "code": "0372_2912",
+        "name": "橡胶板、管、带制造",
+        "industry_code": "2912"
+       }
+      ]
+     },
+     {
+      "code": "0373",
+      "name": "天然橡胶原料制橡胶零件",
+      "children": [
+       {
+        "code": "0373_2913",
+        "name": "橡胶零件制造",
+        "industry_code": "2913"
+       }
+      ]
+     },
+     {
+      "code": "0374",
+      "name": "天然橡胶原料制日用及医用制品",
+      "children": [
+       {
+        "code": "0374_2915",
+        "name": "日用及医用橡胶制品制造",
+        "industry_code": "2915"
+       }
+      ]
+     },
+     {
+      "code": "0375",
+      "name": "天然橡胶原料制其他橡胶制品",
+      "children": [
+       {
+        "code": "0375_2919",
+        "name": "其他橡胶制品制造",
+        "industry_code": "2919"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "038",
+    "name": "农林牧渔原料化工品制造",
+    "children": [
+     {
+      "code": "0381",
+      "name": "林产化学产品制造",
+      "children": [
+       {
+        "code": "0381_2663",
+        "name": "林产化学产品制造",
+        "industry_code": "2663"
+       }
+      ]
+     },
+     {
+      "code": "0382",
+      "name": "动物胶制造",
+      "children": [
+       {
+        "code": "0382_2667",
+        "name": "动物胶制造",
+        "industry_code": "2667"
+       }
+      ]
+     },
+     {
+      "code": "0383",
+      "name": "香料香精制造",
+      "children": [
+       {
+        "code": "0383_2684",
+        "name": "香料、香精制造",
+        "industry_code": "2684"
+       }
+      ]
+     },
+     {
+      "code": "0384",
+      "name": "生物基化学纤维制造",
+      "children": [
+       {
+        "code": "0384_2831",
+        "name": "生物基化学纤维制造",
+        "industry_code": "2831"
+       }
+      ]
+     },
+     {
+      "code": "0385",
+      "name": "生物基淀粉基新材料制造",
+      "children": [
+       {
+        "code": "0385_2832",
+        "name": "生物基、淀粉基新材料制造",
+        "industry_code": "2832"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "code": "04",
+  "name": "农林牧渔业生产资料制造和农田水利设施建设",
+  "children": [
+   {
+    "code": "041",
+    "name": "肥料制造",
+    "children": [
+     {
+      "code": "0411",
+      "name": "氮肥制造",
+      "children": [
+       {
+        "code": "0411_2621",
+        "name": "氮肥制造",
+        "industry_code": "2621"
+       }
+      ]
+     },
+     {
+      "code": "0412",
+      "name": "磷肥制造",
+      "children": [
+       {
+        "code": "0412_2622",
+        "name": "磷肥制造",
+        "industry_code": "2622"
+       }
+      ]
+     },
+     {
+      "code": "0413",
+      "name": "钾肥制造",
+      "children": [
+       {
+        "code": "0413_2623",
+        "name": "钾肥制造",
+        "industry_code": "2623"
+       }
+      ]
+     },
+     {
+      "code": "0414",
+      "name": "复混肥料制造",
+      "children": [
+       {
+        "code": "0414_2624",
+        "name": "复混肥料制造",
+        "industry_code": "2624"
+       }
+      ]
+     },
+     {
+      "code": "0415",
+      "name": "有机肥料及微生物肥料制造",
+      "children": [
+       {
+        "code": "0415_2625",
+        "name": "有机肥料及微生物肥料制造",
+        "industry_code": "2625"
+       }
+      ]
+     },
+     {
+      "code": "0416",
+      "name": "其他肥料制造",
+      "children": [
+       {
+        "code": "0416_2629",
+        "name": "其他肥料制造",
+        "industry_code": "2629"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "042",
+    "name": "农兽药制造",
+    "children": [
+     {
+      "code": "0421",
+      "name": "化学农药制造",
+      "children": [
+       {
+        "code": "0421_2631",
+        "name": "化学农药制造",
+        "industry_code": "2631"
+       }
+      ]
+     },
+     {
+      "code": "0422",
+      "name": "生物化学农药及微生物农药制造",
+      "children": [
+       {
+        "code": "0422_2632",
+        "name": "生物化学农药及微生物农药制造",
+        "industry_code": "2632"
+       }
+      ]
+     },
+     {
+      "code": "0423",
+      "name": "兽用药品制造",
+      "children": [
+       {
+        "code": "0423_2750",
+        "name": "兽用药品制造",
+        "industry_code": "2750"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "043",
+    "name": "农业用塑料制品制造",
+    "children": [
+     {
+      "code": "0431",
+      "name": "农业用塑料薄膜制造",
+      "children": [
+       {
+        "code": "0431_2921",
+        "name": "塑料薄膜制造",
+        "industry_code": "2921"
+       }
+      ]
+     },
+     {
+      "code": "0432",
+      "name": "农业用泡沫塑料制造",
+      "children": [
+       {
+        "code": "0432_2924",
+        "name": "泡沫塑料制造",
+        "industry_code": "2924"
+       }
+      ]
+     },
+     {
+      "code": "0433",
+      "name": "其他农业用塑料制品制造",
+      "children": [
+       {
+        "code": "0433_2922",
+        "name": "塑料板、管、型材制造",
+        "industry_code": "2922"
+       },
+       {
+        "code": "0433_2923",
+        "name": "塑料丝、绳及编织品制造",
+        "industry_code": "2923"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "044",
+    "name": "农林牧渔业专用机械制造",
+    "children": [
+     {
+      "code": "0441",
+      "name": "拖拉机制造",
+      "children": [
+       {
+        "code": "0441_3571",
+        "name": "拖拉机制造",
+        "industry_code": "3571"
+       }
+      ]
+     },
+     {
+      "code": "0442",
+      "name": "种植业机械制造",
+      "children": [
+       {
+        "code": "0442_3572",
+        "name": "机械化农业及园艺机具制造",
+        "industry_code": "3572"
+       }
+      ]
+     },
+     {
+      "code": "0443",
+      "name": "林业机械制造",
+      "children": [
+       {
+        "code": "0443_3524",
+        "name": "木竹材加工机械制造",
+        "industry_code": "3524"
+       },
+       {
+        "code": "0443_3573",
+        "name": "营林及木竹采伐机械制造",
+        "industry_code": "3573"
+       }
+      ]
+     },
+     {
+      "code": "0444",
+      "name": "畜牧业机械制造",
+      "children": [
+       {
+        "code": "0444_3574",
+        "name": "畜牧机械制造",
+        "industry_code": "3574"
+       }
+      ]
+     },
+     {
+      "code": "0445",
+      "name": "渔业机械制造",
+      "children": [
+       {
+        "code": "0445_3575",
+        "name": "渔业机械制造",
+        "industry_code": "3575"
+       }
+      ]
+     },
+     {
+      "code": "0446",
+      "name": "农林牧渔机械配件制造",
+      "children": [
+       {
+        "code": "0446_3576",
+        "name": "农林牧渔机械配件制造",
+        "industry_code": "3576"
+       }
+      ]
+     },
+     {
+      "code": "0447",
+      "name": "棉花加工机械制造",
+      "children": [
+       {
+        "code": "0447_3577",
+        "name": "棉花加工机械制造",
+        "industry_code": "3577"
+       }
+      ]
+     },
+     {
+      "code": "0448",
+      "name": "其他农、林、牧、渔业机械制造",
+      "children": [
+       {
+        "code": "0448_3579",
+        "name": "其他农、林、牧、渔业机械制造",
+        "industry_code": "3579"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "045",
+    "name": "食用类产品生产专用设备制造",
+    "children": [
+     {
+      "code": "0451",
+      "name": "食品、酒、饮料及茶生产专用设备制造",
+      "children": [
+       {
+        "code": "0451_3531",
+        "name": "食品、酒、饮料及茶生产专用设备制造",
+        "industry_code": "3531"
+       }
+      ]
+     },
+     {
+      "code": "0452",
+      "name": "农副食品加工专用设备制造",
+      "children": [
+       {
+        "code": "0452_3532",
+        "name": "农副食品加工专用设备制造",
+        "industry_code": "3532"
+       }
+      ]
+     },
+     {
+      "code": "0453",
+      "name": "烟草生产专用设备制造",
+      "children": [
+       {
+        "code": "0453_3533",
+        "name": "烟草生产专用设备制造",
+        "industry_code": "3533"
+       }
+      ]
+     },
+     {
+      "code": "0454",
+      "name": "饲料生产专用设备制造",
+      "children": [
+       {
+        "code": "0454_3534",
+        "name": "饲料生产专用设备制造",
+        "industry_code": "3534"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "046",
+    "name": "渔业养殖捕捞船舶制造",
+    "children": [
+     {
+      "code": "0461",
+      "name": "金属渔业船舶制造",
+      "children": [
+       {
+        "code": "0461_3731",
+        "name": "金属船舶制造",
+        "industry_code": "3731"
+       }
+      ]
+     },
+     {
+      "code": "0462",
+      "name": "非金属渔业船舶制造",
+      "children": [
+       {
+        "code": "0462_3732",
+        "name": "非金属船舶制造",
+        "industry_code": "3732"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "047",
+    "name": "智慧农林牧渔业设备制造",
+    "children": [
+     {
+      "code": "0471",
+      "name": "农业专用智能无人飞行器制造",
+      "children": [
+       {
+        "code": "0471_3963",
+        "name": "智能无人飞行器制造",
+        "industry_code": "3963"
+       }
+      ]
+     },
+     {
+      "code": "0472",
+      "name": "农林牧渔业机器人制造",
+      "children": [
+       {
+        "code": "0472_3492",
+        "name": "特殊作业机器人制造",
+        "industry_code": "3492"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "048",
+    "name": "农林牧渔专用仪器及农园用金属工具制造",
+    "children": [
+     {
+      "code": "0481",
+      "name": "农林牧渔专用仪器仪表制造",
+      "children": [
+       {
+        "code": "0481_4024",
+        "name": "农林牧渔专用仪器仪表制造",
+        "industry_code": "4024"
+       }
+      ]
+     },
+     {
+      "code": "0482",
+      "name": "农用及园林用金属工具制造",
+      "children": [
+       {
+        "code": "0482_3323",
+        "name": "农用及园林用金属工具制造",
+        "industry_code": "3323"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "049",
+    "name": "现代农田水利设施建设",
+    "children": [
+     {
+      "code": "0490",
+      "name": "现代农田水利设施建设",
+      "children": [
+       {
+        "code": "0490_4821",
+        "name": "水源及供水设施工程建筑",
+        "industry_code": "4821"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "code": "05",
+  "name": "农林牧渔业及相关产品流通服务",
+  "children": [
+   {
+    "code": "051",
+    "name": "农林牧渔业及相关产品批发",
+    "children": [
+     {
+      "code": "0511",
+      "name": "农林牧渔初级产品批发",
+      "children": [
+       {
+        "code": "0511_5111",
+        "name": "谷物、豆及薯类批发",
+        "industry_code": "5111"
+       },
+       {
+        "code": "0511_5113",
+        "name": "畜牧渔业饲料批发",
+        "industry_code": "5113"
+       },
+       {
+        "code": "0511_5114",
+        "name": "棉、麻批发",
+        "industry_code": "5114"
+       },
+       {
+        "code": "0511_5115",
+        "name": "林业产品批发",
+        "industry_code": "5115"
+       },
+       {
+        "code": "0511_5116",
+        "name": "牲畜批发",
+        "industry_code": "5116"
+       },
+       {
+        "code": "0511_5117",
+        "name": "渔业产品批发",
+        "industry_code": "5117"
+       },
+       {
+        "code": "0511_5119",
+        "name": "其他农牧产品批发",
+        "industry_code": "5119"
+       }
+      ]
+     },
+     {
+      "code": "0512",
+      "name": "食品、饮料及烟草制品批发",
+      "children": [
+       {
+        "code": "0512_5121",
+        "name": "米、面制品及食用油批发",
+        "industry_code": "5121"
+       },
+       {
+        "code": "0512_5122",
+        "name": "糕点、糖果及糖批发",
+        "industry_code": "5122"
+       },
+       {
+        "code": "0512_5123",
+        "name": "果品、蔬菜批发",
+        "industry_code": "5123"
+       },
+       {
+        "code": "0512_5124",
+        "name": "肉、禽、蛋、奶及水产品批发",
+        "industry_code": "5124"
+       },
+       {
+        "code": "0512_5127",
+        "name": "酒、饮料及茶叶批发",
+        "industry_code": "5127"
+       },
+       {
+        "code": "0512_5128",
+        "name": "烟草制品批发",
+        "industry_code": "5128"
+       }
+      ]
+     },
+     {
+      "code": "0513",
+      "name": "中药材及动物用药批发",
+      "children": [
+       {
+        "code": "0513_5152",
+        "name": "中药批发",
+        "industry_code": "5152"
+       },
+       {
+        "code": "0513_5153",
+        "name": "动物用药品批发",
+        "industry_code": "5153"
+       }
+      ]
+     },
+     {
+      "code": "0514",
+      "name": "农资批发",
+      "children": [
+       {
+        "code": "0514_5112",
+        "name": "种子批发",
+        "industry_code": "5112"
+       },
+       {
+        "code": "0514_5166",
+        "name": "化肥批发",
+        "industry_code": "5166"
+       },
+       {
+        "code": "0514_5167",
+        "name": "农药批发",
+        "industry_code": "5167"
+       },
+       {
+        "code": "0514_5168",
+        "name": "农用薄膜批发",
+        "industry_code": "5168"
+       },
+       {
+        "code": "0514_5171",
+        "name": "农业机械批发",
+        "industry_code": "5171"
+       }
+      ]
+     },
+     {
+      "code": "0515",
+      "name": "宠物食品批发",
+      "children": [
+       {
+        "code": "0515_5192",
+        "name": "宠物食品用品批发",
+        "industry_code": "5192"
+       }
+      ]
+     },
+     {
+      "code": "0516",
+      "name": "农林牧渔产品互联网批发",
+      "children": [
+       {
+        "code": "0516_5193",
+        "name": "互联网批发",
+        "industry_code": "5193"
+       }
+      ]
+     },
+     {
+      "code": "0517",
+      "name": "农林牧渔产品贸易代理",
+      "children": [
+       {
+        "code": "0517_5181",
+        "name": "贸易代理",
+        "industry_code": "5181"
+       }
+      ]
+     },
+     {
+      "code": "0518",
+      "name": "大宗农林牧渔产品拍卖",
+      "children": [
+       {
+        "code": "0518_5182",
+        "name": "一般物品拍卖",
+        "industry_code": "5182"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "052",
+    "name": "农林牧渔业及相关产品零售",
+    "children": [
+     {
+      "code": "0521",
+      "name": "食品、饮料及茶叶零售",
+      "children": [
+       {
+        "code": "0521_5221",
+        "name": "粮油零售",
+        "industry_code": "5221"
+       },
+       {
+        "code": "0521_5223",
+        "name": "果品、蔬菜零售",
+        "industry_code": "5223"
+       },
+       {
+        "code": "0521_5224",
+        "name": "肉、禽、蛋、奶及水产品零售",
+        "industry_code": "5224"
+       },
+       {
+        "code": "0521_5226",
+        "name": "酒、饮料及茶叶零售",
+        "industry_code": "5226"
+       }
+      ]
+     },
+     {
+      "code": "0522",
+      "name": "烟草制品零售",
+      "children": [
+       {
+        "code": "0522_5227",
+        "name": "烟草制品零售",
+        "industry_code": "5227"
+       }
+      ]
+     },
+     {
+      "code": "0523",
+      "name": "中药零售",
+      "children": [
+       {
+        "code": "0523_5252",
+        "name": "中药零售",
+        "industry_code": "5252"
+       }
+      ]
+     },
+     {
+      "code": "0524",
+      "name": "动物用药零售",
+      "children": [
+       {
+        "code": "0524_5253",
+        "name": "动物用药品零售",
+        "industry_code": "5253"
+       }
+      ]
+     },
+     {
+      "code": "0525",
+      "name": "蔬菜、水果等流动货摊零售",
+      "children": [
+       {
+        "code": "0525_5291",
+        "name": "流动货摊零售",
+        "industry_code": "5291"
+       }
+      ]
+     },
+     {
+      "code": "0526",
+      "name": "宠物食品零售",
+      "children": [
+       {
+        "code": "0526_5297",
+        "name": "宠物食品用品零售",
+        "industry_code": "5297"
+       }
+      ]
+     },
+     {
+      "code": "0527",
+      "name": "农林牧渔及相关产品互联网零售",
+      "children": [
+       {
+        "code": "0527_5292",
+        "name": "互联网零售",
+        "industry_code": "5292"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "053",
+    "name": "农林牧渔业及相关产品运输",
+    "children": [
+     {
+      "code": "0531",
+      "name": "农林牧渔及相关产品铁路运输",
+      "children": [
+       {
+        "code": "0531_5320",
+        "name": "铁路货物运输",
+        "industry_code": "5320"
+       }
+      ]
+     },
+     {
+      "code": "0532",
+      "name": "农林牧渔及相关产品道路运输",
+      "children": [
+       {
+        "code": "0532_5431",
+        "name": "普通货物道路运输",
+        "industry_code": "5431"
+       },
+       {
+        "code": "0532_5432",
+        "name": "冷藏车道路运输",
+        "industry_code": "5432"
+       },
+       {
+        "code": "0532_5436",
+        "name": "邮件包裹道路运输",
+        "industry_code": "5436"
+       },
+       {
+        "code": "0532_5439",
+        "name": "其他道路货物运输",
+        "industry_code": "5439"
+       }
+      ]
+     },
+     {
+      "code": "0533",
+      "name": "农林牧渔及相关产品水上运输",
+      "children": [
+       {
+        "code": "0533_5521",
+        "name": "远洋货物运输",
+        "industry_code": "5521"
+       },
+       {
+        "code": "0533_5522",
+        "name": "沿海货物运输",
+        "industry_code": "5522"
+       },
+       {
+        "code": "0533_5523",
+        "name": "内河货物运输",
+        "industry_code": "5523"
+       }
+      ]
+     },
+     {
+      "code": "0534",
+      "name": "农林牧渔及相关产品航空运输",
+      "children": [
+       {
+        "code": "0534_5612",
+        "name": "航空货物运输",
+        "industry_code": "5612"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "054",
+    "name": "农林牧渔产品仓储、配送",
+    "children": [
+     {
+      "code": "0541",
+      "name": "农林牧渔产品仓储",
+      "children": [
+       {
+        "code": "0541_5930",
+        "name": "低温仓储",
+        "industry_code": "5930"
+       },
+       {
+        "code": "0541_5942",
+        "name": "危险化学品仓储",
+        "industry_code": "5942"
+       },
+       {
+        "code": "0541_5951",
+        "name": "谷物仓储",
+        "industry_code": "5951"
+       },
+       {
+        "code": "0541_5952",
+        "name": "棉花仓储",
+        "industry_code": "5952"
+       },
+       {
+        "code": "0541_5959",
+        "name": "其他农产品仓储",
+        "industry_code": "5959"
+       }
+      ]
+     },
+     {
+      "code": "0542",
+      "name": "中药材仓储",
+      "children": [
+       {
+        "code": "0542_5960",
+        "name": "中药材仓储",
+        "industry_code": "5960"
+       }
+      ]
+     },
+     {
+      "code": "0543",
+      "name": "农林牧渔及相关产品配送",
+      "children": [
+       {
+        "code": "0543_6010",
+        "name": "邮政基本服务",
+        "industry_code": "6010"
+       },
+       {
+        "code": "0543_6020",
+        "name": "快递服务",
+        "industry_code": "6020"
+       },
+       {
+        "code": "0543_6090",
+        "name": "其他寄递服务",
+        "industry_code": "6090"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "code": "06",
+  "name": "农林牧渔业科研和技术服务",
+  "children": [
+   {
+    "code": "061",
+    "name": "农林牧渔业生物工程技术研究和农业环境保护技术研究",
+    "children": [
+     {
+      "code": "0610",
+      "name": "农林牧渔业生物工程技术研究和农业环境保护技术研究",
+      "children": [
+       {
+        "code": "0610_7320",
+        "name": "工程和技术研究和试验发展",
+        "industry_code": "7320"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "062",
+    "name": "农业科学研究和试验发展",
+    "children": [
+     {
+      "code": "0620",
+      "name": "农业科学研究和试验发展",
+      "children": [
+       {
+        "code": "0620_7330",
+        "name": "农业科学研究和试验发展",
+        "industry_code": "7330"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "063",
+    "name": "农林牧渔业专业技术服务",
+    "children": [
+     {
+      "code": "0631",
+      "name": "农林牧渔业气象服务",
+      "children": [
+       {
+        "code": "0631_7410",
+        "name": "气象服务",
+        "industry_code": "7410"
+       }
+      ]
+     },
+     {
+      "code": "0632",
+      "name": "兽医服务",
+      "children": [
+       {
+        "code": "0632_7493",
+        "name": "兽医服务",
+        "industry_code": "7493"
+       }
+      ]
+     },
+     {
+      "code": "0633",
+      "name": "农林牧渔业质检技术服务",
+      "children": [
+       {
+        "code": "0633_7451",
+        "name": "检验检疫服务",
+        "industry_code": "7451"
+       },
+       {
+        "code": "0633_7452",
+        "name": "检测服务",
+        "industry_code": "7452"
+       },
+       {
+        "code": "0633_7453",
+        "name": "计量服务",
+        "industry_code": "7453"
+       },
+       {
+        "code": "0633_7454",
+        "name": "标准化服务",
+        "industry_code": "7454"
+       },
+       {
+        "code": "0633_7455",
+        "name": "认证认可服务",
+        "industry_code": "7455"
+       },
+       {
+        "code": "0633_7459",
+        "name": "其他质检技术服务",
+        "industry_code": "7459"
+       }
+      ]
+     },
+     {
+      "code": "0634",
+      "name": "森林草原生态监测服务",
+      "children": [
+       {
+        "code": "0634_7462",
+        "name": "生态资源监测",
+        "industry_code": "7462"
+       }
+      ]
+     },
+     {
+      "code": "0635",
+      "name": "农林牧渔业规划服务",
+      "children": [
+       {
+        "code": "0635_7485",
+        "name": "规划设计管理",
+        "industry_code": "7485"
+       }
+      ]
+     },
+     {
+      "code": "0636",
+      "name": "农林牧渔业专业设计服务",
+      "children": [
+       {
+        "code": "0636_7499",
+        "name": "其他未列明专业技术服务业",
+        "industry_code": "7499"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "064",
+    "name": "农林牧渔技术推广服务",
+    "children": [
+     {
+      "code": "0640",
+      "name": "农林牧渔技术推广服务",
+      "children": [
+       {
+        "code": "0640_7511",
+        "name": "农林牧渔技术推广服务",
+        "industry_code": "7511"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "065",
+    "name": "农林牧渔生物技术推广服务",
+    "children": [
+     {
+      "code": "0650",
+      "name": "农林牧渔生物技术推广服务",
+      "children": [
+       {
+        "code": "0650_7512",
+        "name": "生物技术推广服务",
+        "industry_code": "7512"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "code": "07",
+  "name": "农林牧渔业教育培训与人力资源服务",
+  "children": [
+   {
+    "code": "071",
+    "name": "农林牧渔业教育",
+    "children": [
+     {
+      "code": "0711",
+      "name": "农林牧渔业中等职业学校教育",
+      "children": [
+       {
+        "code": "0711_8336",
+        "name": "中等职业学校教育",
+        "industry_code": "8336"
+       }
+      ]
+     },
+     {
+      "code": "0712",
+      "name": "农林牧渔业高等教育",
+      "children": [
+       {
+        "code": "0712_8341",
+        "name": "普通高等教育",
+        "industry_code": "8341"
+       },
+       {
+        "code": "0712_8342",
+        "name": "成人高等教育",
+        "industry_code": "8342"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "072",
+    "name": "农林牧渔业职业技能培训",
+    "children": [
+     {
+      "code": "0720",
+      "name": "农林牧渔业职业技能培训",
+      "children": [
+       {
+        "code": "0720_8391",
+        "name": "职业技能培训",
+        "industry_code": "8391"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "073",
+    "name": "农林牧渔业知识普及",
+    "children": [
+     {
+      "code": "0731",
+      "name": "新闻广播电视农林牧渔业知识普及",
+      "children": [
+       {
+        "code": "0731_8610",
+        "name": "新闻业",
+        "industry_code": "8610"
+       },
+       {
+        "code": "0731_8710",
+        "name": "广播",
+        "industry_code": "8710"
+       },
+       {
+        "code": "0731_8720",
+        "name": "电视",
+        "industry_code": "8720"
+       },
+       {
+        "code": "0731_8740",
+        "name": "广播电视集成播控",
+        "industry_code": "8740"
+       }
+      ]
+     },
+     {
+      "code": "0732",
+      "name": "互联网农林牧渔业知识普及",
+      "children": [
+       {
+        "code": "0732_6410",
+        "name": "互联网接入及相关服务",
+        "industry_code": "6410"
+       },
+       {
+        "code": "0732_642",
+        "name": "互联网信息服务",
+        "industry_code": "642"
+       }
+      ]
+     },
+     {
+      "code": "0733",
+      "name": "出版物农林牧渔业知识普及",
+      "children": [
+       {
+        "code": "0733_8621",
+        "name": "图书出版",
+        "industry_code": "8621"
+       },
+       {
+        "code": "0733_8622",
+        "name": "报纸出版",
+        "industry_code": "8622"
+       },
+       {
+        "code": "0733_8623",
+        "name": "期刊出版",
+        "industry_code": "8623"
+       },
+       {
+        "code": "0733_8624",
+        "name": "音像制品出版",
+        "industry_code": "8624"
+       },
+       {
+        "code": "0733_8625",
+        "name": "电子出版物出版",
+        "industry_code": "8625"
+       },
+       {
+        "code": "0733_8626",
+        "name": "数字出版",
+        "industry_code": "8626"
+       },
+       {
+        "code": "0733_8629",
+        "name": "其他出版业",
+        "industry_code": "8629"
+       }
+      ]
+     },
+     {
+      "code": "0734",
+      "name": "农林牧渔业会展及相关知识普及",
+      "children": [
+       {
+        "code": "0734_7284",
+        "name": "文化会展服务",
+        "industry_code": "7284"
+       },
+       {
+        "code": "0734_7289",
+        "name": "其他会议、展览及相关服务",
+        "industry_code": "7289"
+       }
+      ]
+     },
+     {
+      "code": "0735",
+      "name": "农林牧渔业知识制作服务",
+      "children": [
+       {
+        "code": "0735_6572",
+        "name": "动漫、游戏数字内容服务",
+        "industry_code": "6572"
+       },
+       {
+        "code": "0735_7492",
+        "name": "专业设计服务",
+        "industry_code": "7492"
+       },
+       {
+        "code": "0735_8730",
+        "name": "影视节目制作",
+        "industry_code": "8730"
+       },
+       {
+        "code": "0735_8810",
+        "name": "文艺创作与表演",
+        "industry_code": "8810"
+       }
+      ]
+     },
+     {
+      "code": "0736",
+      "name": "其他农林牧渔业知识普及",
+      "children": [
+       {
+        "code": "0736_8399",
+        "name": "其他未列明教育",
+        "industry_code": "8399"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "074",
+    "name": "农林牧渔业人力资源服务",
+    "children": [
+     {
+      "code": "0741",
+      "name": "农林牧渔业就业与职业发展服务",
+      "children": [
+       {
+        "code": "0741_7261",
+        "name": "公共就业服务",
+        "industry_code": "7261"
+       },
+       {
+        "code": "0741_7262",
+        "name": "职业中介服务",
+        "industry_code": "7262"
+       },
+       {
+        "code": "0741_7263",
+        "name": "劳务派遣服务",
+        "industry_code": "7263"
+       }
+      ]
+     },
+     {
+      "code": "0742",
+      "name": "农林牧渔业创业指导服务",
+      "children": [
+       {
+        "code": "0742_7264",
+        "name": "创业指导服务",
+        "industry_code": "7264"
+       }
+      ]
+     },
+     {
+      "code": "0743",
+      "name": "其他农林牧渔业人力资源服务",
+      "children": [
+       {
+        "code": "0743_7269",
+        "name": "其他人力资源服务",
+        "industry_code": "7269"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "code": "08",
+  "name": "农林牧渔业生态保护和环境治理",
+  "children": [
+   {
+    "code": "081",
+    "name": "农林牧渔业生态保护",
+    "children": [
+     {
+      "code": "0811",
+      "name": "农林牧渔业自然生态系统保护管理",
+      "children": [
+       {
+        "code": "0811_7711",
+        "name": "自然生态系统保护管理",
+        "industry_code": "7711"
+       }
+      ]
+     },
+     {
+      "code": "0812",
+      "name": "野生动植物保护",
+      "children": [
+       {
+        "code": "0812_7713",
+        "name": "野生动物保护",
+        "industry_code": "7713"
+       },
+       {
+        "code": "0812_7714",
+        "name": "野生植物保护",
+        "industry_code": "7714"
+       }
+      ]
+     },
+     {
+      "code": "0813",
+      "name": "动植物园区管理服务",
+      "children": [
+       {
+        "code": "0813_7715",
+        "name": "动物园、水族馆管理服务",
+        "industry_code": "7715"
+       },
+       {
+        "code": "0813_7716",
+        "name": "植物园管理服务",
+        "industry_code": "7716"
+       }
+      ]
+     },
+     {
+      "code": "0814",
+      "name": "风景名胜区和森林公园管理",
+      "children": [
+       {
+        "code": "0814_7861",
+        "name": "名胜风景区管理",
+        "industry_code": "7861"
+       },
+       {
+        "code": "0814_7862",
+        "name": "森林公园管理",
+        "industry_code": "7862"
+       }
+      ]
+     },
+     {
+      "code": "0815",
+      "name": "其他自然保护",
+      "children": [
+       {
+        "code": "0815_7719",
+        "name": "其他自然保护",
+        "industry_code": "7719"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "082",
+    "name": "废旧农膜回收利用服务",
+    "children": [
+     {
+      "code": "0820",
+      "name": "废旧农膜回收利用服务",
+      "children": [
+       {
+        "code": "0820_4220",
+        "name": "非金属废料和碎屑加工处理",
+        "industry_code": "4220"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "083",
+    "name": "畜禽粪污处理活动",
+    "children": [
+     {
+      "code": "0830",
+      "name": "畜禽粪污处理活动",
+      "children": [
+       {
+        "code": "0830_0532",
+        "name": "畜禽粪污处理活动",
+        "industry_code": "0532"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "084",
+    "name": "病死畜禽处理",
+    "children": [
+     {
+      "code": "0840",
+      "name": "病死畜禽处理",
+      "children": [
+       {
+        "code": "0840_0539",
+        "name": "其他畜牧专业及辅助性活动",
+        "industry_code": "0539"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "085",
+    "name": "农林牧渔业环境与生态监测检测服务",
+    "children": [
+     {
+      "code": "0851",
+      "name": "土壤及水环境监测评估服务",
+      "children": [
+       {
+        "code": "0851_7461",
+        "name": "环境保护监测",
+        "industry_code": "7461"
+       }
+      ]
+     },
+     {
+      "code": "0852",
+      "name": "森林、湿地、草原、野生动植物资源调查与服务",
+      "children": [
+       {
+        "code": "0852_7462",
+        "name": "生态资源监测",
+        "industry_code": "7462"
+       }
+      ]
+     },
+     {
+      "code": "0853",
+      "name": "野生动物疫源疫病防控监测",
+      "children": [
+       {
+        "code": "0853_7463",
+        "name": "野生动物疫源疫病防控监测",
+        "industry_code": "7463"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "086",
+    "name": "涉农土壤污染治理与修复",
+    "children": [
+     {
+      "code": "0860",
+      "name": "涉农土壤污染治理与修复",
+      "children": [
+       {
+        "code": "0860_7726",
+        "name": "土壤污染治理与修复服务",
+        "industry_code": "7726"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "087",
+    "name": "农村人居环境整治",
+    "children": [
+     {
+      "code": "0870",
+      "name": "农村人居环境整治",
+      "children": [
+       {
+        "code": "0870_7721",
+        "name": "水污染治理",
+        "industry_code": "7721"
+       },
+       {
+        "code": "0870_7729",
+        "name": "其他污染治理",
+        "industry_code": "7729"
+       },
+       {
+        "code": "0870_7820",
+        "name": "环境卫生管理",
+        "industry_code": "7820"
+       },
+       {
+        "code": "0870_7830",
+        "name": "城乡市容管理",
+        "industry_code": "7830"
+       },
+       {
+        "code": "0870_7840",
+        "name": "绿化管理",
+        "industry_code": "7840"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "code": "09",
+  "name": "农林牧渔业休闲观光与农业农村管理服务",
+  "children": [
+   {
+    "code": "091",
+    "name": "农林牧渔业休闲观光和乡村旅游",
+    "children": [
+     {
+      "code": "0911",
+      "name": "农林牧渔业休闲活动",
+      "children": [
+       {
+        "code": "0911_9030",
+        "name": "休闲观光活动",
+        "industry_code": "9030"
+       }
+      ]
+     },
+     {
+      "code": "0912",
+      "name": "农林牧渔业主题景区管理",
+      "children": [
+       {
+        "code": "0912_7869",
+        "name": "其他游览景区管理",
+        "industry_code": "7869"
+       }
+      ]
+     },
+     {
+      "code": "0913",
+      "name": "农家乐经营及乡村民宿服务",
+      "children": [
+       {
+        "code": "0913_6130",
+        "name": "民宿服务",
+        "industry_code": "6130"
+       },
+       {
+        "code": "0913_6210",
+        "name": "正餐服务",
+        "industry_code": "6210"
+       },
+       {
+        "code": "0913_6291",
+        "name": "小吃服务",
+        "industry_code": "6291"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "092",
+    "name": "农业农村组织管理服务",
+    "children": [
+     {
+      "code": "0921",
+      "name": "政府农业农村事务管理服务",
+      "children": [
+       {
+        "code": "0921_9221",
+        "name": "综合事务管理机构",
+        "industry_code": "9221"
+       },
+       {
+        "code": "0921_9222",
+        "name": "对外事务管理机构",
+        "industry_code": "9222"
+       },
+       {
+        "code": "0921_9225",
+        "name": "经济事务管理机构",
+        "industry_code": "9225"
+       },
+       {
+        "code": "0921_9226",
+        "name": "行政监督检查机构",
+        "industry_code": "9226"
+       }
+      ]
+     },
+     {
+      "code": "0922",
+      "name": "社会组织农业农村管理服务",
+      "children": [
+       {
+        "code": "0922_9521",
+        "name": "专业性团体",
+        "industry_code": "9521"
+       },
+       {
+        "code": "0922_9522",
+        "name": "行业性团体",
+        "industry_code": "9522"
+       }
+      ]
+     },
+     {
+      "code": "0923",
+      "name": "农村经济与资源市场化组织管理服务",
+      "children": [
+       {
+        "code": "0923_7213",
+        "name": "资源与产权交易服务",
+        "industry_code": "7213"
+       },
+       {
+        "code": "0923_7215",
+        "name": "农村集体经济组织管理",
+        "industry_code": "7215"
+       },
+       {
+        "code": "0923_7219",
+        "name": "其他组织管理服务",
+        "industry_code": "7219"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "093",
+    "name": "农林牧渔业综合管理服务",
+    "children": [
+     {
+      "code": "0931",
+      "name": "农林牧渔业园区管理服务",
+      "children": [
+       {
+        "code": "0931_7221",
+        "name": "园区管理服务",
+        "industry_code": "7221"
+       }
+      ]
+     },
+     {
+      "code": "0932",
+      "name": "农林牧渔产品市场管理服务",
+      "children": [
+       {
+        "code": "0932_7223",
+        "name": "市场管理服务",
+        "industry_code": "7223"
+       }
+      ]
+     },
+     {
+      "code": "0933",
+      "name": "农林牧渔及相关产品供应链管理服务",
+      "children": [
+       {
+        "code": "0933_7224",
+        "name": "供应链管理服务",
+        "industry_code": "7224"
+       }
+      ]
+     },
+     {
+      "code": "0934",
+      "name": "乡村土地综合管理服务",
+      "children": [
+       {
+        "code": "0934_7910",
+        "name": "土地整治服务",
+        "industry_code": "7910"
+       },
+       {
+        "code": "0934_7920",
+        "name": "土地调查评估服务",
+        "industry_code": "7920"
+       },
+       {
+        "code": "0934_7930",
+        "name": "土地登记服务",
+        "industry_code": "7930"
+       },
+       {
+        "code": "0934_7940",
+        "name": "土地登记代理服务",
+        "industry_code": "7940"
+       },
+       {
+        "code": "0934_7990",
+        "name": "其他土地管理服务",
+        "industry_code": "7990"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "code": "10",
+  "name": "其他支持服务",
+  "children": [
+   {
+    "code": "101",
+    "name": "农林牧渔业机械设备修理",
+    "children": [
+     {
+      "code": "1010",
+      "name": "农林牧渔业机械设备修理",
+      "children": [
+       {
+        "code": "1010_4330",
+        "name": "专用设备修理",
+        "industry_code": "4330"
+       },
+       {
+        "code": "1010_4342",
+        "name": "船舶修理",
+        "industry_code": "4342"
+       },
+       {
+        "code": "1010_4390",
+        "name": "其他机械和设备修理业",
+        "industry_code": "4390"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "102",
+    "name": "农林牧渔业通用航空生产服务",
+    "children": [
+     {
+      "code": "1020",
+      "name": "农林牧渔业通用航空生产服务",
+      "children": [
+       {
+        "code": "1020_5621",
+        "name": "通用航空生产服务",
+        "industry_code": "5621"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "103",
+    "name": "农林牧渔业信息技术服务",
+    "children": [
+     {
+      "code": "1031",
+      "name": "农林牧渔业互联网服务平台",
+      "children": [
+       {
+        "code": "1031_6431",
+        "name": "互联网生产服务平台",
+        "industry_code": "6431"
+       },
+       {
+        "code": "1031_6434",
+        "name": "互联网公共服务平台",
+        "industry_code": "6434"
+       }
+      ]
+     },
+     {
+      "code": "1032",
+      "name": "农林牧渔业互联网数据服务",
+      "children": [
+       {
+        "code": "1032_6450",
+        "name": "互联网数据服务",
+        "industry_code": "6450"
+       }
+      ]
+     },
+     {
+      "code": "1033",
+      "name": "农林牧渔业物联网技术和应用服务",
+      "children": [
+       {
+        "code": "1033_6490",
+        "name": "其他互联网服务",
+        "industry_code": "6490"
+       },
+       {
+        "code": "1033_6532",
+        "name": "物联网技术服务",
+        "industry_code": "6532"
+       }
+      ]
+     },
+     {
+      "code": "1034",
+      "name": "农林牧渔业数字化信息服务",
+      "children": [
+       {
+        "code": "1034_6513",
+        "name": "应用软件开发",
+        "industry_code": "6513"
+       },
+       {
+        "code": "1034_6531",
+        "name": "信息系统集成服务",
+        "industry_code": "6531"
+       },
+       {
+        "code": "1034_6540",
+        "name": "运行维护服务",
+        "industry_code": "6540"
+       },
+       {
+        "code": "1034_6550",
+        "name": "信息处理和存储支持服务",
+        "industry_code": "6550"
+       },
+       {
+        "code": "1034_6560",
+        "name": "信息技术咨询服务",
+        "industry_code": "6560"
+       },
+       {
+        "code": "1034_6579",
+        "name": "其他数字内容服务",
+        "industry_code": "6579"
+       }
+      ]
+     },
+     {
+      "code": "1035",
+      "name": "农林牧渔业遥感信息服务",
+      "children": [
+       {
+        "code": "1035_6571",
+        "name": "地理遥感信息服务",
+        "industry_code": "6571"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "104",
+    "name": "农林牧渔业金融服务",
+    "children": [
+     {
+      "code": "1041",
+      "name": "农林牧渔业货币银行服务",
+      "children": [
+       {
+        "code": "1041_6621",
+        "name": "商业银行服务",
+        "industry_code": "6621"
+       },
+       {
+        "code": "1041_6622",
+        "name": "政策性银行服务",
+        "industry_code": "6622"
+       },
+       {
+        "code": "1041_6623",
+        "name": "信用合作社服务",
+        "industry_code": "6623"
+       },
+       {
+        "code": "1041_6624",
+        "name": "农村资金互助社服务",
+        "industry_code": "6624"
+       },
+       {
+        "code": "1041_6629",
+        "name": "其他货币银行服务",
+        "industry_code": "6629"
+       }
+      ]
+     },
+     {
+      "code": "1042",
+      "name": "农林牧渔产品期货市场服务",
+      "children": [
+       {
+        "code": "1042_6741",
+        "name": "期货市场管理服务",
+        "industry_code": "6741"
+       }
+      ]
+     },
+     {
+      "code": "1043",
+      "name": "农林牧渔业保险服务",
+      "children": [
+       {
+        "code": "1043_6820",
+        "name": "财产保险",
+        "industry_code": "6820"
+       }
+      ]
+     },
+     {
+      "code": "1044",
+      "name": "农林牧渔企业上市融资辅导服务",
+      "children": [
+       {
+        "code": "1044_6712",
+        "name": "证券经纪交易服务",
+        "industry_code": "6712"
+       }
+      ]
+     },
+     {
+      "code": "1045",
+      "name": "农林牧渔企业财务服务",
+      "children": [
+       {
+        "code": "1045_6632",
+        "name": "财务公司服务",
+        "industry_code": "6632"
+       }
+      ]
+     },
+     {
+      "code": "1046",
+      "name": "农林牧渔企业其他资本市场服务",
+      "children": [
+       {
+        "code": "1046_6790",
+        "name": "其他资本市场服务",
+        "industry_code": "6790"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "105",
+    "name": "农业机械经营租赁服务",
+    "children": [
+     {
+      "code": "1050",
+      "name": "农业机械经营租赁服务",
+      "children": [
+       {
+        "code": "1050_7112",
+        "name": "农业机械经营租赁",
+        "industry_code": "7112"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "106",
+    "name": "农林牧渔业产品广告服务",
+    "children": [
+     {
+      "code": "1061",
+      "name": "互联网农林牧渔业广告服务",
+      "children": [
+       {
+        "code": "1061_7251",
+        "name": "互联网广告服务",
+        "industry_code": "7251"
+       }
+      ]
+     },
+     {
+      "code": "1062",
+      "name": "非互联网农林牧渔业广告服务",
+      "children": [
+       {
+        "code": "1062_7259",
+        "name": "其他广告服务",
+        "industry_code": "7259"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "code": "107",
+    "name": "农林牧渔业产品包装服务",
+    "children": [
+     {
+      "code": "1070",
+      "name": "农林牧渔业产品包装服务",
+      "children": [
+       {
+        "code": "1070_7292",
+        "name": "包装服务",
+        "industry_code": "7292"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ }
+]

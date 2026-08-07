@@ -40,8 +40,10 @@ class DynamicRiskInput(BaseModel):
     enterpriseName: str = ""
     businessType: str = ""  # 经营类型大类编码 01~10；混合经营用 MIXED
     productType: str = ""
-    middleType: str = ""  # 中类编码（可选）
-    smallType: str = ""  # 小类编码（可选）
+    middleType: str = ""  # 中类编码（可选，兼容旧渐进式）
+    smallType: str = ""  # 小类编码（可选，兼容旧渐进式）
+    specificType: str = ""  # 具体营业类型编码（可选，兼容旧渐进式）
+    selectedCategories: list[str] = []  # el-tree 勾选的具体营业类型叶子编码列表
     mixedBusiness: dict[str, float] = {}  # 混合经营比例 {大类编码: 0~1}
     indicators: dict[str, str] = {}  # 动态指标值 {指标编码: 值}
 

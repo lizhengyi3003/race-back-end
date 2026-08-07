@@ -33,6 +33,7 @@ DEFAULT_LEVEL_WEIGHTS = {
     "大类": 0.28,
     "中类": 0.22,
     "小类": 0.15,
+    "具体营业类型": 0.10,
 }
 
 # ---------- 默认布尔/枚举启发 ----------
@@ -181,6 +182,7 @@ def expert_assess(
     business_type: str,
     indicators: dict[str, Any],
     mixed_business: dict | None = None,
+    selected_categories: list[str] | None = None,
 ) -> dict[str, Any]:
     """专家引擎评估。返回与现有 RiskResult 兼容的结构。"""
     codes = list(indicators.keys())
@@ -203,7 +205,7 @@ def expert_assess(
             "suggestedAmount": 0.0, "suggestedRate": 0.0,
             "contributions": [], "deductions": [],
             "advice": f"【一票否决】命中『{veto_hit}』，不予授信。",
-            "overrides": [f"veto:{veto_hit}"], "veto": veto_hit, "completeness": _completeness(db, business_type, indicators, configs),
+            "overrides": [f"veto:{veto_hit}"], "veto": veto_hit, "completeness": _completeness(db, business_type, indicators, configs, selected_categories),
         }
 
     # 逐指标打分（跳过文本/缺失）
@@ -221,7 +223,7 @@ def expert_assess(
             "score": 300, "probability": 0.8, "level": "高风险",
             "suggestedAmount": 0.0, "suggestedRate": 0.0,
             "contributions": [], "deductions": [], "advice": "缺少可计分指标，暂按高风险处理",
-            "overrides": [], "veto": None, "completeness": _completeness(db, business_type, indicators, configs),
+            "overrides": [], "veto": None, "completeness": _completeness(db, business_type, indicators, configs, selected_categories),
         }
 
     # 权重计算
@@ -296,18 +298,33 @@ def expert_assess(
         "advice": advice,
         "overrides": overrides,
         "veto": None,
-        "completeness": _completeness(db, business_type, indicators, configs),
+        "completeness": _completeness(db, business_type, indicators, configs, selected_categories),
     }
 
 
-def _completeness(db: Session, business_type: str, indicators: dict, configs: dict) -> float:
-    """数据完整度：相对期望指标集（基本项 + 该大类指标）计算已填比例。"""
+def _completeness(
+    db: Session, business_type: str, indicators: dict, configs: dict,
+    selected_categories: list[str] | None = None,
+) -> float:
+    """数据完整度：相对期望指标集（基本项 + 大类 + 勾选叶子路径上的各级指标）计算已填比例。"""
+    from sqlalchemy import or_
+    conds: list = [IndicatorConfig.level == "基本项"]
+    if business_type:
+        conds.append(
+            (IndicatorConfig.level == "大类") & (IndicatorConfig.category_code == business_type)
+        )
+    # 勾选的具体营业类型叶子 → 其路径（大类/中类/小类/具体营业类型）上的指标纳入期望
+    sel = selected_categories or []
+    if sel:
+        small_codes = [c.split("_")[0] for c in sel if "_" in c]
+        mid_codes = sorted({s[:3] for s in small_codes})
+        big_codes = sorted({s[:2] for s in small_codes})
+        conds.append(
+            IndicatorConfig.category_code.in_(list(sel) + small_codes + mid_codes + big_codes)
+        )
     expected = (
         db.query(IndicatorConfig.code)
-        .filter(
-            (IndicatorConfig.level == "基本项")
-            | ((IndicatorConfig.level == "大类") & (IndicatorConfig.category_code == business_type))
-        )
+        .filter(or_(*conds))
         .all()
     )
     expected_codes = [c[0] for c in expected]

@@ -137,18 +137,22 @@ def assess_dynamic_and_store(
     indicators = payload.get("indicators", {}) or {}
     business_type = payload.get("businessType", "")
     mixed = payload.get("mixedBusiness", {}) or {}
+    selected_categories = payload.get("selectedCategories", []) or []
 
     if business_type == "MIXED" and mixed:
         sub_results: dict[str, tuple[float, dict]] = {}
         for code, ratio in mixed.items():
             if ratio > 0:
-                sub_results[code] = (float(ratio), expert_assess(db, code, indicators))
+                sub_results[code] = (
+                    float(ratio),
+                    expert_assess(db, code, indicators, selected_categories=selected_categories),
+                )
         if sub_results:
             result = _combine_mixed(sub_results, db)
         else:
-            result = expert_assess(db, "", indicators)
+            result = expert_assess(db, "", indicators, selected_categories=selected_categories)
     else:
-        result = expert_assess(db, business_type, indicators)
+        result = expert_assess(db, business_type, indicators, selected_categories=selected_categories)
 
     # 落库：动态输入/结果快照 + 指标明细
     rec = AssessmentRecord(

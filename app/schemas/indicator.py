@@ -29,13 +29,14 @@ class IndicatorField(BaseModel):
 
 
 class CategoryNode(BaseModel):
-    """指标类别树节点（大类/中类/小类）。"""
+    """指标类别树节点（大类/中类/小类/具体营业类型）。"""
 
     code: str
     name: str
     level: str
     display: str  # "0111 谷物种植"
     indicator_count: int = 0
+    indicators: list["IndicatorField"] = []  # 该节点自身层级的指标字段
     children: list["CategoryNode"] = []
 
 

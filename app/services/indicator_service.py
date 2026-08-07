@@ -74,12 +74,23 @@ def get_indicator_tree(db: Session) -> IndicatorTree:
             if child.parent_code == cat.code
         ]
         children.sort(key=lambda n: n.code)
+        # 该节点自身层级的指标字段（用于 el-tree 勾选后直接展示）
+        node_indicators = [
+            _to_field(c)
+            for c in (
+                db.query(IndicatorConfig)
+                .filter(IndicatorConfig.category_code == cat.code)
+                .order_by(IndicatorConfig.display_order)
+                .all()
+            )
+        ]
         return CategoryNode(
             code=cat.code,
             name=cat.name,
             level=cat.level,
             display=f"{cat.code} {cat.name}",
             indicator_count=counts.get(cat.code, 0),
+            indicators=node_indicators,
             children=children,
         )
 
@@ -103,6 +114,7 @@ def get_indicator_config(
     business_type: str,
     middle_type: str = "",
     small_type: str = "",
+    specific_type: str = "",
 ) -> IndicatorConfigOut:
     """渐进式表单配置：基本项 + 按所选类别逐级追加指标。"""
     basic = (
@@ -120,6 +132,8 @@ def get_indicator_config(
         levels.append(("中类", middle_type))
     if small_type:
         levels.append(("小类", small_type))
+    if specific_type:
+        levels.append(("具体营业类型", specific_type))
 
     for level, cat_code in levels:
         if not cat_code:
@@ -139,6 +153,7 @@ def get_indicator_config(
             "businessType": business_type,
             "middleType": middle_type,
             "smallType": small_type,
+            "specificType": specific_type,
         },
     )
 
