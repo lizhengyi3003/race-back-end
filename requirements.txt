@@ -21,6 +21,9 @@ statsmodels>=0.14.4
 imbalanced-learn>=0.12.0
 optbinning>=0.20.0
 
+# 指标体系文档解析（import_indicators.py）
+openpyxl>=3.1.0
+
 # 系统监控（服务器状态）
 psutil>=6.0.0
 
