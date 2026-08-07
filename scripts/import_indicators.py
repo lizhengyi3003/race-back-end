@@ -9,6 +9,7 @@
 """
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
@@ -64,6 +65,51 @@ def derive_parent(code: str, level: str) -> str | None:
     return None
 
 
+def parse_enum_options(value_range: str) -> list[str]:
+    """从取值说明解析枚举档位选项（去掉括号/分号后的说明文字）。"""
+    s = str(value_range or "")
+    s = re.sub(r"[（(].*?[）)]", "", s)          # 去括号说明
+    s = re.split(r"[；;]", s)[0]                  # 去分号说明
+    for sep in ("/", "／", "、", "，"):
+        if sep in s:
+            return [p.strip() for p in s.split(sep) if p.strip()]
+    return []
+
+
+def build_enum_map(options: list[str], name: str) -> dict | None:
+    """枚举档位 → 分值映射（scoring_config.map）。
+    绝大多数枚举按『从好到坏』书写（稳定/一般/不稳定、无/轻/中/重…），
+    少数『认证/地标/商标/林下参』从无到有是『从坏到好』；结构/用途/品种类为中性不配置。"""
+    opts = [o.strip() for o in options if o.strip()]
+    if len(opts) < 2:
+        return None
+    # 特例：银行信贷履约记录（无逾期/有逾期/逾期已结清）——有逾期最差，已结清中等
+    if opts[0] == "无逾期" or (opts[0] == "无" and len(opts) == 3 and "逾期" in " ".join(opts)):
+        return {opts[0]: 100, opts[1]: 30, opts[2]: 60}
+    # 中性档位（用途/结构/品种/`xx为主`类）：无好坏之分，不配置（引擎给中分）
+    if any(k in name for k in ("用途", "结构", "品种")) or any("为主" in o for o in opts):
+        return None
+    # 从坏到好（起点=最差）：认证/地标/商标/林下参经营 等
+    joined = " ".join(opts)
+    if opts[0] == "无" and any(k in joined for k in ("申报中", "省级", "国家级", "规模化", "少量", "已认证")):
+        n = len(opts)
+        return {opts[i]: round(20 + 80 * i / (n - 1)) for i in range(n)}  # 20,60,100
+    # 默认从好到坏：100, 63, 25 / 100, 75, 50, 25
+    n = len(opts)
+    return {opts[i]: round(100 - 75 * i / (n - 1)) for i in range(n)}
+
+
+def build_numeric_config(scoring_rule: str) -> dict | None:
+    """数值指标方向：规则含『风险越高/越高越差』→ lower_better=true；
+    『得分越高/越高越好』→ lower_better=false。显式配置优先于引擎启发。"""
+    r = scoring_rule or ""
+    if any(k in r for k in ("风险越高", "越高风险", "越高越差", "越高越不利", "越低越好")):
+        return {"lower_better": True}
+    if any(k in r for k in ("得分越高", "越高越好", "越高分越高")):
+        return {"lower_better": False}
+    return None
+
+
 def parse_rows(xlsx_path: Path) -> list[dict]:
     wb = load_workbook(xlsx_path, read_only=True, data_only=True)
     ws = wb[wb.sheetnames[0]]
@@ -99,6 +145,16 @@ def build(data: list[dict]) -> tuple[list[dict], list[dict]]:
         is_veto = str(r[11] or "").strip() == "是"
         cycle = str(r[12] or "").strip()
         scoring_rule = str(r[13] or "").strip()
+
+        # 评分参数：枚举档位 map / 数值方向，显式配置优先于引擎关键词启发
+        scoring_config = None
+        if ind_type == "枚举":
+            _opts = parse_enum_options(value_range)
+            _m = build_enum_map(_opts, name) if _opts else None
+            if _m:
+                scoring_config = {"map": _m}
+        elif ind_type == "数值":
+            scoring_config = build_numeric_config(scoring_rule)
 
         # 类别节点（基本项作为伪类别 BASIC）
         key = cat_code
@@ -136,6 +192,7 @@ def build(data: list[dict]) -> tuple[list[dict], list[dict]]:
             "is_veto": is_veto,
             "cycle": cycle,
             "scoring_rule": scoring_rule,
+            "scoring_config": scoring_config,
             "display_order": idx,
         })
 
