@@ -29,6 +29,7 @@ back-end/
 ├── admin-web/              # 后台管理平台前端（Vue3 + Element Plus + ECharts）
 ├── scripts/                # init_db / seed_data / train_model / import_csv
 ├── data/                   # 数据库文件、模型文件、合成样本
+│   └── 数据集/             # 竞赛研究数据集（CFPS/CHFS/CMES，**Git LFS 托管**，克隆需 `git lfs pull`）
 ├── tests/                  # pytest 测试（26 项）
 ├── Dockerfile              # 多阶段构建（前端 + 后端）
 └── docker-compose.yml      # backend + MySQL 一键启动
