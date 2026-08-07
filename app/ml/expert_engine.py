@@ -111,7 +111,10 @@ def _score_value(value: float, indicator: IndicatorConfig) -> float:
     """数值指标 → 0-100。支持『越高越好』与『越低越好』。"""
     cfg = indicator.scoring_config or {}
     rule = (indicator.scoring_rule or "") + " " + (indicator.name or "")
-    lower_better = cfg.get("lower_better", False) or "越低" in rule
+    # 越低越好判定：显式配置 > 规则/名称语义（负债率/风险/负担/频次等越高越差）
+    lower_better = cfg.get("lower_better", False)
+    if not lower_better and "越高越好" not in rule:
+        lower_better = any(kw in rule for kw in ("越低", "风险越高", "越高越差", "越高风险", "越高越不利"))
     ref = _ref_max(indicator)
     if ref <= 0:
         ref = 100.0

@@ -61,14 +61,73 @@ def init_default_configs(db: Session) -> None:
     db.commit()
 
 
+# 业务类型默认配置（与 scripts/seed_business_config.py 一致，供服务器开箱即用）
+_DEFAULT_LEVEL_WEIGHTS = {"基本项": 0.35, "大类": 0.28, "中类": 0.22, "小类": 0.15}
+_SYNERGY_FACTORS: dict[str, dict] = {
+    "01+02": {"factor": 1.06, "name": "种植+食用加工·产销一体"},
+    "01+04": {"factor": 1.04, "name": "种植+生产资料·农资一体化"},
+    "01+08": {"factor": 1.05, "name": "种植+生态环保·生态循环"},
+    "01+05": {"factor": 1.04, "name": "种植+流通·产销衔接"},
+    "02+05": {"factor": 1.04, "name": "加工+流通·供应链闭环"},
+    "03+05": {"factor": 1.03, "name": "非食用加工+流通·原料直达"},
+    "04+01": {"factor": 1.04, "name": "生产资料+种植·农资一体化"},
+}
+
+
+def init_business_configs(db: Session) -> None:
+    """种子经营类型配置：10 大类层级权重 + MIXED 协同因子（已存在则补齐默认）。"""
+    from app.models.indicator import BusinessTypeConfig, IndicatorCategory
+
+    cats = db.query(IndicatorCategory).filter(IndicatorCategory.level == "大类").all()
+    for cat in cats:
+        row = db.query(BusinessTypeConfig).filter(BusinessTypeConfig.business_type_code == cat.code).first()
+        if row:
+            if not row.level_weights:
+                row.level_weights = dict(_DEFAULT_LEVEL_WEIGHTS)
+            if not row.feature_boost:
+                row.feature_boost = 1.1
+            continue
+        db.add(
+            BusinessTypeConfig(
+                business_type_code=cat.code,
+                name=cat.name,
+                level_weights=dict(_DEFAULT_LEVEL_WEIGHTS),
+                feature_boost=1.1,
+                region_boost={},
+                synergy_factors={},
+                active=True,
+            )
+        )
+    mixed = db.query(BusinessTypeConfig).filter(BusinessTypeConfig.business_type_code == "MIXED").first()
+    if not mixed:
+        db.add(
+            BusinessTypeConfig(
+                business_type_code="MIXED",
+                name="混合经营",
+                level_weights=dict(_DEFAULT_LEVEL_WEIGHTS),
+                feature_boost=1.1,
+                region_boost={},
+                synergy_factors=dict(_SYNERGY_FACTORS),
+                active=True,
+            )
+        )
+    elif not mixed.synergy_factors:
+        mixed.synergy_factors = dict(_SYNERGY_FACTORS)
+    db.commit()
+
+
 def full_init(db: Session | None = None) -> None:
-    """完整初始化：建表 + 默认管理员 + 默认配置"""
+    """完整初始化：建表 + 默认管理员 + 默认配置 + 业务配置"""
     init_db(db)
     own_session = db is None
     session = db or SessionLocal()
     try:
         init_default_admin(session)
         init_default_configs(session)
+        try:
+            init_business_configs(session)
+        except Exception:  # noqa: BLE001  指标表未导入时不阻断启动
+            pass
     finally:
         if own_session:
             session.close()
