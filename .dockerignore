@@ -1,0 +1,26 @@
+# ===== 版本控制 / 环境 =====
+.git
+.github
+.venv
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.env
+
+# ===== 大数据（不进入镜像/构建上下文）=====
+data/数据集/
+data/*.db
+data/models/*
+data/samples/*
+
+# ===== Node / 前端构建产物（镜像内重新安装构建）=====
+node_modules/
+admin-web/node_modules/
+admin-web/dist/
+
+# ===== 其他 =====
+tests/
+*.log
+.DS_Store
+Thumbs.db
