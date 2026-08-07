@@ -16,6 +16,7 @@ data/models/*
 data/samples/*
 !data/samples/.gitkeep
 data/数据集/
+data/raw/
 !data/README.md
 
 # ===== Node / 前端构建 =====

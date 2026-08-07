@@ -14,8 +14,18 @@ def artifact_dir() -> Path:
     return Path(settings.MODEL_DIR)
 
 
+def _resolve(path: str) -> Path:
+    """兼容历史相对路径（如 data\\models\\xxx.pkl）：相对路径解析到项目根。"""
+    p = Path(path)
+    if p.is_absolute():
+        return p
+    from app.core.config import PROJECT_ROOT
+
+    return PROJECT_ROOT / p
+
+
 def save_scorecard(model: Scorecard) -> str:
-    """保存评分卡，返回文件路径"""
+    """保存评分卡，返回文件路径（绝对路径，跨 cwd 可加载）"""
     path = artifact_dir() / f"scorecard_{model.version}.pkl"
     with open(path, "wb") as f:
         pickle.dump(model, f)
@@ -24,7 +34,7 @@ def save_scorecard(model: Scorecard) -> str:
 
 def load_scorecard(path: str) -> Scorecard | None:
     try:
-        with open(path, "rb") as f:
+        with open(_resolve(path), "rb") as f:
             return pickle.load(f)
     except Exception:
         return None

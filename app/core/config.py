@@ -1,8 +1,19 @@
 """应用配置：基于 pydantic-settings 从 .env / 环境变量读取。"""
 
 from functools import lru_cache
+from pathlib import Path
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# 项目根目录（config.py 位于 app/core/，上溯 3 级）
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+
+
+def _abs_path(value: str) -> str:
+    """相对路径解析到项目根，避免后端从任意 cwd 启动时找不到模型/样本。"""
+    p = Path(value)
+    return str(p.resolve()) if p.is_absolute() else str((PROJECT_ROOT / p).resolve())
 
 
 class Settings(BaseSettings):
@@ -32,6 +43,11 @@ class Settings(BaseSettings):
     # ---------- 模型与数据目录 ----------
     MODEL_DIR: str = "data/models"
     SAMPLE_DIR: str = "data/samples"
+
+    @field_validator("MODEL_DIR", "SAMPLE_DIR")
+    @classmethod
+    def _absolutize_dirs(cls, v: str) -> str:
+        return _abs_path(v)
 
     # ---------- 模型训练 ----------
     AUTO_TRAIN_ON_STARTUP: bool = True

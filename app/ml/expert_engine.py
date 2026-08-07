@@ -244,6 +244,21 @@ def expert_assess(
     total_100 = total_s / total_w  # 0-100
     score = max(0, min(1000, round(total_100 * 10)))
 
+    # ---- 数据层混合（混合引擎：专家层 0.75 + 数据层 0.25）----
+    overrides: list[str] = []
+    try:
+        from app.ml.data_layer import data_layer_score
+
+        blended, dl_info = data_layer_score(db, indicators, score)
+        if blended is not None:
+            score = blended
+            overrides.append(
+                f"data_layer:score={dl_info['dataScore']}({dl_info['features']})"
+            )
+    except Exception:  # noqa: BLE001
+        # 数据层异常不阻断主流程
+        pass
+
     # 等级
     level = "低风险" if score >= 700 else ("中等风险" if score >= 500 else "高风险")
     probability = round(1 / (1 + math.exp((score - 550) / 80)), 4)  # 校准用逻辑映射
@@ -276,7 +291,7 @@ def expert_assess(
         "contributions": contributions,
         "deductions": deductions,
         "advice": advice,
-        "overrides": [],
+        "overrides": overrides,
         "veto": None,
         "completeness": _completeness(db, business_type, indicators, configs),
     }

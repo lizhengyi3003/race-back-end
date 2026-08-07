@@ -30,3 +30,7 @@ aws s3 sync s3://race-datasets/datasets ./data/数据集/
 ## 其他
 
 - `models/`、`samples/`、`*.db` 同样被 .gitignore 忽略（保留目录结构）。
+- `raw/`：CMES/CHFS 关键字段解压文件（约 150MB，被 .gitignore 忽略），
+  由 `scripts/build_proxy_dataset.py` 读取生成 `samples/proxy_samples.csv`。
+  需要时可从 `data/数据集/` 的 zip 中重新解压（仅 master_hh + CMES 主表即可）。
+- 数据管道（Phase 3）说明见 `scripts/DATA_PIPELINE.md`。

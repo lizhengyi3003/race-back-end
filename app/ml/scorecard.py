@@ -30,6 +30,9 @@ class Scorecard:
         base_score: float = 600.0,
         random_state: int = 42,
         use_smote: bool = True,
+        feature_cols: list[str] | None = None,
+        categorical_cols: list[str] | None = None,
+        eval_threshold_mode: str = "business",
     ):
         self.version = version
         self.max_bins = max_bins
@@ -40,6 +43,11 @@ class Scorecard:
         self.base_score = base_score
         self.random_state = random_state
         self.use_smote = use_smote
+        # 特征列可配置（默认 15 项合成指标；数据层可传指标编码特征）
+        self._features: list[str] = list(feature_cols) if feature_cols else list(INDICATOR_ORDER)
+        self._categorical: set[str] = set(categorical_cols) if categorical_cols else set(CATEGORICAL_FIELDS)
+        # 评估阈值模式：business=业务风险评分阈值(默认)；default_rate=按违约率分位（数据层独立模型用）
+        self._eval_threshold_mode = eval_threshold_mode
 
         self.B = pdo / np.log(2)
         self.A: float = base_score
@@ -78,7 +86,7 @@ class Scorecard:
             try:
                 from imblearn.over_sampling import SMOTE
 
-                X_enc, cat_maps = self._encode_categorical(df_train[INDICATOR_ORDER])
+                X_enc, cat_maps = self._encode_categorical(df_train[self._features])
                 smote = SMOTE(random_state=self.random_state)
                 X_res, y_train = smote.fit_resample(X_enc, y_train)
                 df_train = self._decode_categorical(X_res, cat_maps)
@@ -88,10 +96,10 @@ class Scorecard:
                 smote_applied = False
 
         # 3) 分箱（仅训练集）
-        for field in INDICATOR_ORDER:
+        for field in self._features:
             binner = WOEBinner(
                 field,
-                is_categorical=field in CATEGORICAL_FIELDS,
+                is_categorical=field in self._categorical,
                 max_bins=self.max_bins,
                 min_bin_pct=self.min_bin_pct,
             )
@@ -101,12 +109,12 @@ class Scorecard:
         # 4) IV 值特征筛选（IV < min_iv 剔除）
         iv_scores = {f: b.iv_ for f, b in self.binners.items()}
         self.iv_table = [
-            {"factor": f, "iv": round(iv_scores[f], 6), "nBins": len(self.binners[f].bins_)} for f in INDICATOR_ORDER
+            {"factor": f, "iv": round(iv_scores[f], 6), "nBins": len(self.binners[f].bins_)} for f in self._features
         ]
-        keep = [f for f in INDICATOR_ORDER if iv_scores[f] >= self.min_iv]
+        keep = [f for f in self._features if iv_scores[f] >= self.min_iv]
         if not keep:
             # 极端兜底：全部 IV 过低时保留 IV 最高的 3 个
-            keep = sorted(INDICATOR_ORDER, key=lambda f: iv_scores[f], reverse=True)[:3]
+            keep = sorted(self._features, key=lambda f: iv_scores[f], reverse=True)[:3]
 
         # 5) WOE 转换（训练集）
         woe_train = self._woe_frame(df_train, keep)
@@ -139,13 +147,23 @@ class Scorecard:
 
         woe_test = self._woe_frame(df_test, selected)
         y_prob = lr.predict_proba(woe_test[selected].values)[:, 1]
-        # 业务判定阈值：评分 < 高风险阈值（默认500）视为预测违约，映射回违约概率阈值。
-        # 信用评分场景用业务阈值而非 bestThreshold，避免类不平衡下精确率失真。
-        high_risk_th = int(settings.HIGH_RISK_THRESHOLD)
-        # score = A - B*logit <= high_risk_th  ⟺  logit >= (A-high_risk_th)/B
-        # prob = sigmoid(logit)，故业务阈值概率 = sigmoid((A-high_risk_th)/B)
-        business_th = float(1.0 / (1.0 + np.exp(-(self.A - high_risk_th) / self.B)))
-        self.metrics = evaluate_binary(y_test, y_prob, threshold=business_th)
+        if self._eval_threshold_mode == "default_rate":
+            # 数据层独立模型：按违约率分位截断（预测 top default_rate 比例为违约）
+            dr = max(float(total_bad / n), 0.01)
+            th = float(np.quantile(y_prob, 1 - dr))
+            high_risk_th = int(settings.HIGH_RISK_THRESHOLD)
+            business_th = th
+            self.metrics = evaluate_binary(y_test, y_prob, threshold=business_th)
+            self.metrics["thresholdMode"] = "default_rate"
+        else:
+            # 业务判定阈值：评分 < 高风险阈值（默认500）视为预测违约，映射回违约概率阈值。
+            # 信用评分场景用业务阈值而非 bestThreshold，避免类不平衡下精确率失真。
+            high_risk_th = int(settings.HIGH_RISK_THRESHOLD)
+            # score = A - B*logit <= high_risk_th  ⟺  logit >= (A-high_risk_th)/B
+            # prob = sigmoid(logit)，故业务阈值概率 = sigmoid((A-high_risk_th)/B)
+            business_th = float(1.0 / (1.0 + np.exp(-(self.A - high_risk_th) / self.B)))
+            self.metrics = evaluate_binary(y_test, y_prob, threshold=business_th)
+            self.metrics["thresholdMode"] = "business"
         self.metrics["businessThreshold"] = round(business_th, 6)
         self.metrics["businessRiskScore"] = high_risk_th
         self.metrics["nSamples"] = n
@@ -183,9 +201,9 @@ class Scorecard:
     def _encode_categorical(self, df_feat: pd.DataFrame) -> tuple[np.ndarray, dict[int, tuple[list, dict]]]:
         """分类列 ordinal 编码为数值矩阵（SMOTE 前）"""
         cat_maps: dict[int, tuple[list, dict]] = {}
-        X = np.zeros((len(df_feat), len(INDICATOR_ORDER)))
-        for j, f in enumerate(INDICATOR_ORDER):
-            if f in CATEGORICAL_FIELDS:
+        X = np.zeros((len(df_feat), len(self._features)))
+        for j, f in enumerate(self._features):
+            if f in self._categorical:
                 cats = sorted(df_feat[f].dropna().unique().tolist())
                 mapping = {c: i for i, c in enumerate(cats)}
                 cat_maps[j] = (cats, mapping)
@@ -196,9 +214,9 @@ class Scorecard:
 
     def _decode_categorical(self, X_res: np.ndarray, cat_maps: dict[int, tuple[list, dict]]) -> pd.DataFrame:
         """SMOTE 插值后：分类列取最近类别，数值列还原"""
-        df_res = pd.DataFrame(X_res, columns=INDICATOR_ORDER)
-        for j, f in enumerate(INDICATOR_ORDER):
-            if f in CATEGORICAL_FIELDS:
+        df_res = pd.DataFrame(X_res, columns=self._features)
+        for j, f in enumerate(self._features):
+            if f in self._categorical:
                 cats, _ = cat_maps[j]
                 idx = np.clip(np.rint(df_res[f].values).astype(int), 0, len(cats) - 1)
                 df_res[f] = [cats[i] for i in idx]
