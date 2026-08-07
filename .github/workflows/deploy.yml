@@ -13,6 +13,8 @@ on:
       - 'docker-compose.yml'
       - 'requirements*.txt'
       - '.github/workflows/deploy.yml'
+  # 支持在 GitHub Actions 页面手动选择分支触发部署
+  workflow_dispatch:
 
 jobs:
   deploy:
