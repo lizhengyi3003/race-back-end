@@ -27,6 +27,12 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '评估记录', icon: 'Document' },
       },
       {
+        path: 'indicators',
+        name: 'Indicators',
+        component: () => import('@/views/indicators/Indicators.vue'),
+        meta: { title: '指标管理', icon: 'Collection' },
+      },
+      {
         path: 'users',
         name: 'Users',
         component: () => import('@/views/users/Users.vue'),

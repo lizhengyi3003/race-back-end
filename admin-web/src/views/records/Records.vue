@@ -134,7 +134,8 @@ onMounted(load)
         <el-descriptions :column="2" border>
           <el-descriptions-item label="企业名称">{{ detail.enterpriseName }}</el-descriptions-item>
           <el-descriptions-item label="经营类型">{{ detail.businessType || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="信用评分" :span="2">
+          <el-descriptions-item label="主营产品">{{ detail.productType || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="信用评分">
             <span
               :style="{
                 color: detail.score >= 700 ? '#67c23a' : detail.score >= 500 ? '#e6a23c' : '#f56c6c',
@@ -150,32 +151,81 @@ onMounted(load)
           </el-descriptions-item>
           <el-descriptions-item label="建议额度">{{ detail.suggestedAmount }} 万元</el-descriptions-item>
           <el-descriptions-item label="建议利率">{{ detail.suggestedRate }}%</el-descriptions-item>
+          <el-descriptions-item v-if="detail.completeness != null" label="数据完整度">
+            {{ (detail.completeness * 100).toFixed(0) }}%
+          </el-descriptions-item>
+          <el-descriptions-item v-if="detail.assessorName" label="评估人">{{ detail.assessorName }}</el-descriptions-item>
+          <el-descriptions-item v-if="detail.createdAt" label="时间" :span="2">
+            {{ detail.createdAt?.replace('T', ' ').slice(0, 19) }}
+          </el-descriptions-item>
         </el-descriptions>
 
-        <h4 style="margin: 18px 0 10px">风险输入指标</h4>
-        <el-descriptions :column="2" border size="small">
-          <el-descriptions-item label="确权耕地总面积">{{ detail.landConfirmedArea ?? '-' }} 亩</el-descriptions-item>
-          <el-descriptions-item label="土地流转合同年限">{{ detail.landTransferYears ?? '-' }} 年</el-descriptions-item>
-          <el-descriptions-item label="土地流转稳定性">{{ detail.landTransferStability || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="黑土地保护耕作面积"
-            >{{ detail.blackSoilProtection ?? '-' }} 亩</el-descriptions-item
-          >
-          <el-descriptions-item label="耕地地力保护补贴">{{ detail.grainSubsidy ?? '-' }} 元</el-descriptions-item>
-          <el-descriptions-item label="大型农机购置补贴">{{ detail.machinerySubsidy ?? '-' }} 元</el-descriptions-item>
-          <el-descriptions-item label="粮食规模种植补贴">{{ detail.grainScaleSubsidy ?? '-' }} 元</el-descriptions-item>
-          <el-descriptions-item label="特色经济作物补贴"
-            >{{ detail.specialtyCropSubsidy ?? '-' }} 元</el-descriptions-item
-          >
-          <el-descriptions-item label="农业保险连续投保年限"
-            >{{ detail.insuranceYears ?? '-' }} 年</el-descriptions-item
-          >
-          <el-descriptions-item label="历史保险理赔频次">{{ detail.claimCount ?? '-' }} 次</el-descriptions-item>
-          <el-descriptions-item label="设施农业附加保险">{{ detail.facilityInsurance || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="主体持续经营年限">{{ detail.yearsOperating ?? '-' }} 年</el-descriptions-item>
-          <el-descriptions-item label="长期收购订单">{{ detail.purchaseOrder || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="农产品年稳定营收">{{ detail.annualRevenue ?? '-' }} 万元</el-descriptions-item>
-          <el-descriptions-item label="历年信贷履约记录">{{ detail.creditRecord || '-' }}</el-descriptions-item>
-        </el-descriptions>
+        <template v-if="detail.veto">
+          <h4 style="margin: 18px 0 10px">一票否决</h4>
+          <el-alert :title="detail.veto" type="error" :closable="false" show-icon />
+        </template>
+
+        <!-- 混合经营构成 -->
+        <template v-if="detail.mixedBusiness && Object.keys(detail.mixedBusiness).length">
+          <h4 style="margin: 18px 0 10px">混合经营构成</h4>
+          <el-descriptions :column="2" border size="small">
+            <el-descriptions-item v-for="(ratio, code) in detail.mixedBusiness" :key="code" :label="`业务 ${code}`">
+              {{ (ratio * 100).toFixed(0) }}%
+            </el-descriptions-item>
+          </el-descriptions>
+        </template>
+
+        <!-- 动态指标明细 -->
+        <template v-if="detail.indicatorValues?.length">
+          <h4 style="margin: 18px 0 10px">
+            动态指标明细（{{ detail.indicatorValues.length }} 项）
+          </h4>
+          <el-table :data="detail.indicatorValues" size="small" max-height="360">
+            <el-table-column prop="code" label="编码" width="110" />
+            <el-table-column prop="name" label="指标" min-width="170" show-overflow-tooltip />
+            <el-table-column prop="level" label="层级" width="70" />
+            <el-table-column label="值" min-width="100">
+              <template #default="{ row }">{{ row.value ?? '-' }}{{ row.unit ? ' ' + row.unit : '' }}</template>
+            </el-table-column>
+            <el-table-column label="质量" width="80">
+              <template #default="{ row }">
+                <el-tag
+                  :type="row.quality === '直接' ? 'success' : row.quality === '代理' ? 'warning' : row.quality === '存疑' ? 'danger' : 'info'"
+                  size="small"
+                  >{{ row.quality }}</el-tag
+                >
+              </template>
+            </el-table-column>
+          </el-table>
+        </template>
+
+        <!-- 传统 15 项指标（兼容旧记录） -->
+        <template v-if="detail.landConfirmedArea != null || detail.grainSubsidy != null || detail.yearsOperating != null">
+          <h4 style="margin: 18px 0 10px">风险输入指标</h4>
+          <el-descriptions :column="2" border size="small">
+            <el-descriptions-item label="确权耕地总面积">{{ detail.landConfirmedArea ?? '-' }} 亩</el-descriptions-item>
+            <el-descriptions-item label="土地流转合同年限">{{ detail.landTransferYears ?? '-' }} 年</el-descriptions-item>
+            <el-descriptions-item label="土地流转稳定性">{{ detail.landTransferStability || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="黑土地保护耕作面积"
+              >{{ detail.blackSoilProtection ?? '-' }} 亩</el-descriptions-item
+            >
+            <el-descriptions-item label="耕地地力保护补贴">{{ detail.grainSubsidy ?? '-' }} 元</el-descriptions-item>
+            <el-descriptions-item label="大型农机购置补贴">{{ detail.machinerySubsidy ?? '-' }} 元</el-descriptions-item>
+            <el-descriptions-item label="粮食规模种植补贴">{{ detail.grainScaleSubsidy ?? '-' }} 元</el-descriptions-item>
+            <el-descriptions-item label="特色经济作物补贴"
+              >{{ detail.specialtyCropSubsidy ?? '-' }} 元</el-descriptions-item
+            >
+            <el-descriptions-item label="农业保险连续投保年限"
+              >{{ detail.insuranceYears ?? '-' }} 年</el-descriptions-item
+            >
+            <el-descriptions-item label="历史保险理赔频次">{{ detail.claimCount ?? '-' }} 次</el-descriptions-item>
+            <el-descriptions-item label="设施农业附加保险">{{ detail.facilityInsurance || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="主体持续经营年限">{{ detail.yearsOperating ?? '-' }} 年</el-descriptions-item>
+            <el-descriptions-item label="长期收购订单">{{ detail.purchaseOrder || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="农产品年稳定营收">{{ detail.annualRevenue ?? '-' }} 万元</el-descriptions-item>
+            <el-descriptions-item label="历年信贷履约记录">{{ detail.creditRecord || '-' }}</el-descriptions-item>
+          </el-descriptions>
+        </template>
 
         <template v-if="detail.result?.deductions?.length">
           <h4 style="margin: 18px 0 10px">主要扣分项</h4>

@@ -16,7 +16,8 @@ from app.schemas.admin import (
 )
 from app.schemas.auth import UserOut
 from app.schemas.common import PageData
-from app.services import admin_service
+from app.schemas.indicator_admin import IndicatorUpdate
+from app.services import admin_service, indicator_service
 
 router = APIRouter(prefix="/admin", tags=["管理平台"])
 
@@ -180,3 +181,44 @@ def update_config(
     _: User = Depends(get_current_user),
 ):
     return ok(admin_service.update_system_config(db, key, value))
+
+
+# ---------- 指标管理 ----------
+@router.get("/indicators", response_model=ApiResponse, summary="指标分页列表")
+def indicator_list(
+    page: int = Query(1, ge=1),
+    size: int = Query(20, ge=1, le=200),
+    keyword: str | None = None,
+    level: str | None = None,
+    categoryCode: str | None = None,
+    indicatorType: str | None = None,
+    isFeature: bool | None = None,
+    isVeto: bool | None = None,
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_user),
+):
+    return ok(
+        indicator_service.list_indicators(
+            db, page, size, keyword, level, categoryCode, indicatorType, isFeature, isVeto
+        )
+    )
+
+
+@router.get("/indicators/stats", response_model=ApiResponse, summary="指标统计")
+def indicator_stats(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+    return ok(indicator_service.indicator_stats(db))
+
+
+@router.get("/indicators/{code}", response_model=ApiResponse, summary="指标详情")
+def indicator_detail(code: str, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+    return ok(indicator_service.get_indicator_detail(db, code))
+
+
+@router.put("/indicators/{code}", response_model=ApiResponse, summary="更新指标")
+def indicator_update(
+    code: str,
+    req: IndicatorUpdate,
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_user),
+):
+    return ok(indicator_service.update_indicator(db, code, req), message="已保存")

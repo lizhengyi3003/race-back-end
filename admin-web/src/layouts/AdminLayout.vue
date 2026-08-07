@@ -24,6 +24,7 @@ const menus = [
     icon: 'FolderOpened',
     children: [
       { path: '/records', title: '评估记录', icon: 'Document' },
+      { path: '/indicators', title: '指标管理', icon: 'Collection' },
       { path: '/users', title: '用户管理', icon: 'User' },
       { path: '/config', title: '系统配置', icon: 'Setting' },
     ],

@@ -1,9 +1,15 @@
-"""指标配置业务逻辑：类别树、渐进式表单字段、枚举选项解析。"""
+"""指标配置业务逻辑：类别树、渐进式表单字段、枚举选项解析、管理平台维护。"""
 
+from collections import Counter
+
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
+from app.core.exceptions import BizException
 from app.models.indicator import IndicatorCategory, IndicatorConfig
+from app.schemas.common import PageData
 from app.schemas.indicator import CategoryNode, IndicatorConfigOut, IndicatorField, IndicatorTree
+from app.schemas.indicator_admin import IndicatorAdminOut, IndicatorStats, IndicatorUpdate
 
 # 枚举取值说明中用于分隔选项的符号
 _OPTION_SEP = ["/", "／", "、", "，"]
@@ -134,4 +140,104 @@ def get_indicator_config(
             "middleType": middle_type,
             "smallType": small_type,
         },
+    )
+
+
+# ---------- 管理平台 ----------
+
+def _to_admin(c: IndicatorConfig) -> IndicatorAdminOut:
+    options = _parse_options(c.value_range) if c.indicator_type == "枚举" else []
+    return IndicatorAdminOut.from_model(c, options)
+
+
+def list_indicators(
+    db: Session,
+    page: int = 1,
+    size: int = 20,
+    keyword: str | None = None,
+    level: str | None = None,
+    category_code: str | None = None,
+    indicator_type: str | None = None,
+    is_feature: bool | None = None,
+    is_veto: bool | None = None,
+) -> PageData[IndicatorAdminOut]:
+    """指标分页列表（管理平台），支持关键字/层级/类别/类型/特色/否决过滤。"""
+    query = db.query(IndicatorConfig)
+    if keyword:
+        like = f"%{keyword}%"
+        query = query.filter(
+            or_(IndicatorConfig.name.like(like), IndicatorConfig.code.like(like))
+        )
+    if level:
+        query = query.filter(IndicatorConfig.level == level)
+    if category_code:
+        # 大类过滤时同时匹配该大类下所有中类/小类（前缀匹配）
+        query = query.filter(IndicatorConfig.category_code.like(f"{category_code}%"))
+    if indicator_type:
+        query = query.filter(IndicatorConfig.indicator_type == indicator_type)
+    if is_feature is not None:
+        query = query.filter(IndicatorConfig.is_feature == is_feature)
+    if is_veto is not None:
+        query = query.filter(IndicatorConfig.is_veto == is_veto)
+
+    total = query.count()
+    items = (
+        query.order_by(IndicatorConfig.display_order, IndicatorConfig.code)
+        .offset((page - 1) * size)
+        .limit(size)
+        .all()
+    )
+    return PageData(
+        total=total,
+        page=page,
+        size=size,
+        items=[_to_admin(c) for c in items],
+    )
+
+
+def get_indicator_detail(db: Session, code: str) -> IndicatorAdminOut:
+    c = db.query(IndicatorConfig).filter(IndicatorConfig.code == code).first()
+    if not c:
+        raise BizException("指标不存在", 404)
+    return _to_admin(c)
+
+
+def update_indicator(db: Session, code: str, req: IndicatorUpdate) -> IndicatorAdminOut:
+    c = db.query(IndicatorConfig).filter(IndicatorConfig.code == code).first()
+    if not c:
+        raise BizException("指标不存在", 404)
+    data = req.model_dump(exclude_unset=True)
+    for k, v in data.items():
+        setattr(c, k, v)
+    db.commit()
+    db.refresh(c)
+    return _to_admin(c)
+
+
+def indicator_stats(db: Session) -> IndicatorStats:
+    """指标总量统计（管理平台概览）。"""
+    rows = db.query(
+        IndicatorConfig.level,
+        IndicatorConfig.indicator_type,
+        IndicatorConfig.is_feature,
+        IndicatorConfig.is_veto,
+    ).all()
+    by_level: Counter = Counter()
+    by_type: Counter = Counter()
+    feature = veto = 0
+    for level, itype, is_feature, is_veto in rows:
+        by_level[level] += 1
+        by_type[itype] += 1
+        if is_feature:
+            feature += 1
+        if is_veto:
+            veto += 1
+    categories = db.query(IndicatorCategory).count()
+    return IndicatorStats(
+        total=len(rows),
+        by_level=dict(by_level),
+        by_type=dict(by_type),
+        feature=feature,
+        veto=veto,
+        categories=categories,
     )

@@ -5,8 +5,31 @@ from sqlalchemy.orm import Session
 
 from app.core.exceptions import BizException
 from app.models.assessment import AssessmentRecord
+from app.models.indicator import IndicatorConfig, IndicatorValue
 from app.schemas.common import PageData
-from app.schemas.record import AssessmentRecordOut
+from app.schemas.record import AssessmentRecordOut, IndicatorValueOut
+
+
+def _indicator_values(db: Session, record_id: int) -> list[IndicatorValueOut]:
+    """加载一次评估的动态指标明细（code→名称/层级/单位）。"""
+    rows = (
+        db.query(IndicatorValue, IndicatorConfig)
+        .outerjoin(IndicatorConfig, IndicatorConfig.code == IndicatorValue.indicator_code)
+        .filter(IndicatorValue.assessment_id == record_id)
+        .order_by(IndicatorValue.id)
+        .all()
+    )
+    return [
+        IndicatorValueOut(
+            code=v.indicator_code,
+            name=c.name if c else v.indicator_code,
+            level=c.level if c else "",
+            unit=c.unit if c else "",
+            value=v.value,
+            quality=v.quality,
+        )
+        for v, c in rows
+    ]
 
 
 def list_records(
@@ -45,7 +68,8 @@ def get_record(db: Session, record_id: int) -> AssessmentRecordOut:
     r = db.query(AssessmentRecord).filter(AssessmentRecord.id == record_id).first()
     if not r:
         raise BizException("记录不存在", 404)
-    return AssessmentRecordOut.from_model(r)
+    values = _indicator_values(db, record_id)
+    return AssessmentRecordOut.from_model(r, indicator_values=values or None)
 
 
 def delete_record(db: Session, record_id: int) -> None:
