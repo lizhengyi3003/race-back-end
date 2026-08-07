@@ -13,12 +13,12 @@ cd /root/race-back-end
 # 解析分支参数：
 # 1) 受限密钥路径（GitHub Actions）：原始命令放入 $SSH_ORIGINAL_COMMAND，
 #    形如 "deploy-backend.sh dev"；
-# 2) 手动测试路径：命令行参数 $2（ssh root@server deploy-backend.sh dev）
+# 2) 手动测试路径：命令行参数 $1（ssh root@server /root/deploy-backend.sh dev）
 BRANCH="main"
 if [[ -n "$SSH_ORIGINAL_COMMAND" ]] && [[ "$SSH_ORIGINAL_COMMAND" =~ deploy-backend\.sh[[:space:]]+([A-Za-z0-9_./-]+) ]]; then
   BRANCH="${BASH_REMATCH[1]}"
-elif [[ -n "$2" ]]; then
-  BRANCH="$2"
+elif [[ -n "$1" ]] && [[ "$1" != *"deploy-backend.sh"* ]]; then
+  BRANCH="$1"
 fi
 if [[ "$BRANCH" != "main" && "$BRANCH" != "dev" ]]; then
   echo "[deploy] 拒绝非受信分支: $BRANCH"
