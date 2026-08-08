@@ -43,3 +43,10 @@ def get_current_user_optional(
     if user and user.status == 1:
         return user
     return None
+
+
+def require_admin(user: User = Depends(get_current_user)) -> User:
+    """管理员权限校验：仅 role=admin 可访问管理接口"""
+    if user.role != "admin":
+        raise BizException("无权限：仅管理员可访问", 403)
+    return user

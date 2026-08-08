@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user
+from app.api.deps import require_admin
 from app.core.response import ApiResponse, ok
 from app.db.session import get_db
 from app.models.user import User
@@ -23,7 +23,7 @@ router = APIRouter(prefix="/admin", tags=["管理平台"])
 
 
 @router.get("/stats", response_model=ApiResponse[SystemOverview], summary="系统概览")
-def overview(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def overview(db: Session = Depends(get_db), _: User = Depends(require_admin)):
     return ok(admin_service.system_overview(db))
 
 
@@ -34,13 +34,13 @@ def users(
     size: int = Query(20, ge=1, le=200),
     keyword: str | None = None,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    _: User = Depends(require_admin),
 ):
     return ok(admin_service.list_users(db, page, size, keyword))
 
 
 @router.post("/users", response_model=ApiResponse[UserOut], summary="新增用户")
-def add_user(req: UserCreate, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def add_user(req: UserCreate, db: Session = Depends(get_db), _: User = Depends(require_admin)):
     return ok(admin_service.create_user(db, req))
 
 
@@ -49,13 +49,13 @@ def edit_user(
     user_id: int,
     req: UserUpdate,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    _: User = Depends(require_admin),
 ):
     return ok(admin_service.update_user(db, user_id, req))
 
 
 @router.delete("/users/{user_id}", response_model=ApiResponse, summary="删除用户")
-def remove_user(user_id: int, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def remove_user(user_id: int, db: Session = Depends(get_db), _: User = Depends(require_admin)):
     admin_service.delete_user(db, user_id)
     return ok(message="删除成功")
 
@@ -65,7 +65,7 @@ def reset_password(
     user_id: int,
     req: ResetPasswordRequest,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    _: User = Depends(require_admin),
 ):
     admin_service.reset_password(db, user_id, req.newPassword)
     return ok(message="密码已重置")
@@ -80,7 +80,7 @@ def api_logs(
     path: str | None = None,
     status: int | None = None,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    _: User = Depends(require_admin),
 ):
     return ok(admin_service.list_api_logs(db, page, size, method, path, status))
 
@@ -89,7 +89,7 @@ def api_logs(
 def cleanup_logs(
     days: int | None = Query(None, ge=1),
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    _: User = Depends(require_admin),
 ):
     deleted = admin_service.cleanup_api_logs(db, days)
     return ok({"deleted": deleted}, message=f"已清理 {deleted} 条日志")
@@ -97,7 +97,7 @@ def cleanup_logs(
 
 # ---------- API 端点列表（聚合 OpenAPI）----------
 @router.get("/api-spec", response_model=ApiResponse, summary="API 端点列表")
-def api_spec(request: Request, _: User = Depends(get_current_user)):
+def api_spec(request: Request, _: User = Depends(require_admin)):
     schema = request.app.openapi()
     paths = schema.get("paths", {})
     items = []
@@ -169,7 +169,7 @@ def _example_from_schema(schema: dict, schemas: dict) -> dict | None:
 
 # ---------- 系统配置 ----------
 @router.get("/configs", response_model=ApiResponse, summary="系统配置列表")
-def configs(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def configs(db: Session = Depends(get_db), _: User = Depends(require_admin)):
     return ok(admin_service.list_system_configs(db))
 
 
@@ -178,7 +178,7 @@ def update_config(
     key: str,
     value: str,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    _: User = Depends(require_admin),
 ):
     return ok(admin_service.update_system_config(db, key, value))
 
@@ -195,7 +195,7 @@ def indicator_list(
     isFeature: bool | None = None,
     isVeto: bool | None = None,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    _: User = Depends(require_admin),
 ):
     return ok(
         indicator_service.list_indicators(
@@ -205,12 +205,12 @@ def indicator_list(
 
 
 @router.get("/indicators/stats", response_model=ApiResponse, summary="指标统计")
-def indicator_stats(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def indicator_stats(db: Session = Depends(get_db), _: User = Depends(require_admin)):
     return ok(indicator_service.indicator_stats(db))
 
 
 @router.get("/indicators/{code}", response_model=ApiResponse, summary="指标详情")
-def indicator_detail(code: str, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def indicator_detail(code: str, db: Session = Depends(get_db), _: User = Depends(require_admin)):
     return ok(indicator_service.get_indicator_detail(db, code))
 
 
@@ -219,6 +219,6 @@ def indicator_update(
     code: str,
     req: IndicatorUpdate,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    _: User = Depends(require_admin),
 ):
     return ok(indicator_service.update_indicator(db, code, req), message="已保存")

@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user
+from app.api.deps import require_admin
 from app.core.response import ApiResponse, ok
 from app.db.session import get_db
 from app.models.user import User
@@ -14,15 +14,15 @@ router = APIRouter(prefix="/monitor", tags=["系统监控"])
 
 
 @router.get("/server", response_model=ApiResponse[ServerStatus], summary="服务器状态")
-def server(_: User = Depends(get_current_user)):
+def server(_: User = Depends(require_admin)):
     return ok(monitor_service.server_status())
 
 
 @router.get("/database", response_model=ApiResponse[DatabaseStatus], summary="数据库状态")
-def database(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def database(db: Session = Depends(get_db), _: User = Depends(require_admin)):
     return ok(monitor_service.database_status(db))
 
 
 @router.get("/health", response_model=ApiResponse[HealthStatus], summary="健康检查")
-def health(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def health(db: Session = Depends(get_db), _: User = Depends(require_admin)):
     return ok(monitor_service.health(db))

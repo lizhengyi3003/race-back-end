@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user
+from app.api.deps import require_admin
 from app.core.response import ApiResponse, ok
 from app.db.session import get_db
 from app.models.user import User
@@ -14,22 +14,22 @@ router = APIRouter(prefix="/model", tags=["模型管理"])
 
 
 @router.get("/info", response_model=ApiResponse[ModelInfo], summary="当前模型信息")
-def model_info(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def model_info(db: Session = Depends(get_db), _: User = Depends(require_admin)):
     return ok(model_service.get_active_model_info(db))
 
 
 @router.get("/versions", response_model=ApiResponse[list[ModelVersionOut]], summary="模型版本列表")
-def model_versions(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def model_versions(db: Session = Depends(get_db), _: User = Depends(require_admin)):
     return ok(model_service.list_versions(db))
 
 
 @router.get("/metrics", response_model=ApiResponse, summary="模型评估指标与曲线")
-def model_metrics(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def model_metrics(db: Session = Depends(get_db), _: User = Depends(require_admin)):
     return ok(model_service.get_metrics(db))
 
 
 @router.get("/monitor", response_model=ApiResponse, summary="模型持续监控（PSI/客群迁移预警）")
-def model_monitor(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def model_monitor(db: Session = Depends(get_db), _: User = Depends(require_admin)):
     return ok(model_service.get_monitor(db))
 
 
@@ -37,7 +37,7 @@ def model_monitor(db: Session = Depends(get_db), _: User = Depends(get_current_u
 def train(
     req: TrainRequest | None = None,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
+    user: User = Depends(require_admin),
 ):
     req = req or TrainRequest()
     result = model_service.train(db, n_samples=req.nSamples, trained_by=user.username)
@@ -45,7 +45,7 @@ def train(
 
 
 @router.get("/thresholds", response_model=ApiResponse[Thresholds], summary="获取业务阈值")
-def get_thresholds(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def get_thresholds(db: Session = Depends(get_db), _: User = Depends(require_admin)):
     return ok(model_service.get_thresholds(db))
 
 
@@ -53,6 +53,6 @@ def get_thresholds(db: Session = Depends(get_db), _: User = Depends(get_current_
 def put_thresholds(
     req: Thresholds,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    _: User = Depends(require_admin),
 ):
     return ok(model_service.save_thresholds(db, req.model_dump()))
