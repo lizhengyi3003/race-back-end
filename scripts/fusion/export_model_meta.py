@@ -52,24 +52,35 @@ def main() -> None:
         "scoreQuantiles": qs,
         "auc": metrics.get("auc"),
         "ks": metrics.get("ks"),
+        "recall": metrics.get("recall"),
+        "precision": metrics.get("precision"),
+        "f1": metrics.get("f1"),
+        "accuracy": metrics.get("accuracy"),
+        "threshold": metrics.get("threshold"),
+        "bestThreshold": metrics.get("bestThreshold"),
+        "thresholdMode": metrics.get("thresholdMode"),
+        "confusionMatrix": metrics.get("confusionMatrix"),
         "cvScores": metrics.get("cvScores"),
         "psi": metrics.get("psi"),
         "defaultRate": metrics.get("defaultRate"),
         "nSamples": metrics.get("nSamples"),
         "nFeatures": len(feats),
+        "ivTable": metrics.get("ivTable"),
+        "featureImportance": metrics.get("featureImportance"),
+        "featureNames": metrics.get("featureNames") or feats,
     }
     meta_path = ROOT / f"data/models/model_meta_{sc.version}.json"
     meta_path.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"元数据: {meta_path}")
 
-    # 生成注册 SQL（ModelVersion 表，metrics_json 含 model_type/scoreQuantiles）
+    # 生成注册 SQL（ModelVersion 表，metrics_json 含 model_type/scoreQuantiles + 完整指标；表列带 recall/precision/f1）
     js = json.dumps(meta, ensure_ascii=False).replace("'", "''")
+    _num = lambda k: (f"{meta[k]:.6f}" if meta.get(k) is not None else "NULL")  # noqa: E731
     sql = (
-        f"INSERT INTO model_version (version, status, n_samples, n_features, auc, ks, "
+        f"INSERT INTO model_version (version, status, n_samples, n_features, auc, ks, recall, `precision`, f1, "
         f"metrics_json, artifact_path, trained_by, created_at) VALUES ("
         f"'{sc.version}', 'active', {len(scores)}, {len(feats)}, "
-        f"{meta['auc'] if meta['auc'] is not None else 'NULL'}, "
-        f"{meta['ks'] if meta['ks'] is not None else 'NULL'}, "
+        f"{_num('auc')}, {_num('ks')}, {_num('recall')}, {_num('precision')}, {_num('f1')}, "
         f"'{js}', 'data/models/{pkl_path.name}', 'fused-pipeline', NOW());\n"
     )
     sql_path = ROOT / f"data/models/register_{sc.version}.sql"

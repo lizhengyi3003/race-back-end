@@ -177,7 +177,8 @@ onMounted(load)
       <div class="form-tip">
         <b>模型体系说明：</b>线上评估主路径为「动态专家引擎」（四层动态指标体系 → 专家评分 →
         混合经营加权，含一票否决红线）； 本页管理的数据层评分卡为多元统计参考模型（IV 特征筛选 → WOE 编码 → Logistic
-        回归），用于模型对比与答辩演示， 不在线上评估链路中直接打分。
+        回归）。模型训练后注册为数据层模型，在线上评估中当提交指标含其已知特征（≥2 项）时参与风险混合——数据层打分落入训练群体
+        最差 15% 客群触发高风险下修、最优 15% 客群轻度上修，中间带保持专家分权威。
       </div>
     </el-alert>
 
@@ -210,22 +211,43 @@ onMounted(load)
         :value="metrics?.auc != null ? metrics.auc.toFixed(4) : '-'"
         icon="TrendCharts"
         color="#2c6e49"
+        desc="排序区分度：0.5=随机、1=完美，0.78 中等偏上。基于合成标签偏乐观，真实区分力看下方 B 验证。参考价值：中"
       />
-      <StatCard title="KS" :value="metrics?.ks != null ? metrics.ks.toFixed(4) : '-'" icon="DataLine" color="#4361ee" />
+      <StatCard
+        title="KS"
+        :value="metrics?.ks != null ? metrics.ks.toFixed(4) : '-'"
+        icon="DataLine"
+        color="#4361ee"
+        desc="好坏客群累计分布最大差距：&gt;0.3 可接受、&gt;0.5 良好。同受合成标签影响。参考价值：中"
+      />
       <StatCard
         title="召回率"
         :value="metrics?.recall != null ? (metrics.recall * 100).toFixed(1) + '%' : '-'"
         icon="CircleCheck"
         color="#67c23a"
+        desc="真实违约户中被识别出的比例（53%）。依赖分类阈值，换阈值即变，且基于合成标签。参考价值：低"
       />
       <StatCard
         title="精确率"
         :value="metrics?.precision != null ? (metrics.precision * 100).toFixed(1) + '%' : '-'"
         icon="Aim"
         color="#e76f51"
+        desc="判为违约的客群中确违约的比例（49%），远超 5% 整体违约率、有甄别力。依赖阈值。参考价值：低-中"
       />
-      <StatCard title="F1" :value="metrics?.f1 != null ? metrics.f1.toFixed(4) : '-'" icon="Star" color="#9b5de5" />
-      <StatCard title="PSI" :value="metrics ? (metrics.psi ?? 0).toFixed(4) : '-'" icon="Odometer" color="#e6a23c" />
+      <StatCard
+        title="F1"
+        :value="metrics?.f1 != null ? metrics.f1.toFixed(4) : '-'"
+        icon="Star"
+        color="#9b5de5"
+        desc="召回与精确的调和平均（0.51），兼顾抓全与抓准，中等水平。依赖阈值。参考价值：低"
+      />
+      <StatCard
+        title="PSI"
+        :value="metrics ? (metrics.psi ?? 0).toFixed(4) : '-'"
+        icon="Odometer"
+        color="#e6a23c"
+        desc="训练/测试评分分布漂移，&lt;0.1 无漂移。不依赖标签、可信度高。参考价值：高"
+      />
     </div>
 
     <el-row :gutter="16">

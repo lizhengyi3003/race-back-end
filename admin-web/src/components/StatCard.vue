@@ -5,6 +5,7 @@ defineProps<{
   unit?: string
   icon?: string
   color?: string
+  desc?: string
 }>()
 </script>
 
@@ -18,6 +19,7 @@ defineProps<{
         {{ value }}<span v-if="unit" class="unit">{{ unit }}</span>
       </div>
       <div class="title">{{ title }}</div>
+      <div v-if="desc" class="desc">{{ desc }}</div>
     </div>
   </div>
 </template>
@@ -57,14 +59,21 @@ defineProps<{
         font-size: 13px;
         color: #909399;
         font-weight: 400;
-        margin-left: 4px;
-      }
+        margin-left: 4px;      }
     }
 
     .title {
       font-size: 13px;
       color: #909399;
       margin-top: 2px;
+    }
+
+    .desc {
+      font-size: 11px;
+      color: #a8abb2;
+      line-height: 1.5;
+      margin-top: 4px;
+      max-width: 260px;
     }
   }
 }
