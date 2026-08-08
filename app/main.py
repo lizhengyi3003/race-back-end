@@ -52,13 +52,14 @@ async def lifespan(app: FastAPI):
 
 
 def create_app() -> FastAPI:
+    is_prod = settings.ENV == "production"
     app = FastAPI(
         title=settings.APP_NAME,
         version=settings.APP_VERSION,
         description="基于多元统计模型的涉农小微企业信贷风险智能评估系统 - 后端管理平台",
         lifespan=lifespan,
-        docs_url="/docs",
-        redoc_url="/redoc",
+        docs_url=None if is_prod else "/docs",
+        redoc_url=None if is_prod else "/redoc",
     )
 
     # ---------- CORS ----------
@@ -70,6 +71,16 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     app.add_middleware(RequestLogMiddleware)
+
+    # ---------- 安全响应头（防点击劫持 / MIME 嗅探 / XSS 基础防护）----------
+    @app.middleware("http")
+    async def add_security_headers(request, call_next):
+        response = await call_next(request)
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
+        response.headers.setdefault("Referrer-Policy", "same-origin")
+        response.headers.setdefault("X-XSS-Protection", "1; mode=block")
+        return response
 
     # ---------- 异常处理 ----------
     register_exception_handlers(app)

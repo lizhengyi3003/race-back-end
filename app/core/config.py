@@ -21,8 +21,10 @@ class Settings(BaseSettings):
 
     # ---------- 应用 ----------
     APP_NAME: str = "涉农信贷风险智能评估系统"
-    APP_VERSION: str = "1.6.0"
+    APP_VERSION: str = "1.7.0"
     API_PREFIX: str = "/api/v1"
+    # 运行环境：development / production（生产关闭 /docs /redoc，避免暴露接口契约）
+    ENV: str = "development"
 
     # ---------- 数据库（MySQL）----------
     # 默认连接本机 MySQL（Docker 或本机安装均可），通过 .env 的 DATABASE_URL 覆盖

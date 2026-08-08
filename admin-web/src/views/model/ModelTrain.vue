@@ -175,9 +175,9 @@ onMounted(load)
 
     <el-alert type="info" :closable="false" style="margin-bottom: 16px">
       <div class="form-tip">
-        <b>模型体系说明：</b>线上评估主路径为「动态专家引擎」（四层动态指标体系 → 专家评分 → 混合经营加权，含一票否决红线）；
-        本页管理的数据层评分卡为多元统计参考模型（IV 特征筛选 → WOE 编码 → Logistic 回归），用于模型对比与答辩演示，
-        不在线上评估链路中直接打分。
+        <b>模型体系说明：</b>线上评估主路径为「动态专家引擎」（四层动态指标体系 → 专家评分 →
+        混合经营加权，含一票否决红线）； 本页管理的数据层评分卡为多元统计参考模型（IV 特征筛选 → WOE 编码 → Logistic
+        回归），用于模型对比与答辩演示， 不在线上评估链路中直接打分。
       </div>
     </el-alert>
 
@@ -199,7 +199,8 @@ onMounted(load)
         <el-button type="primary" :loading="training" @click="doTrain">开始训练</el-button>
       </div>
       <div class="form-tip">
-        训练使用合成样本（违约率约 3%-5%）；训练结果为数据层评分卡参考模型（SMOTE 过采样 + 5 折交叉验证），供模型对比与答辩演示。
+        训练使用合成样本（违约率约 3%-5%）；训练结果为数据层评分卡参考模型（SMOTE 过采样 + 5
+        折交叉验证），供模型对比与答辩演示。
       </div>
     </div>
 

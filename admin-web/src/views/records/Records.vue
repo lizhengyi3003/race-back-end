@@ -157,7 +157,9 @@ onMounted(load)
           <el-descriptions-item v-if="detail.completeness != null" label="数据完整度">
             {{ (detail.completeness * 100).toFixed(0) }}%
           </el-descriptions-item>
-          <el-descriptions-item v-if="detail.assessorName" label="评估人">{{ detail.assessorName }}</el-descriptions-item>
+          <el-descriptions-item v-if="detail.assessorName" label="评估人">{{
+            detail.assessorName
+          }}</el-descriptions-item>
           <el-descriptions-item v-if="detail.createdAt" label="时间" :span="2">
             {{ detail.createdAt?.replace('T', ' ').slice(0, 19) }}
           </el-descriptions-item>
@@ -180,9 +182,7 @@ onMounted(load)
 
         <!-- 动态指标明细 -->
         <template v-if="detail.indicatorValues?.length">
-          <h4 style="margin: 18px 0 10px">
-            动态指标明细（{{ detail.indicatorValues.length }} 项）
-          </h4>
+          <h4 style="margin: 18px 0 10px">动态指标明细（{{ detail.indicatorValues.length }} 项）</h4>
           <el-table :data="detail.indicatorValues" size="small" max-height="360">
             <el-table-column prop="code" label="编码" width="110" />
             <el-table-column prop="name" label="指标" min-width="170" show-overflow-tooltip />
@@ -193,7 +193,15 @@ onMounted(load)
             <el-table-column label="质量" width="80">
               <template #default="{ row }">
                 <el-tag
-                  :type="row.quality === '直接' ? 'success' : row.quality === '代理' ? 'warning' : row.quality === '存疑' ? 'danger' : 'info'"
+                  :type="
+                    row.quality === '直接'
+                      ? 'success'
+                      : row.quality === '代理'
+                        ? 'warning'
+                        : row.quality === '存疑'
+                          ? 'danger'
+                          : 'info'
+                  "
                   size="small"
                   >{{ row.quality }}</el-tag
                 >

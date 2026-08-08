@@ -154,7 +154,13 @@ async function save() {
 }
 
 const weightStarText = computed(() => {
-  const map: Record<number, string> = { 3: '★★★ 一般', 3.5: '★★★☆ 中', 4: '★★★★ 中高', 4.5: '★★★★☆ 高', 5: '★★★★★ 极高' }
+  const map: Record<number, string> = {
+    3: '★★★ 一般',
+    3.5: '★★★☆ 中',
+    4: '★★★★ 中高',
+    4.5: '★★★★☆ 高',
+    5: '★★★★★ 极高',
+  }
   return map[editForm.weight_star] || `${editForm.weight_star} 星`
 })
 

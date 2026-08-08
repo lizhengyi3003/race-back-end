@@ -27,6 +27,11 @@ async function load() {
   }
 }
 
+function onSearch() {
+  query.page = 1
+  load()
+}
+
 function openAdd() {
   isEdit.value = false
   Object.assign(form, { id: 0, username: '', password: '', realName: '', role: 'analyst', status: 1 })
@@ -102,13 +107,9 @@ onMounted(load)
           placeholder="搜索用户名/姓名"
           clearable
           style="width: 240px"
-          @keyup.enter="query.page = 1; load()"
+          @keyup.enter="onSearch"
         />
-        <el-button
-          type="primary"
-          @click="query.page = 1; load()"
-          >查询</el-button
-        >
+        <el-button type="primary" @click="onSearch">查询</el-button>
         <div style="flex: 1" />
         <el-button type="success" @click="openAdd">新增用户</el-button>
       </div>

@@ -131,7 +131,12 @@ def score_indicator(value: Any, indicator: IndicatorConfig) -> float | None:
         return None
     if t == "数值":
         num = _parse_num(value)
-        return _score_value(num, indicator) if num is not None else None
+        if num is None:
+            return None
+        # 数据正确性：数值指标（面积/金额/年限/次数等）不允许负数，负数视为无效数据
+        if num < 0:
+            return None
+        return _score_value(num, indicator)
     if t == "枚举":
         return _score_enum(str(value).strip(), indicator)
     if t == "布尔":
