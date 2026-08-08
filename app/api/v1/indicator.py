@@ -8,7 +8,7 @@ from app.db.session import get_db
 from app.schemas.indicator import IndicatorTree
 from app.services import indicator_service
 
-router = APIRouter(prefix="/indicators", tags=["indicators"])
+router = APIRouter(prefix="/indicators", tags=["指标体系"])
 
 
 @router.get("/tree", response_model=ApiResponse[IndicatorTree], summary="指标类别树")
