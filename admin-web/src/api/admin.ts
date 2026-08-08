@@ -18,6 +18,9 @@ export interface AssessmentRecord {
   suggestedRate: number
   assessorName?: string
   createdAt?: string
+  outcome?: string
+  outcomeNote?: string
+  outcomeAt?: string
   completeness?: number
   veto?: string
   mixedBusiness?: Record<string, number>
@@ -36,6 +39,26 @@ export function getRecord(id: number): Promise<AssessmentRecord> {
 
 export function deleteRecord(id: number): Promise<void> {
   return http.delete(`/risk/records/${id}`)
+}
+
+export interface BacktestStats {
+  total: number
+  filled: number
+  byOutcome: Record<string, number>
+  byLevel: Record<string, number>
+  cross: Record<string, Record<string, number>>
+  precisionHighRisk: number | null
+  recallOverdue: number | null
+  highRiskTotal: number
+  overdueTotal: number
+}
+
+export function getBacktestStats(): Promise<BacktestStats> {
+  return http.get('/risk/records/backtest/stats')
+}
+
+export function updateRecordOutcome(id: number, body: { outcome: string; note?: string }): Promise<AssessmentRecord> {
+  return http.put(`/risk/records/${id}/outcome`, body)
 }
 
 export interface SystemOverview {

@@ -33,3 +33,8 @@ class AssessmentRecord(Base):
 
     assessor_name: Mapped[str | None] = mapped_column(String(64), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, index=True)
+
+    # ---------- 真实回测（人工回填放款/逾期结果，用于现实版召回率/精确率）----------
+    outcome: Mapped[str] = mapped_column(String(16), default="pending")  # pending/normal/overdue/rejected
+    outcome_note: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    outcome_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

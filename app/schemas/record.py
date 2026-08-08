@@ -29,6 +29,11 @@ class AssessmentRecordOut(BaseModel):
     assessorName: str | None = None
     createdAt: datetime | None = None
 
+    # 真实回测（人工回填放款结果）
+    outcome: str = "pending"  # pending/normal/overdue/rejected
+    outcomeNote: str | None = None
+    outcomeAt: datetime | None = None
+
     # 动态评估扩展
     mixedBusiness: dict | None = None
     completeness: float | None = None
@@ -54,6 +59,9 @@ class AssessmentRecordOut(BaseModel):
             suggestedRate=r.suggested_rate,
             assessorName=r.assessor_name,
             createdAt=r.created_at,
+            outcome=r.outcome or "pending",
+            outcomeNote=r.outcome_note,
+            outcomeAt=r.outcome_at,
             mixedBusiness=input_json.get("mixedBusiness") if isinstance(input_json, dict) else None,
             completeness=result_json.get("completeness") if isinstance(result_json, dict) else None,
             veto=result_json.get("veto") if isinstance(result_json, dict) else None,

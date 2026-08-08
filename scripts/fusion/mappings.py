@@ -51,6 +51,8 @@ MAPPINGS: list[tuple] = [
     ("CHFS", "total_debt", "BASIC_009", "derived", "div({total_debt},sum({total_asset},1))", 0.76, "直接", "资产负债率", "all"),
     ("CHFS", "agri_asset", "_chfs_agri", "label", "mask({agri_asset},sum({agri_asset},{agri_inc})>0)", 0.80, "直接", "是否涉农家庭", "all"),
     ("CHFS", "total_income", "_chfs_income", "direct", "{total_income}", 0.80, "直接", "家庭总收入", "all"),
+    ("CHFS", "total_asset", "_total_asset", "direct", "{total_asset}", 0.78, "直接", "家庭总资产(元,与CFPS统一编码)", "all"),
+    ("CHFS", "hhsize", "_hh_size", "direct", "{hhsize}", 0.78, "直接", "家庭规模(人口)", "all"),
     # ============ CFPS 2016（famecon 2016 波）============
     ("CFPS", "fl3", "_cfps_agri", "label", "map({fl3},{1:1,2:0})", 0.72, "直接", "是否从事种植业/林业", "2016"),
     ("CFPS", "ft501", "BASIC_019", "derived", "div({ft501},10000)", 0.72, "加权平均", "待偿贷款额(元→万元)", "2016"),
@@ -65,7 +67,8 @@ MAPPINGS: list[tuple] = [
     ("CFPS", "fincome1", "_cfps_income", "direct", "div({fincome1},10000)", 0.72, "直接", "全部家庭纯收入(万元)", "2018plus"),
     ("CFPS", "land_asset", "01_05", "proxy", "{land_asset}", 0.70, "加权平均", "土地资产(元,代理规模)", "2018plus"),
     ("CFPS", "fm401", "_cfps_assets", "direct", "{fm401}", 0.68, "直接", "全部经营总资产(万元)", "2018plus"),
-    ("CFPS", "total_asset", "_cfps_total_asset", "direct", "{total_asset}", 0.68, "直接", "家庭净资产(元)", "2018plus"),
+    ("CFPS", "total_asset", "_total_asset", "direct", "{total_asset}", 0.68, "直接", "家庭净资产(元,与CHFS统一编码)", "2018plus"),
+    ("CFPS", "fml_count", "_hh_size", "direct", "{fml_count}", 0.78, "直接", "家庭成员人口数(与CHFS统一编码)", "2018plus"),
     ("CFPS", "ft8", "_cfps_rejected", "label", "map({ft8},{1:1,5:0})", 0.70, "直接", "借款被拒经历(独立B验证信号,不入模)", "2018plus"),
 ]
 
@@ -113,5 +116,6 @@ MODEL_FEATURES: list[str] = [
     "_cmes_had_loan", "_cmes_profit", "_cmes_credit", "_cmes_purchase_credit",
     "_chfs_agri", "_chfs_income",
     "_cfps_agri", "_cfps_livestock", "_cfps_hus_input", "_cfps_private_debt",
-    "_cfps_income", "_cfps_assets", "_cfps_total_asset",
+    "_cfps_income", "_cfps_assets",
+    "_total_asset", "_hh_size",
 ]

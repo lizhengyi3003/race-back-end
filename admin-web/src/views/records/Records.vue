@@ -1,7 +1,15 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { listRecords, deleteRecord, getRecord, type AssessmentRecord } from '@/api/admin'
+import {
+  listRecords,
+  deleteRecord,
+  getRecord,
+  getBacktestStats,
+  updateRecordOutcome,
+  type AssessmentRecord,
+  type BacktestStats,
+} from '@/api/admin'
 
 const loading = ref(false)
 const records = ref<AssessmentRecord[]>([])
@@ -9,6 +17,48 @@ const total = ref(0)
 const query = reactive({ page: 1, size: 10, keyword: '', level: '', businessType: '' })
 const detailVisible = ref(false)
 const detail = ref<any>(null)
+
+// ---- 真实回测 ----
+const stats = ref<BacktestStats | null>(null)
+const outcomeVisible = ref(false)
+const outcomeForm = reactive({ id: 0, enterpriseName: '', outcome: 'pending', note: '' })
+const OUTCOME_OPTIONS = [
+  { label: '正常还款', value: 'normal', type: 'success' },
+  { label: '逾期', value: 'overdue', type: 'danger' },
+  { label: '未放款', value: 'rejected', type: 'info' },
+  { label: '待回填', value: 'pending', type: 'warning' },
+]
+
+async function loadStats() {
+  try {
+    stats.value = await getBacktestStats()
+  } catch {
+    // 忽略（统计接口失败不影响列表）
+  }
+}
+
+function outcomeTag(outcome?: string) {
+  return OUTCOME_OPTIONS.find((o) => o.value === outcome)?.type || 'info'
+}
+function outcomeLabel(outcome?: string) {
+  return OUTCOME_OPTIONS.find((o) => o.value === outcome)?.label || outcome || '待回填'
+}
+
+function openOutcome(row: AssessmentRecord) {
+  outcomeForm.id = row.id
+  outcomeForm.enterpriseName = row.enterpriseName
+  outcomeForm.outcome = row.outcome || 'pending'
+  outcomeForm.note = row.outcomeNote || ''
+  outcomeVisible.value = true
+}
+
+async function saveOutcome() {
+  await updateRecordOutcome(outcomeForm.id, { outcome: outcomeForm.outcome, note: outcomeForm.note })
+  ElMessage.success('已回填')
+  outcomeVisible.value = false
+  load()
+  loadStats()
+}
 
 async function load() {
   loading.value = true
@@ -46,7 +96,10 @@ async function remove(row: AssessmentRecord) {
   load()
 }
 
-onMounted(load)
+onMounted(() => {
+  load()
+  loadStats()
+})
 </script>
 
 <template>
@@ -54,6 +107,32 @@ onMounted(load)
     <div class="page-header">
       <h1>评估记录</h1>
       <p>涉农主体信贷风险评估历史记录管理</p>
+    </div>
+
+    <!-- 真实回测统计 -->
+    <div v-if="stats" class="backtest-card info-card">
+      <div class="backtest-head">
+        <b>真实回测</b>
+        <span class="backtest-sub">已回填 {{ stats.filled }}/{{ stats.total }} 条 · 现实版指标基于人工回填的真实放款结果（记录列表「回填」维护）</span>
+      </div>
+      <div class="backtest-grid">
+        <div class="bt-item">
+          <div class="bt-value">{{ stats.precisionHighRisk != null ? (stats.precisionHighRisk * 100).toFixed(1) + '%' : '-' }}</div>
+          <div class="bt-label">精确率 · 判高风险中实际逾期</div>
+        </div>
+        <div class="bt-item">
+          <div class="bt-value">{{ stats.recallOverdue != null ? (stats.recallOverdue * 100).toFixed(1) + '%' : '-' }}</div>
+          <div class="bt-label">召回率 · 实际逾期中被判高风险</div>
+        </div>
+        <div class="bt-item">
+          <div class="bt-value">{{ stats.overdueTotal }}</div>
+          <div class="bt-label">已逾期样本</div>
+        </div>
+        <div class="bt-item">
+          <div class="bt-value">{{ stats.highRiskTotal }}</div>
+          <div class="bt-label">判高风险样本</div>
+        </div>
+      </div>
     </div>
 
     <div class="info-card">
@@ -114,9 +193,15 @@ onMounted(load)
           <el-table-column prop="createdAt" label="时间" width="170">
             <template #default="{ row }">{{ row.createdAt?.replace('T', ' ').slice(0, 19) }}</template>
           </el-table-column>
-          <el-table-column label="操作" width="130" fixed="right">
+          <el-table-column label="回填结果" width="110">
+            <template #default="{ row }">
+              <el-tag :type="outcomeTag(row.outcome)" size="small">{{ outcomeLabel(row.outcome) }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="170" fixed="right">
             <template #default="{ row }">
               <el-button link type="primary" size="small" @click="showDetail(row)">详情</el-button>
+              <el-button link type="warning" size="small" @click="openOutcome(row)">回填</el-button>
               <el-button link type="danger" size="small" @click="remove(row)">删除</el-button>
             </template>
           </el-table-column>
@@ -226,6 +311,33 @@ onMounted(load)
         <el-alert :title="detail.result?.advice || '-'" type="info" :closable="false" />
       </template>
     </el-drawer>
+
+    <!-- 回填真实结果弹窗 -->
+    <el-dialog v-model="outcomeVisible" title="回填真实结果" width="420px" append-to-body>
+      <el-form label-width="90px">
+        <el-form-item label="企业名称">
+          <span>{{ outcomeForm.enterpriseName }}</span>
+        </el-form-item>
+        <el-form-item label="真实结果">
+          <el-select v-model="outcomeForm.outcome" style="width: 100%">
+            <el-option v-for="o in OUTCOME_OPTIONS" :key="o.value" :label="o.label" :value="o.value" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="备注">
+          <el-input
+            v-model="outcomeForm.note"
+            type="textarea"
+            :rows="2"
+            maxlength="255"
+            placeholder="如：实际放款后 6 个月出现逾期"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="outcomeVisible = false">取消</el-button>
+        <el-button type="primary" @click="saveOutcome">保存</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -236,6 +348,49 @@ onMounted(load)
   align-items: center;
   gap: 10px;
   margin-bottom: 16px;
+}
+
+// 真实回测统计卡片
+.backtest-card {
+  margin-bottom: 16px;
+  padding: 16px 20px;
+
+  .backtest-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 12px;
+
+    .backtest-sub {
+      font-size: 12px;
+      color: #909399;
+    }
+  }
+
+  .backtest-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+
+    .bt-item {
+      background: #f7f8fa;
+      border-radius: 8px;
+      padding: 12px 14px;
+
+      .bt-value {
+        font-size: 22px;
+        font-weight: 700;
+        color: #303133;
+        line-height: 1.2;
+      }
+
+      .bt-label {
+        font-size: 12px;
+        color: #909399;
+        margin-top: 4px;
+      }
+    }
+  }
 }
 
 // 表格横向滚动：窄屏时避免列被压缩（风险等级/时间显示不全）
