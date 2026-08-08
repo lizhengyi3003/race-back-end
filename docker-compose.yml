@@ -35,6 +35,8 @@ services:
       CORS_ORIGINS: ${CORS_ORIGINS:-*}
       AUTO_TRAIN_ON_STARTUP: ${AUTO_TRAIN_ON_STARTUP:-true}
       SEED_SAMPLES: ${SEED_SAMPLES:-3000}
+      # 运行环境：production 时 FastAPI 关闭 /docs、/redoc（生产不暴露接口契约）
+      ENV: ${ENV:-development}
     ports:
       - "8000:8000"
     volumes:
