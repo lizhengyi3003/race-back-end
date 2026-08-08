@@ -17,6 +17,9 @@ const loading = ref(false)
 const captchaVisible = ref(false)
 const captchaData = ref<CaptchaData | null>(null)
 const captchaLoading = ref(false)
+// 已通过验证的 captchaKey 与登录提交状态（防止重复触发登录 / @closed 清空竞态）
+const pendingCaptchaKey = ref('')
+const loginSubmitting = ref(false)
 
 const TYPE_TIPS: Record<CaptchaType, string> = {
   click: '请依次点击下图中的字符',
@@ -27,6 +30,7 @@ const TYPE_TIPS: Record<CaptchaType, string> = {
 
 /** 加载/刷新验证码（弹窗打开或点击组件内置刷新按钮时调用） */
 async function loadCaptcha() {
+  if (loginSubmitting.value) return
   captchaLoading.value = true
   try {
     captchaData.value = await getCaptcha()
@@ -39,16 +43,24 @@ async function loadCaptcha() {
 
 /** 打开验证码弹窗并加载验证码 */
 function openCaptcha() {
+  if (loginSubmitting.value) return
   captchaVisible.value = true
   loadCaptcha()
 }
 
+/** 弹窗完全关闭后清理（不清理 pendingCaptchaKey，避免与进行中的登录竞态） */
+function onCaptchaClosed() {
+  captchaData.value = null
+}
+
 /** 统一校验：通过则关闭弹窗执行登录，失败则重置并换一张 */
 function doCheck(value: string, reset: () => void) {
-  if (!captchaData.value) return
+  if (loginSubmitting.value || !captchaData.value) return
   checkCaptcha(captchaData.value.captchaKey, captchaData.value.type, value)
     .then((res) => {
       if (res.passed) {
+        // 先缓存已验证的 key（后续弹窗关闭 @closed 会清空 captchaData，避免竞态）
+        pendingCaptchaKey.value = captchaData.value?.captchaKey || ''
         ElMessage.success('验证成功')
         captchaVisible.value = false
         doLogin()
@@ -87,25 +99,34 @@ function captchaEvents() {
   }
 }
 
-/** 真实登录（验证码已通过后调用） */
+/** 真实登录（验证码已通过后调用，防重进入） */
 async function doLogin() {
-  if (!captchaData.value) return
+  // 防重：登录请求进行中不再触发
+  if (loginSubmitting.value) return
+  const captchaKey = pendingCaptchaKey.value || captchaData.value?.captchaKey || ''
+  if (!captchaKey) return
+  loginSubmitting.value = true
   loading.value = true
   try {
-    const res = await login(form.username, form.password, captchaData.value.captchaKey)
+    const res = await login(form.username, form.password, captchaKey)
     auth.setLogin(res.token, res.user)
-    ElMessage.success('登录成功')
-    router.push('/')
   } catch {
-    // 登录失败：重新弹出验证码（换一张，防止同一验证码重复试探）
+    // 仅登录失败才重新弹出验证码（换一张，防止同一验证码重复试探）
+    pendingCaptchaKey.value = ''
     captchaVisible.value = true
     loadCaptcha()
+    return
   } finally {
     loading.value = false
   }
+  // 登录成功：提示并跳转；跳转失败不回滚登录状态、不重新弹窗
+  ElMessage.success('登录成功')
+  await router.push('/').catch(() => {})
+  loginSubmitting.value = false
 }
 
 function handleLogin() {
+  if (loginSubmitting.value) return
   if (!form.username || !form.password) {
     ElMessage.warning('请输入用户名和密码')
     return
@@ -155,7 +176,7 @@ function handleLogin() {
       :close-on-press-escape="false"
       align-center
       append-to-body
-      @closed="captchaData = null"
+      @closed="onCaptchaClosed"
     >
       <div v-loading="captchaLoading" class="captcha-box">
         <div v-if="captchaData" class="captcha-tip">{{ TYPE_TIPS[captchaData.type] }}</div>
