@@ -8,7 +8,6 @@ class RiskInput(BaseModel):
     # 基本信息
     enterpriseName: str = ""
     businessType: str = ""  # 经营类型：种植/养殖/加工/混合
-    productType: str = ""  # 主营产品
 
     # === 维度一：土地经营类 ===
     landConfirmedArea: float | None = None  # 确权耕地总面积（亩）
@@ -39,7 +38,6 @@ class DynamicRiskInput(BaseModel):
 
     enterpriseName: str = ""
     businessType: str = ""  # 经营类型大类编码 01~10；混合经营用 MIXED
-    productType: str = ""
     middleType: str = ""  # 中类编码（可选，兼容旧渐进式）
     smallType: str = ""  # 小类编码（可选，兼容旧渐进式）
     specificType: str = ""  # 具体营业类型编码（可选，兼容旧渐进式）

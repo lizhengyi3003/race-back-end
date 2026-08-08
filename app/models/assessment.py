@@ -13,10 +13,12 @@ class AssessmentRecord(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
+    # ---------- 归属（当前账号）----------
+    user_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)  # sys_user.id；匿名评估为 NULL
+
     # ---------- 基本信息 ----------
     enterprise_name: Mapped[str] = mapped_column(String(128), default="")
     business_type: Mapped[str] = mapped_column(String(32), default="")  # 种植/养殖/加工/混合
-    product_type: Mapped[str] = mapped_column(String(64), default="")
 
     # ---------- 维度一：土地经营类 ----------
     land_confirmed_area: Mapped[float | None] = mapped_column(Float, nullable=True)  # 亩

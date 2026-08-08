@@ -22,7 +22,12 @@ def assess(
     user: User | None = Depends(get_current_user_optional),
 ):
     payload = req.model_dump()
-    result = risk_service.assess_and_store(db, payload, assessor_name=user.username if user else None)
+    result = risk_service.assess_and_store(
+        db,
+        payload,
+        assessor_name=user.username if user else None,
+        user_id=user.id if user else None,
+    )
     return ok(result)
 
 
@@ -34,7 +39,10 @@ def assess_dynamic(
 ):
     payload = req.model_dump()
     result = risk_service.assess_dynamic_and_store(
-        db, payload, assessor_name=user.username if user else None
+        db,
+        payload,
+        assessor_name=user.username if user else None,
+        user_id=user.id if user else None,
     )
     return ok(result)
 
@@ -47,9 +55,9 @@ def records(
     level: str | None = None,
     businessType: str | None = None,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    user: User = Depends(get_current_user),
 ):
-    data = record_service.list_records(db, page, size, keyword, level, businessType)
+    data = record_service.list_records(db, page, size, keyword, level, businessType, user_id=user.id)
     return ok(data)
 
 
@@ -57,16 +65,16 @@ def records(
 def record_detail(
     record_id: int,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    user: User = Depends(get_current_user),
 ):
-    return ok(record_service.get_record(db, record_id))
+    return ok(record_service.get_record(db, record_id, user_id=user.id))
 
 
 @router.delete("/records/{record_id}", response_model=ApiResponse, summary="删除记录")
 def delete_record(
     record_id: int,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    user: User = Depends(get_current_user),
 ):
-    record_service.delete_record(db, record_id)
+    record_service.delete_record(db, record_id, user_id=user.id)
     return ok(message="删除成功")

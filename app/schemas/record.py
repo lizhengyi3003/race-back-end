@@ -20,7 +20,6 @@ class AssessmentRecordOut(BaseModel):
     id: int
     enterpriseName: str
     businessType: str
-    productType: str
 
     landConfirmedArea: float | None = None
     landTransferYears: float | None = None
@@ -64,7 +63,6 @@ class AssessmentRecordOut(BaseModel):
             id=r.id,
             enterpriseName=r.enterprise_name,
             businessType=r.business_type,
-            productType=r.product_type,
             landConfirmedArea=r.land_confirmed_area,
             landTransferYears=r.land_transfer_years,
             landTransferStability=r.land_transfer_stability,

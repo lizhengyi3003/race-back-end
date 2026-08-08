@@ -29,7 +29,12 @@ _COLUMN_MAP = {
 }
 
 
-def assess_and_store(db: Session, payload: dict, assessor_name: str | None = None) -> dict:
+def assess_and_store(
+    db: Session,
+    payload: dict,
+    assessor_name: str | None = None,
+    user_id: int | None = None,
+) -> dict:
     model = load_active_model(db)
     thresholds = get_thresholds(db)
     result = assess(payload, model=model, thresholds=thresholds)
@@ -37,7 +42,7 @@ def assess_and_store(db: Session, payload: dict, assessor_name: str | None = Non
     rec = AssessmentRecord(
         enterprise_name=payload.get("enterpriseName", ""),
         business_type=payload.get("businessType", ""),
-        product_type=payload.get("productType", ""),
+        user_id=user_id,
         **{_COLUMN_MAP[k]: payload.get(k) for k in _COLUMN_MAP},
         score=result["score"],
         probability=result["probability"],
@@ -132,6 +137,7 @@ def assess_dynamic_and_store(
     db: Session,
     payload: dict,
     assessor_name: str | None = None,
+    user_id: int | None = None,
 ) -> dict:
     """动态指标体系评估（专家引擎）：支持单经营类型与混合经营加权。"""
     indicators = payload.get("indicators", {}) or {}
@@ -158,7 +164,7 @@ def assess_dynamic_and_store(
     rec = AssessmentRecord(
         enterprise_name=payload.get("enterpriseName", ""),
         business_type=business_type,
-        product_type=payload.get("productType", ""),
+        user_id=user_id,
         score=result["score"],
         probability=result["probability"],
         level=result["level"],

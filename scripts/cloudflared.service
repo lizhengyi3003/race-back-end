@@ -1,0 +1,14 @@
+[Unit]
+Description=Cloudflare Tunnel client
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+TimeoutStartSec=90
+Type=notify
+ExecStart=/usr/local/bin/cloudflared --config /etc/cloudflared/config.yml --edge-ip-version 4 --no-autoupdate --region us tunnel run --protocol quic
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

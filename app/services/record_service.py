@@ -1,6 +1,5 @@
 """评估记录管理服务"""
 
-from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import BizException
@@ -39,16 +38,15 @@ def list_records(
     keyword: str | None = None,
     level: str | None = None,
     business_type: str | None = None,
+    user_id: int | None = None,
 ) -> PageData[AssessmentRecordOut]:
+    """评估记录分页；user_id 非 None 时仅返回该用户自己的记录。"""
     query = db.query(AssessmentRecord)
+    if user_id is not None:
+        query = query.filter(AssessmentRecord.user_id == user_id)
     if keyword:
         like = f"%{keyword}%"
-        query = query.filter(
-            or_(
-                AssessmentRecord.enterprise_name.like(like),
-                AssessmentRecord.product_type.like(like),
-            )
-        )
+        query = query.filter(AssessmentRecord.enterprise_name.like(like))
     if level:
         query = query.filter(AssessmentRecord.level == level)
     if business_type:
@@ -64,18 +62,26 @@ def list_records(
     )
 
 
-def get_record(db: Session, record_id: int) -> AssessmentRecordOut:
+def _check_owner(r: AssessmentRecord, user_id: int | None) -> None:
+    """归属校验：非空 user_id 时仅允许操作本人记录。"""
+    if user_id is not None and r.user_id != user_id:
+        raise BizException("无权访问该记录", 403)
+
+
+def get_record(db: Session, record_id: int, user_id: int | None = None) -> AssessmentRecordOut:
     r = db.query(AssessmentRecord).filter(AssessmentRecord.id == record_id).first()
     if not r:
         raise BizException("记录不存在", 404)
+    _check_owner(r, user_id)
     values = _indicator_values(db, record_id)
     return AssessmentRecordOut.from_model(r, indicator_values=values or None)
 
 
-def delete_record(db: Session, record_id: int) -> None:
+def delete_record(db: Session, record_id: int, user_id: int | None = None) -> None:
     r = db.query(AssessmentRecord).filter(AssessmentRecord.id == record_id).first()
     if not r:
         raise BizException("记录不存在", 404)
+    _check_owner(r, user_id)
     db.delete(r)
     db.commit()
 

@@ -1,0 +1,10 @@
+# Cloudflare Tunnel 本地配置（credentials-file 模式，完全绕开面板远程配置）
+tunnel: aa1b1ed6-ad6b-4fe0-ae2d-1b6f6f918aa3
+credentials-file: /etc/cloudflared/aa1b1ed6-ad6b-4fe0-ae2d-1b6f6f918aa3.json
+
+ingress:
+  - hostname: backend.intellicoretech.cn
+    service: http://localhost:8000
+  - hostname: backend-dev.intellicoretech.cn
+    service: http://localhost:8081
+  - service: http_status:404
