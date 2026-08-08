@@ -9,26 +9,10 @@ from app.db.session import get_db
 from app.models.user import User
 from app.schemas.common import PageData
 from app.schemas.record import AssessmentRecordOut
-from app.schemas.risk import DynamicRiskInput, RiskInput, RiskResult
+from app.schemas.risk import DynamicRiskInput, RiskResult
 from app.services import record_service, risk_service
 
 router = APIRouter(prefix="/risk", tags=["椋庨櫓璇勪及"])
-
-
-@router.post("/assess", response_model=ApiResponse[RiskResult], summary="鎻愪氦椋庨櫓璇勪及")
-def assess(
-    req: RiskInput,
-    db: Session = Depends(get_db),
-    user: User | None = Depends(get_current_user_optional),
-):
-    payload = req.model_dump()
-    result = risk_service.assess_and_store(
-        db,
-        payload,
-        assessor_name=user.username if user else None,
-        user_id=user.id if user else None,
-    )
-    return ok(result)
 
 
 @router.post("/assess-dynamic", response_model=ApiResponse[RiskResult], summary="动态指标体系评估（专家引擎）")

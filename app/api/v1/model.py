@@ -1,6 +1,6 @@
 """模型管理接口"""
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
@@ -31,15 +31,6 @@ def model_metrics(db: Session = Depends(get_db), _: User = Depends(get_current_u
 @router.get("/monitor", response_model=ApiResponse, summary="模型持续监控（PSI/客群迁移预警）")
 def model_monitor(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
     return ok(model_service.get_monitor(db))
-
-
-@router.get("/simulate", response_model=ApiResponse, summary="业务仿真验证（极端场景模拟）")
-def model_simulate(
-    nSamples: int = Query(2000, ge=100, le=10000),
-    db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
-):
-    return ok(model_service.run_simulation(db, n_samples=nSamples))
 
 
 @router.post("/train", response_model=ApiResponse, summary="训练 / 重训评分卡")

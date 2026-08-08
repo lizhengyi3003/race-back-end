@@ -3,36 +3,6 @@
 from pydantic import BaseModel
 
 
-class RiskInput(BaseModel):
-    """涉农企业风险录入数据（文档 3.3.2 四大维度 15 项替代数据指标体系）"""
-    # 基本信息
-    enterpriseName: str = ""
-    businessType: str = ""  # 经营类型：种植/养殖/加工/混合
-
-    # === 维度一：土地经营类 ===
-    landConfirmedArea: float | None = None  # 确权耕地总面积（亩）
-    landTransferYears: float | None = None  # 土地流转合同年限（年）
-    landTransferStability: str = ""  # 稳定/小幅调整/频繁变更
-    blackSoilProtection: float | None = None  # 黑土地保护性耕作面积（亩）
-
-    # === 维度二：农业补贴类 ===
-    grainSubsidy: float | None = None  # 耕地地力保护补贴（元）
-    machinerySubsidy: float | None = None  # 大型农机购置补贴（元）
-    grainScaleSubsidy: float | None = None  # 粮食规模种植专项补贴（元）
-    specialtyCropSubsidy: float | None = None  # 特色经济作物补贴（元）
-
-    # === 维度三：农业保险类 ===
-    insuranceYears: float | None = None  # 农业保险连续投保年限（年）
-    claimCount: float | None = None  # 历史保险理赔频次（次）
-    facilityInsurance: str = ""  # 完整投保/仅基础险/未投保
-
-    # === 维度四：产销经营类 ===
-    yearsOperating: float | None = None  # 主体持续经营年限（年）
-    purchaseOrder: str = ""  # 年度订单/零散收购/无稳定渠道
-    annualRevenue: float | None = None  # 农产品年稳定营收（万元）
-    creditRecord: str = ""  # 无逾期/有逾期
-
-
 class DynamicRiskInput(BaseModel):
     """动态指标体系评估请求（Phase 1：专家引擎，指标按编码动态传入）。"""
 

@@ -1,4 +1,4 @@
-"""评估记录模型：15 项涉农替代数据指标（文档 3.3.2 四大维度）+ 评分结果 + 输入/结果 JSON 快照"""
+"""评估记录模型：动态指标体系（专家引擎）+ 评分结果 + 输入/结果 JSON 快照"""
 
 from datetime import datetime
 
@@ -18,30 +18,7 @@ class AssessmentRecord(Base):
 
     # ---------- 基本信息 ----------
     enterprise_name: Mapped[str] = mapped_column(String(128), default="")
-    business_type: Mapped[str] = mapped_column(String(32), default="")  # 种植/养殖/加工/混合
-
-    # ---------- 维度一：土地经营类 ----------
-    land_confirmed_area: Mapped[float | None] = mapped_column(Float, nullable=True)  # 亩
-    land_transfer_years: Mapped[float | None] = mapped_column(Float, nullable=True)  # 年
-    land_transfer_stability: Mapped[str | None] = mapped_column(String(32), nullable=True)  # 稳定/小幅调整/频繁变更
-    black_soil_protection: Mapped[float | None] = mapped_column(Float, nullable=True)  # 亩
-
-    # ---------- 维度二：农业补贴类 ----------
-    grain_subsidy: Mapped[float | None] = mapped_column(Float, nullable=True)  # 元
-    machinery_subsidy: Mapped[float | None] = mapped_column(Float, nullable=True)  # 元
-    grain_scale_subsidy: Mapped[float | None] = mapped_column(Float, nullable=True)  # 元
-    specialty_crop_subsidy: Mapped[float | None] = mapped_column(Float, nullable=True)  # 元
-
-    # ---------- 维度三：农业保险类 ----------
-    insurance_years: Mapped[float | None] = mapped_column(Float, nullable=True)  # 年
-    claim_count: Mapped[float | None] = mapped_column(Float, nullable=True)  # 次
-    facility_insurance: Mapped[str | None] = mapped_column(String(32), nullable=True)  # 完整投保/仅基础险/未投保
-
-    # ---------- 维度四：产销经营类 ----------
-    years_operating: Mapped[float | None] = mapped_column(Float, nullable=True)  # 年
-    purchase_order: Mapped[str | None] = mapped_column(String(32), nullable=True)  # 年度订单/零散收购/无稳定渠道
-    annual_revenue: Mapped[float | None] = mapped_column(Float, nullable=True)  # 万元
-    credit_record: Mapped[str | None] = mapped_column(String(32), nullable=True)  # 无逾期/有逾期
+    business_type: Mapped[str] = mapped_column(String(32), default="")  # 经营类型大类编码 01~10 / MIXED
 
     # ---------- 评估结果 ----------
     score: Mapped[int] = mapped_column(Integer, default=0)

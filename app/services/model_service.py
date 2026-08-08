@@ -146,12 +146,9 @@ def get_monitor(db: Session, n_samples: int = 200) -> dict:
 
         sample_df = generate_samples(n=2000, default_rate=0.04, seed=42)
         train_scores = []
-        from app.ml.predictor import assess
-
-        thresholds = get_thresholds(db)
         for _, row in sample_df.iterrows():
-            r = assess({c: row[c] for c in sample_df.columns if c != "default"}, model=model, thresholds=thresholds)
-            train_scores.append(r["score"])
+            r = model.predict_score({c: row[c] for c in sample_df.columns if c != "default"})
+            train_scores.append(r)
     except Exception:
         train_scores = []
 
@@ -199,25 +196,6 @@ def get_monitor(db: Session, n_samples: int = 200) -> dict:
         "warnings": warnings,
         "thresholds": {"lowRiskThreshold": low_th, "highRiskThreshold": high_th},
     }
-
-
-# ---------------------------------------------------------------
-# 业务仿真验证（对齐计划书 3.3.3 极端场景模拟）
-# ---------------------------------------------------------------
-def run_simulation(db: Session, n_samples: int = 2000, scenarios: list[str] | None = None) -> dict:
-    from app.ml.simulation import simulate
-
-    model = load_active_model(db)
-    if model is None:
-        return {"available": False, "message": "尚未训练模型"}
-
-    from app.ml.seed import generate_samples
-
-    samples = generate_samples(n=n_samples, default_rate=0.04, seed=42)
-    thresholds = get_thresholds(db)
-    result = simulate(model, samples, scenarios=scenarios, thresholds=thresholds)
-    result["available"] = True
-    return result
 
 
 def list_versions(db: Session) -> list[dict]:
