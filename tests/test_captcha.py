@@ -33,12 +33,15 @@ def _enable_captcha(monkeypatch):
 
 
 def test_get_captcha_fields(monkeypatch, client):
-    """/captcha 应透传验证码数据并转换为前端友好字段"""
+    """/captcha 应透传验证码数据并转换为前端友好字段（固定随机为 click 保证确定性）"""
     _enable_captcha(monkeypatch)
-    with mock.patch("app.api.v1.captcha._call_captcha", return_value=_MOCK_GET_DATA) as m:
+    with mock.patch("app.api.v1.captcha._call_captcha", return_value=_MOCK_GET_DATA) as m, mock.patch(
+        "app.api.v1.captcha.random.choice", return_value=("click", "click-default-ch")
+    ):
         r = client.get("/api/v1/captcha")
     assert r.json()["code"] == 200
     d = r.json()["data"]
+    assert d["type"] == "click"
     assert d["captchaKey"] == "mock-key-123"
     assert d["image"].startswith("data:image/jpeg")
     assert d["thumb"].startswith("data:image/png")
@@ -49,27 +52,40 @@ def test_get_captcha_fields(monkeypatch, client):
 
 
 def test_check_captcha_passed(monkeypatch, client):
-    """点选校验通过时返回 passed=true"""
+    """校验通过时返回 passed=true，且转发时携带类型对应配置 id"""
     _enable_captcha(monkeypatch)
     with mock.patch(
         "app.api.v1.captcha._call_captcha",
         return_value={"code": 200, "data": "ok"},
     ) as m:
-        r = client.post("/api/v1/captcha/check", json={"captchaKey": "k1", "dots": [[10, 20], [30, 40]]})
+        r = client.post("/api/v1/captcha/check", json={"captchaKey": "k1", "type": "click", "value": "10,20,30,40"})
     assert r.json()["data"]["passed"] is True
-    # 转发给 go-captcha-service 的 value 应为逗号分隔坐标
+    # 转发给 go-captcha-service 的 value 应为逗号分隔坐标，id 对应 click 配置
     body = m.call_args.kwargs["body"]
     assert body["value"] == "10,20,30,40"
+    assert body["id"] == "click-default-ch"
+
+
+def test_check_captcha_slide(monkeypatch, client):
+    """滑块类型校验应使用 slide 配置 id"""
+    _enable_captcha(monkeypatch)
+    with mock.patch(
+        "app.api.v1.captcha._call_captcha",
+        return_value={"code": 200, "data": "ok"},
+    ) as m:
+        r = client.post("/api/v1/captcha/check", json={"captchaKey": "k2", "type": "slide", "value": "120,45"})
+    assert r.json()["data"]["passed"] is True
+    assert m.call_args.kwargs["body"]["id"] == "slide-default"
 
 
 def test_check_captcha_failed(monkeypatch, client):
-    """点选校验失败时返回 passed=false"""
+    """校验失败时返回 passed=false"""
     _enable_captcha(monkeypatch)
     with mock.patch(
         "app.api.v1.captcha._call_captcha",
         return_value={"code": 200, "data": "failure"},
     ):
-        r = client.post("/api/v1/captcha/check", json={"captchaKey": "k1", "dots": [[1, 2]]})
+        r = client.post("/api/v1/captcha/check", json={"captchaKey": "k1", "type": "click", "value": "1,2"})
     assert r.json()["data"]["passed"] is False
 
 

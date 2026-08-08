@@ -2,10 +2,12 @@
 
 go-captcha-service 是官方 Go 验证码服务（Docker 部署），本模块将其
 HTTP 接口包装为业务 API，并供登录等场景强制校验。
+支持四种交互模式随机轮换：click（点选）/ slide（滑块）/ drag（拖拽）/ rotate（旋转）。
 """
 
 import json
 import logging
+import random
 import urllib.request
 
 from fastapi import APIRouter
@@ -19,12 +21,28 @@ router = APIRouter(prefix="/captcha", tags=["验证码"])
 
 logger = logging.getLogger("app")
 
+# 支持的验证码类型 → go-captcha-service 配置 id
+CAPTCHA_TYPES: list[tuple[str, str]] = [
+    ("click", "click-default-ch"),
+    ("slide", "slide-default"),
+    ("drag", "drag-default"),
+    ("rotate", "rotate-default"),
+]
+_TYPE_ID_MAP = dict(CAPTCHA_TYPES)
+
+# 内存记录 captchaKey → 类型（go-captcha-service 校验时需对应配置 id）
+_KEY_TYPES: dict[str, str] = {}
+
 
 class CaptchaCheckRequest(BaseModel):
-    """点选校验请求：captchaKey + 用户点击坐标列表 [[x, y], ...]"""
+    """校验请求：captchaKey + 类型 + 统一 value 字符串。
+
+    value 格式：click="x1,y1,x2,y2"；slide/drag="x,y"；rotate="角度数值"
+    """
 
     captchaKey: str
-    dots: list[list[int]]
+    type: str = ""
+    value: str = ""
 
 
 def _call_captcha(path: str, method: str = "GET", body: dict | None = None, timeout: float = 10) -> dict | None:
@@ -44,12 +62,13 @@ def _call_captcha(path: str, method: str = "GET", body: dict | None = None, time
         return None
 
 
-@router.get("", response_model=ApiResponse, summary="获取行为验证码")
+@router.get("", response_model=ApiResponse, summary="获取行为验证码（四种模式随机）")
 def get_captcha():
-    """获取点选验证码：主图/缩略图 base64 与 captchaKey。"""
+    """获取行为验证码：click/slide/drag/rotate 随机一种，返回 type 与对应数据。"""
     if not settings.CAPTCHA_ENABLED:
         return ok(
             {
+                "type": "click",
                 "captchaKey": "",
                 "image": "",
                 "thumb": "",
@@ -57,35 +76,46 @@ def get_captcha():
                 "height": 0,
                 "thumbWidth": 0,
                 "thumbHeight": 0,
+                "thumbSize": 0,
+                "displayX": 0,
+                "displayY": 0,
             }
         )
-    data = _call_captcha(f"/api/v1/public/get-data?id={settings.CAPTCHA_ID}")
+    captcha_type, captcha_id = random.choice(CAPTCHA_TYPES)
+    data = _call_captcha(f"/api/v1/public/get-data?id={captcha_id}")
     if not data or not data.get("data"):
         raise BizException("验证码服务暂不可用，请稍后重试", 500)
     d = data["data"]
+    captcha_key = d.get("captcha_key", "")
+    _KEY_TYPES[captcha_key] = captcha_type
     return ok(
         {
-            "captchaKey": d.get("captcha_key", ""),
+            "type": captcha_type,
+            "captchaKey": captcha_key,
             "image": d.get("master_image_base64", ""),
             "thumb": d.get("thumb_image_base64", ""),
             "width": d.get("master_width", 300),
             "height": d.get("master_height", 220),
             "thumbWidth": d.get("thumb_width", 150),
             "thumbHeight": d.get("thumb_height", 40),
+            "thumbSize": d.get("thumb_size", 0),
+            "displayX": d.get("display_x", 0),
+            "displayY": d.get("display_y", 0),
         }
     )
 
 
-@router.post("/check", response_model=ApiResponse, summary="校验验证码点选")
+@router.post("/check", response_model=ApiResponse, summary="校验验证码")
 def check_captcha(req: CaptchaCheckRequest):
-    """校验用户点选坐标；通过后 go-captcha-service 缓存该 captchaKey 为已通过状态。"""
+    """校验验证码作答；通过后 go-captcha-service 缓存该 captchaKey 为已通过状态。"""
     if not settings.CAPTCHA_ENABLED:
         return ok({"passed": True})
-    value = ",".join(f"{x},{y}" for x, y in req.dots)
+    captcha_type = req.type or _KEY_TYPES.get(req.captchaKey, "click")
+    captcha_id = _TYPE_ID_MAP.get(captcha_type, "click-default-ch")
     data = _call_captcha(
         "/api/v1/public/check-data",
         method="POST",
-        body={"id": settings.CAPTCHA_ID, "captchaKey": req.captchaKey, "value": value},
+        body={"id": captcha_id, "captchaKey": req.captchaKey, "value": req.value},
     )
     return ok({"passed": bool(data and data.get("data") == "ok")})
 
