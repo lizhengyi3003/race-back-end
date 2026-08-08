@@ -66,6 +66,7 @@ MAPPINGS: list[tuple] = [
     ("CFPS", "land_asset", "01_05", "proxy", "{land_asset}", 0.70, "加权平均", "土地资产(元,代理规模)", "2018plus"),
     ("CFPS", "fm401", "_cfps_assets", "direct", "{fm401}", 0.68, "直接", "全部经营总资产(万元)", "2018plus"),
     ("CFPS", "total_asset", "_cfps_total_asset", "direct", "{total_asset}", 0.68, "直接", "家庭净资产(元)", "2018plus"),
+    ("CFPS", "ft8", "_cfps_rejected", "label", "map({ft8},{1:1,5:0})", 0.70, "直接", "借款被拒经历(独立B验证信号,不入模)", "2018plus"),
 ]
 
 # 数据源整体可信度（用于多源 N:1 加权融合）

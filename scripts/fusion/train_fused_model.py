@@ -82,11 +82,16 @@ def synth_label(df: pd.DataFrame, rate: float = TARGET_RATE, seed: int = 42) -> 
     return (rng.random(len(df)) < p_default).astype(int)
 
 
-def real_risk_signal(df: pd.DataFrame) -> pd.Series:
-    """B 真实负面信号：民间借款/未还贷款/未还借款（1=有负面，0=无，NaN=无该数据源字段）。"""
+def real_risk_signal(df: pd.DataFrame, exclude: set[str] | None = None) -> pd.Series:
+    """B 真实负面信号：民间借款/未还贷款/未还借款（1=有负面，0=无，NaN=无该数据源字段）。
+
+    exclude: 排除与模型入模特征重叠的信号变量（避免同一变量自我验证导致 Spearman 虚高泄漏）。
+    """
     sig = pd.Series(0.0, index=df.index)
     any_signal = pd.Series(False, index=df.index)
-    for c in ("_cmes_credit", "_cmes_purchase_credit", "_cmes_had_loan", "_cfps_private_debt"):
+    for c in ("_cmes_credit", "_cmes_purchase_credit", "_cmes_had_loan", "_cfps_private_debt", "_cfps_rejected"):
+        if exclude and c in exclude:
+            continue
         if c in df and df[c].notna().mean() > 0.1:
             sig = sig + df[c].fillna(0)
             any_signal = any_signal | df[c].notna()
@@ -158,13 +163,18 @@ def train(version: str, subset: str, register: bool) -> None:
     if "cvScores" in m and m["cvScores"]:
         print(f"5折CV AUC: {np.mean(m['cvScores']):.4f} ± {np.std(m['cvScores']):.4f}")
 
-    # B 验证：真实负面信号 vs 预测分排序一致性
-    sig = real_risk_signal(df)
+    # B 验证：真实负面信号 vs 模型违约概率（排除与入模特征重叠的信号变量，防泄漏）
+    sig = real_risk_signal(df, exclude=set(scorecard.feature_names))
     valid = sig.notna()
     if valid.sum() > 50:
-        pred = df[feats].fillna(df[feats].median()).mean(axis=1)
-        rho, pval = sp_stats.spearmanr(pred[valid], sig[valid])
-        print(f"B 验证: 预测分 vs 真实负面信号 Spearman={rho:.3f} (p={pval:.2e}, n={int(valid.sum())})")
+        fnames = scorecard.feature_names
+        woe = pd.DataFrame(index=df.index)
+        for f in fnames:
+            woe[f] = df[f].apply(scorecard.binners[f].transform)
+        logit = scorecard.intercept + woe[fnames].values @ scorecard.coef
+        proba = 1.0 / (1.0 + np.exp(-logit))
+        rho, pval = sp_stats.spearmanr(proba[valid], sig[valid])
+        print(f"B 验证: 违约概率 vs 真实负面信号 Spearman={rho:.3f} (p={pval:.2e}, n={int(valid.sum())})")
     else:
         rho = None
         print("B 验证: 有效样本不足，跳过")
