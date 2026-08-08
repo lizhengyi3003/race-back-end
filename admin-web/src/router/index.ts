@@ -2,11 +2,15 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
-// 懒加载 chunk 失败（如部署后旧 chunk 404）时自动刷新加载最新版本，最多 2 次
+// 懒加载 chunk 失败（如部署后旧 chunk 404 / 网络瞬断 HTTP2 PING 失败）时自动刷新加载最新版本，最多 2 次
 const MAX_AUTO_RELOAD = 2
+const CHUNK_TIMEOUT = 20000 // 单 chunk 加载超时（防止网络挂起导致导航卡死）
 function lazyView(loader: () => Promise<unknown>): () => Promise<unknown> {
   return () =>
-    loader().catch((err: unknown) => {
+    Promise.race([
+      loader(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('chunk load timeout')), CHUNK_TIMEOUT)),
+    ]).catch((err: unknown) => {
       const count = Number(sessionStorage.getItem('__race_admin_chunk_reload__') || 0)
       if (count < MAX_AUTO_RELOAD) {
         sessionStorage.setItem('__race_admin_chunk_reload__', String(count + 1))

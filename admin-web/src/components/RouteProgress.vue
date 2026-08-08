@@ -12,6 +12,7 @@ const visible = ref(false)
 const width = ref(0)
 let timer: number | null = null
 let hideTimer: number | null = null
+let timeoutTimer: number | null = null
 
 function start() {
   if (hideTimer) {
@@ -24,12 +25,19 @@ function start() {
   timer = window.setInterval(() => {
     width.value = Math.min(92, width.value + Math.random() * 16)
   }, 300)
+  // 超时兜底：20s 导航仍未完成则强制收起（防止 chunk 网络挂起导致进度条/页面卡死）
+  if (timeoutTimer) window.clearTimeout(timeoutTimer)
+  timeoutTimer = window.setTimeout(() => finish(), 20000)
 }
 
 function finish() {
   if (timer) {
     window.clearInterval(timer)
     timer = null
+  }
+  if (timeoutTimer) {
+    window.clearTimeout(timeoutTimer)
+    timeoutTimer = null
   }
   width.value = 100
   hideTimer = window.setTimeout(() => {
@@ -53,6 +61,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   if (timer) window.clearInterval(timer)
   if (hideTimer) window.clearTimeout(hideTimer)
+  if (timeoutTimer) window.clearTimeout(timeoutTimer)
 })
 </script>
 
