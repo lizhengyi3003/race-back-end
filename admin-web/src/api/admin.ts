@@ -84,7 +84,12 @@ export function resetPassword(id: number, newPassword: string): Promise<void> {
 }
 
 export function listApiLogs(params: any): Promise<PageData<ApiLogItem>> {
-  return http.get('/admin/api-logs', { params })
+  // 过滤空值查询参数：axios 会把 undefined/空串序列化成 status= 等，导致后端 422
+  const clean: Record<string, unknown> = {}
+  for (const [k, v] of Object.entries(params || {})) {
+    if (v !== undefined && v !== null && v !== '') clean[k] = v
+  }
+  return http.get('/admin/api-logs', { params: clean })
 }
 
 export interface ApiLogItem {

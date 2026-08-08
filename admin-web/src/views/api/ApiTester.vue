@@ -116,7 +116,7 @@ onMounted(async () => {
     </div>
 
     <el-row :gutter="16">
-      <el-col :span="10">
+      <el-col :xs="24" :md="10">
         <div class="info-card">
           <h3 class="card-title">接口选择</h3>
           <el-input
@@ -187,7 +187,7 @@ onMounted(async () => {
         </div>
       </el-col>
 
-      <el-col :span="14">
+      <el-col :xs="24" :md="14">
         <div class="info-card">
           <h3 class="card-title">响应结果</h3>
           <template v-if="response.status">

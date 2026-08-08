@@ -49,7 +49,7 @@ onMounted(load)
 
     <div class="info-card">
       <h3 class="card-title">数据表</h3>
-      <el-table v-loading="loading" :data="db?.tables ?? []" stripe>
+      <el-table v-loading="loading" :data="db?.tables ?? []" stripe style="min-width: 1152px">
         <el-table-column prop="name" label="表名" min-width="220" />
         <el-table-column prop="rows" label="记录数" width="150" />
         <el-table-column label="容量 (MB)" width="150">

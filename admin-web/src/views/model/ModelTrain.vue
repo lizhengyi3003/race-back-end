@@ -229,13 +229,13 @@ onMounted(load)
     </div>
 
     <el-row :gutter="16">
-      <el-col :span="12">
+      <el-col :xs="24" :md="12">
         <div class="info-card">
           <h3 class="card-title">ROC 曲线（AUC={{ metrics?.auc?.toFixed(4) }})</h3>
           <div ref="rocChartRef" style="width: 100%; height: 300px" />
         </div>
       </el-col>
-      <el-col :span="12">
+      <el-col :xs="24" :md="12">
         <div class="info-card">
           <h3 class="card-title">KS 曲线（KS={{ metrics?.ks?.toFixed(4) }})</h3>
           <div ref="ksChartRef" style="width: 100%; height: 300px" />
@@ -244,7 +244,7 @@ onMounted(load)
     </el-row>
 
     <el-row :gutter="16" style="margin-top: 16px">
-      <el-col :span="12">
+      <el-col :xs="24" :md="12">
         <div class="info-card">
           <h3 class="card-title">混淆矩阵</h3>
           <div v-if="cmDisplay" class="cm-grid">
@@ -278,7 +278,7 @@ onMounted(load)
           </div>
         </div>
       </el-col>
-      <el-col :span="12">
+      <el-col :xs="24" :md="12">
         <div class="info-card">
           <h3 class="card-title">评分卡特征 IV 值（特征筛选）</h3>
           <div ref="ivChartRef" style="width: 100%; height: 280px" />

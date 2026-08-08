@@ -212,13 +212,13 @@ onUnmounted(() => {
     </div>
 
     <el-row :gutter="16">
-      <el-col :span="12">
+      <el-col :xs="24" :md="12">
         <div class="info-card">
           <h3 class="card-title">近 14 天评估趋势</h3>
           <div ref="trendChartRef" style="width: 100%; height: 320px" />
         </div>
       </el-col>
-      <el-col :span="12">
+      <el-col :xs="24" :md="12">
         <div class="info-card">
           <h3 class="card-title">信用评分分布</h3>
           <div ref="scoreChartRef" style="width: 100%; height: 320px" />
@@ -227,13 +227,13 @@ onUnmounted(() => {
     </el-row>
 
     <el-row :gutter="16" style="margin-top: 16px">
-      <el-col :span="12">
+      <el-col :xs="24" :md="12">
         <div class="info-card">
           <h3 class="card-title">行业分布</h3>
           <div ref="industryChartRef" style="width: 100%; height: 300px" />
         </div>
       </el-col>
-      <el-col :span="12">
+      <el-col :xs="24" :md="12">
         <div class="info-card">
           <h3 class="card-title">服务健康</h3>
           <div class="health-grid">

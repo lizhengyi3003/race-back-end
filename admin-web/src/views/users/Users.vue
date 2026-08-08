@@ -114,7 +114,7 @@ onMounted(load)
         <el-button type="success" @click="openAdd">新增用户</el-button>
       </div>
 
-      <el-table v-loading="loading" :data="users" stripe>
+      <el-table v-loading="loading" :data="users" stripe style="min-width: 1150px">
         <el-table-column prop="id" label="ID" width="70" />
         <el-table-column prop="username" label="用户名" min-width="130" />
         <el-table-column prop="realName" label="姓名" min-width="120" />

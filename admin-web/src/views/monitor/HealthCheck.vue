@@ -49,7 +49,8 @@ onMounted(check)
             },
           ]"
           :key="item.label"
-          :span="8"
+          :xs="24"
+          :md="8"
         >
           <div class="probe-card" :class="{ ok: item.ok, fail: !item.ok }">
             <el-icon :size="34" :color="item.ok ? '#67c23a' : '#f56c6c'">

@@ -29,7 +29,7 @@ onMounted(load)
     </div>
 
     <div class="info-card">
-      <el-table v-loading="loading" :data="versions" stripe>
+      <el-table v-loading="loading" :data="versions" stripe style="min-width: 1290px">
         <el-table-column prop="id" label="ID" width="70" />
         <el-table-column prop="version" label="版本号" min-width="170">
           <template #default="{ row }">

@@ -105,13 +105,13 @@ onUnmounted(() => {
     </div>
 
     <el-row :gutter="16">
-      <el-col :span="12">
+      <el-col :xs="24" :md="12">
         <div class="info-card">
           <h3 class="card-title">CPU 使用率趋势</h3>
           <div ref="cpuChartRef" style="width: 100%; height: 300px" />
         </div>
       </el-col>
-      <el-col :span="12">
+      <el-col :xs="24" :md="12">
         <div class="info-card">
           <h3 class="card-title">内存使用率趋势</h3>
           <div ref="memChartRef" style="width: 100%; height: 300px" />
@@ -120,7 +120,7 @@ onUnmounted(() => {
     </el-row>
 
     <el-row :gutter="16" style="margin-top: 16px">
-      <el-col :span="12">
+      <el-col :xs="24" :md="12">
         <div class="info-card">
           <h3 class="card-title">资源详情</h3>
           <el-descriptions v-if="server" :column="2" border>
@@ -137,7 +137,7 @@ onUnmounted(() => {
           </el-descriptions>
         </div>
       </el-col>
-      <el-col :span="12">
+      <el-col :xs="24" :md="12">
         <div class="info-card">
           <h3 class="card-title">内存与磁盘</h3>
           <template v-if="server">

@@ -67,6 +67,16 @@
   align-items: center;
 }
 
+// 表格横向滚动容器（各页面 el-table 在窄屏可左右滑动，避免列被压缩）
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  .el-table {
+    width: 100%;
+  }
+}
+
 .metric-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -106,6 +116,17 @@
   }
   .info-card > .el-card__body {
     min-width: 0;
+  }
+
+  // 弹窗窄屏不溢出（固定宽度的 el-dialog / el-drawer）
+  .el-dialog {
+    width: calc(100vw - 24px) !important;
+    max-width: calc(100vw - 24px) !important;
+    margin-top: 5vh !important;
+  }
+  .el-dialog__body {
+    max-height: 70vh;
+    overflow-y: auto;
   }
 }
 

@@ -17,6 +17,8 @@ async function load() {
     const res = await listApiLogs(query)
     logs.value = res.items
     total.value = res.total
+  } catch (e: any) {
+    ElMessage.error(e?.response?.data?.message || '接口日志加载失败，请稍后重试')
   } finally {
     loading.value = false
   }
@@ -70,8 +72,9 @@ onMounted(load)
         <el-button type="warning" plain @click="cleanup(30)">清理30天前</el-button>
       </div>
 
-      <el-table v-loading="loading" :data="logs" stripe size="default">
-        <el-table-column prop="id" label="ID" width="70" />
+      <div class="table-scroll">
+        <el-table v-loading="loading" :data="logs" stripe size="default" style="min-width: 1080px">
+          <el-table-column prop="id" label="ID" width="70" />
         <el-table-column label="方法" width="90">
           <template #default="{ row }">
             <el-tag size="small">{{ row.method }}</el-tag>
@@ -102,7 +105,8 @@ onMounted(load)
             <el-button link type="primary" size="small" @click="showDetail(row)">详情</el-button>
           </template>
         </el-table-column>
-      </el-table>
+        </el-table>
+      </div>
 
       <el-pagination
         v-model:current-page="query.page"

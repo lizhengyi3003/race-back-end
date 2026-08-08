@@ -64,7 +64,7 @@ onMounted(async () => {
 
     <div v-for="[tag, items] in grouped" :key="tag" class="info-card" style="margin-bottom: 16px">
       <h3 class="card-title">{{ tag }}（{{ items.length }}）</h3>
-      <el-table v-loading="loading" :data="items" size="small">
+      <el-table v-loading="loading" :data="items" size="small" style="min-width: 1240px">
         <el-table-column label="方法" width="90">
           <template #default="{ row }">
             <el-tag :color="methodColor[row.method]" style="border: none; color: #fff" size="small">{{

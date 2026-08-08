@@ -196,25 +196,25 @@ async function toggleVeto(row: IndicatorItem) {
 
     <!-- 统计卡片 -->
     <el-row v-if="stats" :gutter="16" class="stat-row">
-      <el-col :span="4">
+      <el-col :xs="12" :sm="8" :md="4">
         <div class="stat-card">
           <div class="stat-num">{{ stats.total }}</div>
           <div class="stat-label">指标总数</div>
         </div>
       </el-col>
-      <el-col v-for="(n, k) in stats.by_level" :key="k" :span="4">
+      <el-col v-for="(n, k) in stats.by_level" :key="k" :xs="12" :sm="8" :md="4">
         <div class="stat-card">
           <div class="stat-num">{{ n }}</div>
           <div class="stat-label">{{ k }}</div>
         </div>
       </el-col>
-      <el-col :span="4">
+      <el-col :xs="12" :sm="8" :md="4">
         <div class="stat-card warn">
           <div class="stat-num">{{ stats.feature }}</div>
           <div class="stat-label">特色指标</div>
         </div>
       </el-col>
-      <el-col :span="4">
+      <el-col :xs="12" :sm="8" :md="4">
         <div class="stat-card danger">
           <div class="stat-num">{{ stats.veto }}</div>
           <div class="stat-label">一票否决</div>
@@ -255,7 +255,8 @@ async function toggleVeto(row: IndicatorItem) {
         <el-button @click="load">刷新</el-button>
       </div>
 
-      <el-table v-loading="loading" :data="items" stripe size="small">
+      <div class="table-scroll">
+        <el-table v-loading="loading" :data="items" stripe size="small" style="min-width: 1160px">
         <el-table-column prop="code" label="编码" width="110" />
         <el-table-column prop="name" label="指标名称" min-width="190" show-overflow-tooltip />
         <el-table-column label="层级" width="80">
@@ -298,6 +299,7 @@ async function toggleVeto(row: IndicatorItem) {
           </template>
         </el-table-column>
       </el-table>
+      </div>
 
       <el-pagination
         v-model:current-page="query.page"
