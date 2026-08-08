@@ -1,5 +1,6 @@
 """API 请求日志中间件：记录 /api/* 请求到 ApiLog 表（管理平台 API 管理数据源）"""
 
+import gzip
 import re
 import time
 
@@ -15,6 +16,16 @@ _RESP_LIMIT = 1000
 
 # 敏感路径：请求体不落库（登录密码等）
 _SENSITIVE_PATHS = {"/api/v1/auth/login", "/api/v1/auth/register"}
+
+
+def _decode_resp_body(body: bytes) -> str:
+    """响应体转文本：检测 gzip 压缩（GZipMiddleware 对大响应压缩）并解压，避免日志记录乱码。"""
+    if body[:2] == b"\x1f\x8b":  # gzip magic number
+        try:
+            body = gzip.decompress(body)
+        except Exception:  # noqa: BLE001
+            pass
+    return body.decode("utf-8", errors="replace")
 
 
 def _mask_sensitive(text: str) -> str:
@@ -48,11 +59,11 @@ class RequestLogMiddleware(BaseHTTPMiddleware):
                 else:
                     req_body = _mask_sensitive(raw.decode("utf-8", errors="replace")[:_BODY_LIMIT])
 
-            # 响应预览（JSONResponse 可读取 body；脱敏 token）
+            # 响应预览（JSONResponse 可读 body；脱敏 token；gzip 压缩响应先解压）
             resp_preview = None
             try:
                 body = b"".join([chunk async for chunk in response.body_iterator])
-                resp_preview = _mask_sensitive(body.decode("utf-8", errors="replace")[:_RESP_LIMIT])
+                resp_preview = _mask_sensitive(_decode_resp_body(body)[:_RESP_LIMIT])
                 response.body_iterator = _iterate_bytes([body])
             except Exception:
                 pass
