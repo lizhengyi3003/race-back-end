@@ -9,6 +9,7 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 
@@ -70,6 +71,8 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    # ---------- gzip 压缩（指标树等大响应 1.7MB → ~300KB，大幅降低 CDN/隧道传输耗时）----------
+    app.add_middleware(GZipMiddleware, minimum_size=1000)
     app.add_middleware(RequestLogMiddleware)
 
     # ---------- 安全响应头（防点击劫持 / MIME 嗅探 / XSS 基础防护）----------
