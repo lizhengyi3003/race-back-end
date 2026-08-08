@@ -26,6 +26,8 @@ class IndicatorField(BaseModel):
     cycle: str = ""
     scoring_rule: str = ""
     required: bool = True  # 文本备注类默认非必填
+    min_value: float | None = None  # 数值型：取值下限（前端校验用）
+    max_value: float | None = None  # 数值型：取值上限（前端校验用）
 
 
 class CategoryNode(BaseModel):

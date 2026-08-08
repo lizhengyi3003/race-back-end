@@ -1,5 +1,6 @@
 """指标配置业务逻辑：类别树、渐进式表单字段、枚举选项解析、管理平台维护。"""
 
+import re
 from collections import Counter
 
 from sqlalchemy import or_
@@ -32,7 +33,28 @@ def _parse_options(value_range: str) -> list[str]:
     return [v] if v and len(v) <= 12 else []
 
 
+def _range_bounds(value_range: str) -> tuple[float | None, float | None]:
+    """从取值说明解析数值区间（如 '0-100' / '0–100' / '0~100' / '≥0'）。"""
+    v = value_range or ""
+    m = re.search(r"(\d+(?:\.\d+)?)\s*[-~至]\s*(\d+(?:\.\d+)?)", v)
+    if m:
+        return float(m.group(1)), float(m.group(2))
+    m = re.search(r"≥\s*(\d+(?:\.\d+)?)", v)
+    if m:
+        return float(m.group(1)), None
+    m = re.search(r"(\d+(?:\.\d+)?)\s*-", v)
+    if m:
+        return None, None
+    return None, None
+
+
 def _to_field(c: IndicatorConfig) -> IndicatorField:
+    sc = c.scoring_config or {}
+    min_v, max_v = _range_bounds(c.value_range)
+    if "min" in sc:
+        min_v = float(sc["min"])
+    if "max" in sc:
+        max_v = float(sc["max"])
     return IndicatorField(
         code=c.code,
         name=c.name,
@@ -52,6 +74,8 @@ def _to_field(c: IndicatorConfig) -> IndicatorField:
         cycle=c.cycle,
         scoring_rule=c.scoring_rule,
         required=c.indicator_type != "文本",
+        min_value=min_v,
+        max_value=max_v,
     )
 
 
@@ -64,7 +88,6 @@ def get_indicator_tree(db: Session) -> IndicatorTree:
         .all()
     )
     cats = db.query(IndicatorCategory).all()
-    cat_by_code = {c.code: c for c in cats}
     counts = _indicator_counts(db)
 
     def build_node(cat: IndicatorCategory) -> CategoryNode:
