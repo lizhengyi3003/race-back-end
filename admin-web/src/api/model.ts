@@ -70,9 +70,6 @@ export function getModelMonitor(): Promise<any> {
   return http.get('/model/monitor')
 }
 
-export function runSimulation(nSamples = 2000): Promise<any> {
-  return http.get('/model/simulate', { params: { nSamples } })
-}
 
 export function trainModel(nSamples?: number): Promise<any> {
   return http.post('/model/train', nSamples ? { nSamples } : {})

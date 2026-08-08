@@ -20,7 +20,6 @@ from __future__ import annotations
 
 import math
 import re
-from collections import OrderedDict
 from typing import Any
 
 from sqlalchemy.orm import Session
@@ -205,7 +204,9 @@ def expert_assess(
             "suggestedAmount": 0.0, "suggestedRate": 0.0,
             "contributions": [], "deductions": [],
             "advice": f"【一票否决】命中『{veto_hit}』，不予授信。",
-            "overrides": [f"veto:{veto_hit}"], "veto": veto_hit, "completeness": _completeness(db, business_type, indicators, configs, selected_categories),
+            "overrides": [f"veto:{veto_hit}"],
+            "veto": veto_hit,
+            "completeness": _completeness(db, business_type, indicators, configs, selected_categories),
         }
 
     # 逐指标打分（跳过文本/缺失）
@@ -223,7 +224,8 @@ def expert_assess(
             "score": 300, "probability": 0.8, "level": "高风险",
             "suggestedAmount": 0.0, "suggestedRate": 0.0,
             "contributions": [], "deductions": [], "advice": "缺少可计分指标，暂按高风险处理",
-            "overrides": [], "veto": None, "completeness": _completeness(db, business_type, indicators, configs, selected_categories),
+            "overrides": [], "veto": None,
+            "completeness": _completeness(db, business_type, indicators, configs, selected_categories),
         }
 
     # 权重计算

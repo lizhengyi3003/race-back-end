@@ -10,6 +10,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
 
+
 class IndicatorCategory(Base):
     """行业类别树：大类(2位) → 中类(3位) → 小类(4位)，编码与《农业及相关产业统计分类（2020）》一致。"""
 
@@ -44,7 +45,7 @@ class IndicatorConfig(Base):
     is_veto: Mapped[bool] = mapped_column(Boolean, default=False)  # 是否一票否决
     cycle: Mapped[str] = mapped_column(String(8), default="")  # 采集周期：年报/季报/月报/实时
     scoring_rule: Mapped[str] = mapped_column(String(255), default="")  # 评分规则
-    scoring_config: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # 评分参数（数值上限/档位映射等，可覆盖默认）
+    scoring_config: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # 评分参数（可覆盖默认）
     display_order: Mapped[int] = mapped_column(Integer, default=0)
 
 
@@ -85,7 +86,7 @@ class BusinessTypeConfig(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     business_type_code: Mapped[str] = mapped_column(String(16), unique=True, index=True)  # 01~10 / MIXED
     name: Mapped[str] = mapped_column(String(64), default="")
-    level_weights: Mapped[dict] = mapped_column(JSON, default=dict)  # {基本项:0.30, 大类:0.25, 中类:0.20, 小类:0.15, 特殊:0.10}
+    level_weights: Mapped[dict] = mapped_column(JSON, default=dict)  # 各层级基础权重
     feature_boost: Mapped[float] = mapped_column(Float, default=1.1)  # 特色指标加成系数
     region_boost: Mapped[dict] = mapped_column(JSON, default=dict)  # {适用区域: 加成}
     synergy_factors: Mapped[dict] = mapped_column(JSON, default=dict)  # { "01+02": {"factor":1.05, "name":"生态循环"} }

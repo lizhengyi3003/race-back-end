@@ -91,7 +91,12 @@ def data_layer_score(
         blended = round(0.9 * expert_score + 0.1 * data_score)
         mode = "confirm_low_risk"
     else:
-        return None, {"features": sorted(inputs), "dataScore": round(data_score, 1), "percentile": round(pct, 3), "skip": "no_strong_signal"}
+        return None, {
+            "features": sorted(inputs),
+            "dataScore": round(data_score, 1),
+            "percentile": round(pct, 3),
+            "skip": "no_strong_signal",
+        }
 
     info = {
         "features": sorted(inputs),

@@ -57,12 +57,6 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '模型版本', icon: 'Histogram' },
       },
       {
-        path: 'model/simulation',
-        name: 'ModelSimulation',
-        component: () => import('@/views/model/ModelSimulation.vue'),
-        meta: { title: '业务仿真验证', icon: 'MagicStick' },
-      },
-      {
         path: 'model/monitor',
         name: 'ModelMonitor',
         component: () => import('@/views/model/ModelMonitor.vue'),

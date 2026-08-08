@@ -56,13 +56,6 @@ class Settings(BaseSettings):
     # SMOTE 过采样（对违约样本合成扩增，缓解样本不平衡）
     SMOTE_ENABLED: bool = True
 
-    # ---------- 兜底规则阈值（触发后强制高风险，供人工复核）----------
-    OVERRIDE_CLAIM_COUNT: int = 2  # 理赔频次 ≥ 此值
-    OVERRIDE_INSURANCE_LOW: float = 2.0  # 投保年限 < 此值（年）
-    OVERRIDE_BLACK_SOIL_RATIO: float = 0.4  # 黑土地保护占比 < 此值
-    OVERRIDE_AREA_MIN: float = 100.0  # 土地面积 ≥ 此值（配合黑土地保护规则）
-    OVERRIDE_CATASTROPHE_CLAIMS: int = 5  # 重大灾害规则：理赔频次 ≥ 此值
-
     # ---------- 评分卡业务阈值（管理平台可在线调整）----------
     LOW_RISK_THRESHOLD: int = 700
     HIGH_RISK_THRESHOLD: int = 500

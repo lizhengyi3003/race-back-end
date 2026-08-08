@@ -54,26 +54,17 @@ from app.db.session import SessionLocal  # noqa: E402
 from app.main import app  # noqa: E402
 from app.ml.training import run_training  # noqa: E402
 
-# 单测样本（优质客户）
+# 单测样本（动态指标体系：基本项 + 大类 01 指标，供造数用）
 SAMPLE_INPUT = {
     "enterpriseName": "测试农场",
-    "businessType": "种植",
-    "productType": "玉米",
-    "landConfirmedArea": 800,
-    "landTransferYears": 8,
-    "landTransferStability": "稳定",
-    "blackSoilProtection": 720,
-    "grainSubsidy": 42000,
-    "machinerySubsidy": 26000,
-    "grainScaleSubsidy": 12000,
-    "specialtyCropSubsidy": 0,
-    "insuranceYears": 6,
-    "claimCount": 0,
-    "facilityInsurance": "仅基础险",
-    "yearsOperating": 12,
-    "purchaseOrder": "年度订单",
-    "annualRevenue": 160,
-    "creditRecord": "无逾期",
+    "businessType": "01",
+    "selectedCategories": [],
+    "mixedBusiness": {},
+    "indicators": {
+        "BASIC_003": "10",
+        "BASIC_008": "200",
+        "01_05": "500",
+    },
 }
 
 

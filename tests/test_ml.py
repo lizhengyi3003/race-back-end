@@ -83,16 +83,3 @@ def test_model_monitor(client, auth_headers):
     assert data["modelVersion"]
     assert "actualSamples" in data
     assert "warnings" in data
-
-
-def test_model_simulate(client, auth_headers):
-    r = client.get("/api/v1/model/simulate", headers=auth_headers, params={"nSamples": 400})
-    body = r.json()
-    assert body["code"] == 200
-    data = body["data"]
-    assert data["available"] is True
-    scenarios = {s["name"] for s in data["scenarios"]}
-    assert {"干旱减产", "粮价下跌", "补贴退坡", "突发灾情"} <= scenarios
-    for s in data["scenarios"]:
-        assert "baseline" in s and "after" in s
-        assert s["baseline"]["avgScore"] >= s["after"]["avgScore"]  # 冲击后平均分下降

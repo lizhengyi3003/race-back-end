@@ -84,10 +84,3 @@ def delete_record(db: Session, record_id: int, user_id: int | None = None) -> No
     _check_owner(r, user_id)
     db.delete(r)
     db.commit()
-
-
-def all_records(db: Session, limit: int | None = None) -> list[AssessmentRecord]:
-    query = db.query(AssessmentRecord).order_by(AssessmentRecord.id.desc())
-    if limit:
-        query = query.limit(limit)
-    return query.all()

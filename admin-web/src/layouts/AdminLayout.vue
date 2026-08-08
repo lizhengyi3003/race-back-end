@@ -35,7 +35,6 @@ const menus = [
     children: [
       { path: '/model/train', title: '模型训练与评估', icon: 'TrendCharts' },
       { path: '/model/versions', title: '模型版本', icon: 'Histogram' },
-      { path: '/model/simulation', title: '业务仿真验证', icon: 'MagicStick' },
       { path: '/model/monitor', title: '模型监控', icon: 'Monitor' },
     ],
   },

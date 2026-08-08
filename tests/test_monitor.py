@@ -1,7 +1,5 @@
 """系统监控与管理平台接口测试"""
 
-from tests.conftest import SAMPLE_INPUT
-
 
 def test_monitor_health(client, auth_headers):
     r = client.get("/api/v1/monitor/health", headers=auth_headers)
@@ -73,7 +71,9 @@ def test_api_spec(client, auth_headers):
 
 
 def test_api_logs(client, auth_headers):
-    client.post("/api/v1/risk/assess", json=SAMPLE_INPUT)
+    from tests.conftest import SAMPLE_INPUT
+
+    client.post("/api/v1/risk/assess-dynamic", json=SAMPLE_INPUT)
     r = client.get("/api/v1/admin/api-logs", headers=auth_headers, params={"page": 1, "size": 5})
     body = r.json()
     assert body["code"] == 200
