@@ -73,3 +73,49 @@
   gap: 16px;
   margin-bottom: 20px;
 }
+
+// ===== 移动端适配 =====
+@media (max-width: 768px) {
+  .page-container {
+    padding: 12px;
+  }
+  .info-card {
+    padding: 14px;
+  }
+  .page-header {
+    margin-bottom: 14px;
+
+    h1 {
+      font-size: 18px;
+    }
+  }
+  .metric-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  // 表格窄屏横向滚动：卡片容器允许横向滚动，表格设最小宽度避免列被压缩
+  .info-card,
+  .el-card {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .info-card .el-table,
+  .el-card .el-table {
+    min-width: 780px;
+  }
+  .info-card > .el-card__body {
+    min-width: 0;
+  }
+}
+
+// 移动端抽屉菜单容器（AdminLayout 无 header 的菜单抽屉）
+.el-drawer.mobile-drawer .el-drawer__body {
+  padding: 0;
+  background: #1d2b3a;
+}
+
+// 详情抽屉窄屏不溢出
+.el-drawer {
+  max-width: 100vw;
+}

@@ -87,39 +87,41 @@ onMounted(load)
         <div style="flex: 1" />
       </div>
 
-      <el-table v-loading="loading" :data="records" stripe>
-        <el-table-column prop="id" label="ID" width="70" />
-        <el-table-column prop="enterpriseName" label="企业名称" min-width="170" show-overflow-tooltip />
-        <el-table-column prop="businessType" label="经营类型" width="100" />
-        <el-table-column label="信用评分" width="110">
-          <template #default="{ row }">
-            <span
-              :style="{
-                color: row.score >= 700 ? '#67c23a' : row.score >= 500 ? '#e6a23c' : '#f56c6c',
-                fontWeight: 600,
-              }"
-              >{{ row.score }}</span
-            >
-          </template>
-        </el-table-column>
-        <el-table-column label="风险等级" width="100">
-          <template #default="{ row }">
-            <el-tag :type="levelTag(row.level)" size="small">{{ row.level }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="suggestedAmount" label="建议额度(万)" width="110" />
-        <el-table-column prop="suggestedRate" label="建议利率(%)" width="100" />
-        <el-table-column prop="assessorName" label="评估人" width="100" />
-        <el-table-column prop="createdAt" label="时间" width="170">
-          <template #default="{ row }">{{ row.createdAt?.replace('T', ' ').slice(0, 19) }}</template>
-        </el-table-column>
-        <el-table-column label="操作" width="130" fixed="right">
-          <template #default="{ row }">
-            <el-button link type="primary" size="small" @click="showDetail(row)">详情</el-button>
-            <el-button link type="danger" size="small" @click="remove(row)">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+      <div class="table-scroll">
+        <el-table v-loading="loading" :data="records" stripe style="min-width: 1160px">
+          <el-table-column prop="id" label="ID" width="70" />
+          <el-table-column prop="enterpriseName" label="企业名称" min-width="170" show-overflow-tooltip />
+          <el-table-column prop="businessType" label="经营类型" width="100" />
+          <el-table-column label="信用评分" width="110">
+            <template #default="{ row }">
+              <span
+                :style="{
+                  color: row.score >= 700 ? '#67c23a' : row.score >= 500 ? '#e6a23c' : '#f56c6c',
+                  fontWeight: 600,
+                }"
+                >{{ row.score }}</span
+              >
+            </template>
+          </el-table-column>
+          <el-table-column label="风险等级" width="120">
+            <template #default="{ row }">
+              <el-tag :type="levelTag(row.level)" size="small">{{ row.level }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="suggestedAmount" label="建议额度(万)" width="110" />
+          <el-table-column prop="suggestedRate" label="建议利率(%)" width="100" />
+          <el-table-column prop="assessorName" label="评估人" width="100" />
+          <el-table-column prop="createdAt" label="时间" width="170">
+            <template #default="{ row }">{{ row.createdAt?.replace('T', ' ').slice(0, 19) }}</template>
+          </el-table-column>
+          <el-table-column label="操作" width="130" fixed="right">
+            <template #default="{ row }">
+              <el-button link type="primary" size="small" @click="showDetail(row)">详情</el-button>
+              <el-button link type="danger" size="small" @click="remove(row)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
 
       <el-pagination
         v-model:current-page="query.page"
@@ -226,3 +228,23 @@ onMounted(load)
     </el-drawer>
   </div>
 </template>
+
+<style scoped lang="scss">
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+// 表格横向滚动：窄屏时避免列被压缩（风险等级/时间显示不全）
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  :deep(.el-table) {
+    width: 100%;
+  }
+}
+</style>

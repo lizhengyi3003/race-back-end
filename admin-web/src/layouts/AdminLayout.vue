@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
@@ -10,12 +10,32 @@ const auth = useAuthStore()
 
 const activeMenu = computed(() => route.path)
 const collapsed = ref(false)
+// 平板/手机（< 992px）使用抽屉菜单，避免侧边栏挤压内容区
+const isMobile = ref(window.innerWidth <= 992)
+const mobileMenuOpen = ref(false)
+
+function updateIsMobile() {
+  isMobile.value = window.innerWidth <= 992
+  if (!isMobile.value) {
+    mobileMenuOpen.value = false
+  }
+}
+
+// 抽屉菜单选中后自动收起（路由跳转由 el-menu router 模式处理）
+function handleMenuSelect() {
+  if (isMobile.value) {
+    mobileMenuOpen.value = false
+  }
+}
 
 async function handleLogout() {
   await ElMessageBox.confirm('确定退出登录吗？', '提示', { type: 'warning' })
   auth.logout()
   router.push('/login')
 }
+
+onMounted(() => window.addEventListener('resize', updateIsMobile))
+onBeforeUnmount(() => window.removeEventListener('resize', updateIsMobile))
 
 const menus = [
   { path: '/dashboard', title: '系统概览', icon: 'Odometer' },
@@ -61,7 +81,7 @@ const menus = [
 
 <template>
   <el-container class="layout">
-    <el-aside :width="collapsed ? '64px' : '220px'" class="aside">
+    <el-aside v-if="!isMobile" :width="collapsed ? '64px' : '220px'" class="aside">
       <div class="logo">
         <el-icon :size="22" color="#4c956c"><Grid /></el-icon>
         <span v-show="!collapsed" class="logo-text">风控管理平台</span>
@@ -74,6 +94,7 @@ const menus = [
         background-color="#1d2b3a"
         text-color="#a5b3c4"
         active-text-color="#67c23a"
+        @select="handleMenuSelect"
       >
         <template v-for="m in menus" :key="m.path || m.title">
           <el-sub-menu v-if="m.children" :index="m.title">
@@ -94,17 +115,54 @@ const menus = [
       </el-menu>
     </el-aside>
 
+    <!-- 移动端抽屉菜单 -->
+    <el-drawer v-model="mobileMenuOpen" direction="ltr" size="220px" :with-header="false" class="mobile-drawer">
+      <div class="logo">
+        <el-icon :size="22" color="#4c956c"><Grid /></el-icon>
+        <span class="logo-text">风控管理平台</span>
+      </div>
+      <el-menu
+        :default-active="activeMenu"
+        router
+        class="menu"
+        background-color="#1d2b3a"
+        text-color="#a5b3c4"
+        active-text-color="#67c23a"
+        @select="handleMenuSelect"
+      >
+        <template v-for="m in menus" :key="m.path || m.title">
+          <el-sub-menu v-if="m.children" :index="m.title">
+            <template #title>
+              <el-icon><component :is="m.icon" /></el-icon>
+              <span>{{ m.title }}</span>
+            </template>
+            <el-menu-item v-for="c in m.children" :key="c.path" :index="c.path">
+              <el-icon><component :is="c.icon" /></el-icon>
+              <span>{{ c.title }}</span>
+            </el-menu-item>
+          </el-sub-menu>
+          <el-menu-item v-else :index="m.path!">
+            <el-icon><component :is="m.icon" /></el-icon>
+            <span>{{ m.title }}</span>
+          </el-menu-item>
+        </template>
+      </el-menu>
+    </el-drawer>
+
     <el-container>
       <el-header class="header">
         <div class="header-left">
-          <el-icon class="collapse-btn" @click="collapsed = !collapsed">
+          <el-icon v-if="isMobile" class="collapse-btn" :size="20" @click="mobileMenuOpen = true">
+            <Menu />
+          </el-icon>
+          <el-icon v-else class="collapse-btn" @click="collapsed = !collapsed">
             <Expand v-if="collapsed" />
             <Fold v-else />
           </el-icon>
           <span class="page-title">{{ route.meta.title }}</span>
         </div>
         <div class="header-right">
-          <el-tag size="small" type="success" effect="plain" class="env-tag">本地环境</el-tag>
+          <el-tag v-if="!isMobile" size="small" type="success" effect="plain" class="env-tag">本地环境</el-tag>
           <el-dropdown>
             <span class="user-info">
               <el-avatar :size="30" class="avatar">{{
@@ -216,5 +274,17 @@ const menus = [
   background: #f0f2f5;
   padding: 0;
   overflow: auto;
+}
+
+// 移动端：顶部栏精简（用户名隐藏），抽屉菜单背景由全局样式处理
+@media (max-width: 768px) {
+  .header {
+    .page-title {
+      font-size: 15px;
+    }
+    .username {
+      display: none;
+    }
+  }
 }
 </style>
