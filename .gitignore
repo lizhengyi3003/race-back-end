@@ -35,3 +35,6 @@ docker-compose.local.yml
 *.log
 .DS_Store
 Thumbs.db
+
+data/cleaned/*
+!data/cleaned/.gitkeep
