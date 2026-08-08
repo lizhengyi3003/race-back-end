@@ -55,6 +55,16 @@ def _to_field(c: IndicatorConfig) -> IndicatorField:
         min_v = float(sc["min"])
     if "max" in sc:
         max_v = float(sc["max"])
+    # 启发式兜底（数值指标前端校验用）：
+    # - 默认非负（min=0）：面积/金额/年限/人数/次数等均为非负
+    # - 占比/覆盖率/比例/率/% 类默认上限 100
+    if c.indicator_type == "数值":
+        if min_v is None:
+            min_v = 0.0
+        if max_v is None:
+            hint = f"{c.name or ''} {c.unit or ''} {c.value_range or ''}"
+            if any(kw in hint for kw in ("占比", "覆盖率", "比例", "比重", "率", "%")):
+                max_v = 100.0
     return IndicatorField(
         code=c.code,
         name=c.name,
