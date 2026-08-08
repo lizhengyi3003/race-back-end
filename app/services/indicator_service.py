@@ -90,7 +90,11 @@ def _to_field(c: IndicatorConfig) -> IndicatorField:
 
 
 def get_indicator_tree(db: Session) -> IndicatorTree:
-    """构建指标树：基本项字段 + 大类→中类→小类 类别树（含指标数）。"""
+    """构建指标树：基本项字段 + 大类→中类→小类 类别树（含指标数）。
+
+    性能：一次性加载全部指标配置并按 category_code 分组，避免每个类别节点
+    N+1 查询（数百节点曾导致接口 14s+，前端超时导致表单加载失败）。
+    """
     basic = (
         db.query(IndicatorConfig)
         .filter(IndicatorConfig.level == "基本项")
@@ -98,21 +102,18 @@ def get_indicator_tree(db: Session) -> IndicatorTree:
         .all()
     )
     cats = db.query(IndicatorCategory).all()
-    counts = _indicator_counts(db)
+    # 一次性加载全部指标，按类别编码分组（替代 N+1）
+    all_cfgs = db.query(IndicatorConfig).order_by(IndicatorConfig.display_order).all()
+    by_cat: dict[str, list[IndicatorConfig]] = {}
+    for c in all_cfgs:
+        by_cat.setdefault(c.category_code, []).append(c)
+    counts = Counter(c.category_code for c in all_cfgs)
 
     def build_node(cat: IndicatorCategory) -> CategoryNode:
         children = [build_node(child) for child in cats if child.parent_code == cat.code]
         children.sort(key=lambda n: n.code)
         # 该节点自身层级的指标字段（用于 el-tree 勾选后直接展示）
-        node_indicators = [
-            _to_field(c)
-            for c in (
-                db.query(IndicatorConfig)
-                .filter(IndicatorConfig.category_code == cat.code)
-                .order_by(IndicatorConfig.display_order)
-                .all()
-            )
-        ]
+        node_indicators = [_to_field(c) for c in by_cat.get(cat.code, [])]
         return CategoryNode(
             code=cat.code,
             name=cat.name,
@@ -129,13 +130,6 @@ def get_indicator_tree(db: Session) -> IndicatorTree:
         basic=[_to_field(b) for b in basic],
         categories=roots,
     )
-
-
-def _indicator_counts(db: Session) -> dict[str, int]:
-    from collections import Counter
-
-    rows = db.query(IndicatorConfig.category_code, IndicatorConfig.level).all()
-    return Counter(code for code, _ in rows)
 
 
 # ---------- 管理平台 ----------
