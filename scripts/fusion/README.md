@@ -87,7 +87,58 @@ python scripts/fusion/train_fused_model.py --version v1 --subset all [--register
 1. **AUC 偏乐观**：合成标签来自同批指标（自我验证），B 验证（0.105）才是与真实信号的参考强度
 2. **跨源缺失仍高**：CMES 专属特征（BASIC_003/004/005/0111_*、1041_02）缺失 >90% 被自动剔除；建议单一融合模型（评分卡缺失单独成箱天然处理）或按数据源分客群建模
 3. **B 验证信号有限**：当前仅 CFPS ft8（被拒经历）为独立信号；CHFS 信号字段（逾期/违约）待扩展，CMES 信号因全局缺失>90% 被过滤
-4. **映射字典待扩展**：当前 35 条核心映射；field_catalog 9,282 字段可人工扩展（mapping_candidates.csv 是候选）
+4. **映射字典待扩展**：当前 37 条核心映射；field_catalog 9,282 字段可人工扩展（mapping_candidates.csv 是候选）
 5. **清洗规则 DSL** 需更多算子（if/聚合窗口），可按需扩展 clean_engine
-6. 合成样本旧管道（seed.py/indicators.py）仍在生产供主评分卡兜底，清理需确认不影响 AUTO_TRAIN_ON_STARTUP
+6. 合成样本旧管道（seed.py/indicators.py）已标记废弃，仅作 AUTO_TRAIN_ON_STARTUP 无 active 模型时的兜底安全网
 7. **脚本提交会触发生产部署**（GitHub Actions paths 含 scripts/**），提交前确认不破坏生产评分卡
+
+## 实验与优化（2026-08-09）
+
+### 模型选型对比（compare_models.py）
+| 模型 | 5 折 CV AUC | KS | B 验证 Spearman（真实信号） |
+|---|---|---|---|
+| Logistic 评分卡 | 0.7974±0.0025 | 0.5367 | **0.106**（p=9e-58，显著） |
+| LightGBM | 0.8317±0.0050 | 0.6021 | **0.004**（p=0.53，不显著） |
+
+- **结论**：LightGBM 合成标签 AUC 更高，但 B 验证为零——**过拟合合成标签、对真实风险信号无排序能力**；可解释 Logistic 评分卡真实泛化显著。选择评分卡作数据层模型正确。
+
+### 分客群建模对比（compare_models.py --subset）
+| 客群 | 评分卡 CV AUC | LightGBM CV AUC |
+|---|---|---|
+| 企业（CMES 5,497） | **0.9168±0.0168** | 0.9036±0.0133 |
+| 家庭（CHFS+CFPS ~85k） | 0.9038±0.0043 | **0.9369±0.0030** |
+| 全量（93,366） | 0.7974±0.0025 | 0.8317±0.0050 |
+
+- 分客群评分卡 AUC 显著高于全量（企业特征 BASIC_004/005/1041_02 在分客群时可用）→ **分客群建模有价值**（合成标签下）
+
+### B 验证信号扩展（2016 波 ft8）
+- CFPS 2016 波新增 ft8（借款被拒）映射 → B 验证样本 **22,745 → 31,881**，Spearman 0.086（p=6e-54 仍显著）
+- CHFS 2015 无逾期/违约字段，B 信号仍以 CFPS 为主
+
+### 数据层混合参数敏感性（sensitivity_analysis.py，生产仅 3 特征场景）
+- 生产打分范围 275-711；当前 0.15/0.85 参数下：**下修触发 11.4%（均幅 -23 分）、上修触发 20.5%（均幅≈-0.9 分，可忽略）**
+- 0.25/0.75 过激（下修 37%）；下修权重 0.5 合理
+- **结论**：下修是数据层混合的主要价值；上修路径（0.9/0.1）实际近乎无效，后续可考虑调权重或移除
+
+### 专家引擎概率校准（app/ml/calibration.py）
+- 用真实回填数据（outcome）Platt 校准 score→逾期概率，替代固定 sigmoid((score-550)/80)
+- 回填 ≥50 条且逾期/正常 ≥5 条时自动启用（TTL 5 分钟缓存）；数据不足回退默认映射
+- 随回测数据积累自动生效
+
+### 数据层触发监控（GET /risk/records/data-layer-stats）
+- 统计线上评估中数据层混合触发率、dataScore 分布（基于 result_json.overrides）
+
+### 枚举打分候选 map 工具（gen_enum_map_candidates.py）
+- 生产枚举指标 1,502 个，其中 1,118 个（74%）无 scoring_config.map（走关键词启发）
+- 工具为其中 **1,117 个生成候选 map**（复用 build_enum_map 启发，含中性跳过 11 个）→ data/enum_map_candidates.csv，**需人工审核后应用**
+
+### 管道自动化（第 9 项，半自动）
+```bash
+# 数据更新后一键重跑（幂等）
+python scripts/fusion/clean_sources.py --sources CMES,CHFS,CFPS --version vN
+python scripts/fusion/fuse_sources.py --version vN
+python scripts/fusion/train_fused_model.py --version vN --subset all
+python scripts/fusion/export_model_meta.py --pkl data/models/scorecard_vXXX.pkl
+# 上传 pkl + 执行 register_*.sql 到生产（详见 /memories/repo/race-deploy-notes.md）
+```
+完整 CI（数据更新→自动训练→自动注册）建议后续接入 GitHub Actions 独立 workflow，避免与主部署耦合。

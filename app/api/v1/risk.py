@@ -103,6 +103,42 @@ def backtest_stats(
     )
 
 
+@router.get("/records/data-layer-stats", response_model=ApiResponse, summary="数据层混合触发监控")
+def data_layer_stats(
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    """统计线上评估中数据层混合的触发情况（基于 result_json.overrides 中的 data_layer 标记）。"""
+    rows = db.query(AssessmentRecord).all()
+    triggered = 0
+    scores: list[float] = []
+    for r in rows:
+        rj = r.result_json or {}
+        ov = rj.get("overrides") or []
+        hit = None
+        for o in ov:
+            if isinstance(o, str) and "data_layer:" in o:
+                hit = o
+                break
+        if hit:
+            triggered += 1
+            import re
+
+            m = re.search(r"data_layer:score=([\d.]+)", hit)
+            if m:
+                scores.append(float(m.group(1)))
+    return ok(
+        {
+            "total": len(rows),
+            "triggered": triggered,
+            "triggerRate": round(triggered / len(rows), 4) if rows else None,
+            "dataScoreAvg": round(sum(scores) / len(scores), 1) if scores else None,
+            "dataScoreMin": min(scores) if scores else None,
+            "dataScoreMax": max(scores) if scores else None,
+        }
+    )
+
+
 @router.get("/records/{record_id}", response_model=ApiResponse[AssessmentRecordOut], summary="记录详情")
 def record_detail(
     record_id: int,

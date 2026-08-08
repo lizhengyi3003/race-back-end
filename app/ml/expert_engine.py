@@ -298,7 +298,16 @@ def expert_assess(
 
     # 等级
     level = "低风险" if score >= 700 else ("中等风险" if score >= 500 else "高风险")
-    probability = round(1 / (1 + math.exp((score - 550) / 80)), 4)  # 校准用逻辑映射
+    # 违约概率：优先用真实回填数据校准（Platt），数据不足回退默认逻辑映射
+    probability = round(1 / (1 + math.exp((score - 550) / 80)), 4)  # 默认逻辑映射（回退）
+    try:
+        from app.ml.calibration import calibrated_probability
+
+        _p = calibrated_probability(db, float(score))
+        if _p is not None:
+            probability = round(_p, 4)
+    except Exception:  # noqa: BLE001
+        pass
 
     # 贡献与扣分
     contributions = [
