@@ -47,11 +47,3 @@ class IndicatorTree(BaseModel):
 
     basic: list[IndicatorField] = []
     categories: list[CategoryNode] = []
-
-
-class IndicatorConfigOut(BaseModel):
-    """渐进式表单配置：基本项 + 选中分支指标 + 当前选择路径。"""
-
-    basic: list[IndicatorField] = []
-    indicators: list[IndicatorField] = []
-    selected: dict = {}  # {"businessType": "01", "middleType": "011", "smallType": "0111"}

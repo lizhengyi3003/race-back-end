@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.core.exceptions import BizException
 from app.models.indicator import IndicatorCategory, IndicatorConfig
 from app.schemas.common import PageData
-from app.schemas.indicator import CategoryNode, IndicatorConfigOut, IndicatorField, IndicatorTree
+from app.schemas.indicator import CategoryNode, IndicatorField, IndicatorTree
 from app.schemas.indicator_admin import IndicatorAdminOut, IndicatorStats, IndicatorUpdate
 
 # 枚举取值说明中用于分隔选项的符号
@@ -136,55 +136,6 @@ def _indicator_counts(db: Session) -> dict[str, int]:
 
     rows = db.query(IndicatorConfig.category_code, IndicatorConfig.level).all()
     return Counter(code for code, _ in rows)
-
-
-def get_indicator_config(
-    db: Session,
-    business_type: str,
-    middle_type: str = "",
-    small_type: str = "",
-    specific_type: str = "",
-) -> IndicatorConfigOut:
-    """渐进式表单配置：基本项 + 按所选类别逐级追加指标。"""
-    basic = (
-        db.query(IndicatorConfig)
-        .filter(IndicatorConfig.level == "基本项")
-        .order_by(IndicatorConfig.display_order)
-        .all()
-    )
-    indicators: list[IndicatorConfig] = []
-
-    levels: list[tuple[str, str]] = [
-        ("大类", business_type),
-    ]
-    if middle_type:
-        levels.append(("中类", middle_type))
-    if small_type:
-        levels.append(("小类", small_type))
-    if specific_type:
-        levels.append(("具体营业类型", specific_type))
-
-    for level, cat_code in levels:
-        if not cat_code:
-            continue
-        rows = (
-            db.query(IndicatorConfig)
-            .filter(IndicatorConfig.level == level, IndicatorConfig.category_code == cat_code)
-            .order_by(IndicatorConfig.display_order)
-            .all()
-        )
-        indicators.extend(rows)
-
-    return IndicatorConfigOut(
-        basic=[_to_field(b) for b in basic],
-        indicators=[_to_field(i) for i in indicators],
-        selected={
-            "businessType": business_type,
-            "middleType": middle_type,
-            "smallType": small_type,
-            "specificType": specific_type,
-        },
-    )
 
 
 # ---------- 管理平台 ----------

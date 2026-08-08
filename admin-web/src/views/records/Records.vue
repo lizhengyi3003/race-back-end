@@ -2,7 +2,6 @@
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { listRecords, deleteRecord, getRecord, type AssessmentRecord } from '@/api/admin'
-import { exportRecords } from '@/api/data'
 
 const loading = ref(false)
 const records = ref<AssessmentRecord[]>([])
@@ -71,22 +70,27 @@ onMounted(load)
           <el-option label="中等风险" value="中等风险" />
           <el-option label="高风险" value="高风险" />
         </el-select>
-        <el-select v-model="query.businessType" placeholder="经营类型" clearable style="width: 140px">
-          <el-option label="种植" value="种植" />
-          <el-option label="养殖" value="养殖" />
-          <el-option label="加工" value="加工" />
-          <el-option label="混合" value="混合" />
+        <el-select v-model="query.businessType" placeholder="经营类型" clearable style="width: 180px">
+          <el-option label="农林牧渔业" value="01" />
+          <el-option label="食用加工与制造" value="02" />
+          <el-option label="非食用加工与制造" value="03" />
+          <el-option label="生产资料制造与农田水利" value="04" />
+          <el-option label="流通服务" value="05" />
+          <el-option label="科研和技术服务" value="06" />
+          <el-option label="教育培训与人力资源服务" value="07" />
+          <el-option label="生态保护和环境治理" value="08" />
+          <el-option label="休闲观光与农业农村管理服务" value="09" />
+          <el-option label="其他支持服务" value="10" />
+          <el-option label="混合经营" value="MIXED" />
         </el-select>
         <el-button type="primary" @click="search">查询</el-button>
         <div style="flex: 1" />
-        <el-button type="success" plain @click="exportRecords">导出 CSV</el-button>
       </div>
 
       <el-table v-loading="loading" :data="records" stripe>
         <el-table-column prop="id" label="ID" width="70" />
         <el-table-column prop="enterpriseName" label="企业名称" min-width="170" show-overflow-tooltip />
-        <el-table-column prop="businessType" label="经营类型" width="90" />
-        <el-table-column prop="productType" label="主营产品" width="110" show-overflow-tooltip />
+        <el-table-column prop="businessType" label="经营类型" width="100" />
         <el-table-column label="信用评分" width="110">
           <template #default="{ row }">
             <span
@@ -134,7 +138,6 @@ onMounted(load)
         <el-descriptions :column="2" border>
           <el-descriptions-item label="企业名称">{{ detail.enterpriseName }}</el-descriptions-item>
           <el-descriptions-item label="经营类型">{{ detail.businessType || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="主营产品">{{ detail.productType || '-' }}</el-descriptions-item>
           <el-descriptions-item label="信用评分">
             <span
               :style="{
@@ -199,34 +202,7 @@ onMounted(load)
           </el-table>
         </template>
 
-        <!-- 传统 15 项指标（兼容旧记录） -->
-        <template v-if="detail.landConfirmedArea != null || detail.grainSubsidy != null || detail.yearsOperating != null">
-          <h4 style="margin: 18px 0 10px">风险输入指标</h4>
-          <el-descriptions :column="2" border size="small">
-            <el-descriptions-item label="确权耕地总面积">{{ detail.landConfirmedArea ?? '-' }} 亩</el-descriptions-item>
-            <el-descriptions-item label="土地流转合同年限">{{ detail.landTransferYears ?? '-' }} 年</el-descriptions-item>
-            <el-descriptions-item label="土地流转稳定性">{{ detail.landTransferStability || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="黑土地保护耕作面积"
-              >{{ detail.blackSoilProtection ?? '-' }} 亩</el-descriptions-item
-            >
-            <el-descriptions-item label="耕地地力保护补贴">{{ detail.grainSubsidy ?? '-' }} 元</el-descriptions-item>
-            <el-descriptions-item label="大型农机购置补贴">{{ detail.machinerySubsidy ?? '-' }} 元</el-descriptions-item>
-            <el-descriptions-item label="粮食规模种植补贴">{{ detail.grainScaleSubsidy ?? '-' }} 元</el-descriptions-item>
-            <el-descriptions-item label="特色经济作物补贴"
-              >{{ detail.specialtyCropSubsidy ?? '-' }} 元</el-descriptions-item
-            >
-            <el-descriptions-item label="农业保险连续投保年限"
-              >{{ detail.insuranceYears ?? '-' }} 年</el-descriptions-item
-            >
-            <el-descriptions-item label="历史保险理赔频次">{{ detail.claimCount ?? '-' }} 次</el-descriptions-item>
-            <el-descriptions-item label="设施农业附加保险">{{ detail.facilityInsurance || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="主体持续经营年限">{{ detail.yearsOperating ?? '-' }} 年</el-descriptions-item>
-            <el-descriptions-item label="长期收购订单">{{ detail.purchaseOrder || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="农产品年稳定营收">{{ detail.annualRevenue ?? '-' }} 万元</el-descriptions-item>
-            <el-descriptions-item label="历年信贷履约记录">{{ detail.creditRecord || '-' }}</el-descriptions-item>
-          </el-descriptions>
-        </template>
-
+        <!-- 主要扣分项 -->
         <template v-if="detail.result?.deductions?.length">
           <h4 style="margin: 18px 0 10px">主要扣分项</h4>
           <el-table :data="detail.result.deductions" size="small">

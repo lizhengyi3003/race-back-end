@@ -96,19 +96,30 @@ def cleanup_logs(
 
 
 # ---------- API 端点列表（聚合 OpenAPI）----------
+# 公开可选认证接口：无 token 也可调用（记录操作人），但 OpenAPI 的 security 无法区分
+_OPTIONAL_AUTH = {("POST", "/api/v1/risk/assess-dynamic")}
+
+
 @router.get("/api-spec", response_model=ApiResponse, summary="API 端点列表")
 def api_spec(request: Request, _: User = Depends(require_admin)):
     schema = request.app.openapi()
     paths = schema.get("paths", {})
     items = []
+    method_order = {"get": 0, "post": 1, "put": 2, "patch": 3, "delete": 4}
     for path, methods in paths.items():
         if not path.startswith("/api/"):
             continue
         for method, op in methods.items():
-            if method not in ("get", "post", "put", "delete", "patch"):
+            if method not in method_order:
                 continue
             security = op.get("security", [])
             auth_required = len(security) > 0
+            if not auth_required:
+                auth_mode = "none"  # 公开
+            elif (method.upper(), path) in _OPTIONAL_AUTH:
+                auth_mode = "optional"  # 公开可选（可匿名调用，登录后记录操作人）
+            else:
+                auth_mode = "required"  # 需登录
             params = []
             for p in op.get("parameters", []):
                 params.append({"name": p.get("name"), "in": p.get("in"), "required": p.get("required", False)})
@@ -123,11 +134,12 @@ def api_spec(request: Request, _: User = Depends(require_admin)):
                     "summary": op.get("summary", ""),
                     "tags": op.get("tags", []),
                     "authRequired": auth_required,
+                    "authMode": auth_mode,
                     "parameters": params,
                     "requestBodyExample": req_example,
                 }
             )
-    items.sort(key=lambda x: (x["path"], x["method"]))
+    items.sort(key=lambda x: (x["path"], method_order.get(x["method"].lower(), 9)))
     return ok(items)
 
 

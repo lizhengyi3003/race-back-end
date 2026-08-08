@@ -11,7 +11,7 @@ class IndicatorAdminOut(BaseModel):
     id: int
     code: str
     name: str
-    level: Literal["基本项", "大类", "中类", "小类"] = "基本项"
+    level: Literal["基本项", "大类", "中类", "小类", "具体营业类型"] = "基本项"
     category_code: str = ""
     category_name: str = ""
     indicator_type: Literal["数值", "枚举", "布尔", "文本"] = "数值"

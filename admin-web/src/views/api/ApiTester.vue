@@ -27,10 +27,31 @@ const methodColor: Record<string, string> = {
   DELETE: '#f56c6c',
 }
 
+// 路径参数：识别 {xxx} 占位符并允许填写
+const pathParams = ref<string[]>([])
+const pathParamValues = ref<Record<string, string>>({})
+
+function extractParams(p: string) {
+  const m = [...p.matchAll(/\{(\w+)\}/g)].map((x) => x[1])
+  pathParams.value = m
+  pathParamValues.value = {}
+  m.forEach((k) => (pathParamValues.value[k] = ''))
+}
+
+function resolvedPath() {
+  let p = path.value
+  pathParams.value.forEach((k) => {
+    const v = (pathParamValues.value[k] || '').trim()
+    p = p.replace(`{${k}}`, v || `{${k}}`)
+  })
+  return p
+}
+
 function onSelect(item: ApiSpecItem) {
   method.value = item.method
   path.value = item.path
   bodyText.value = item.requestBodyExample ? JSON.stringify(item.requestBodyExample, null, 2) : ''
+  extractParams(item.path)
 }
 
 async function send() {
@@ -40,7 +61,7 @@ async function send() {
   }
   sending.value = true
   const start = Date.now()
-  const url = `${import.meta.env.VITE_API_BASE || '/api/v1'}${path.value}${queryParams.value ? '?' + queryParams.value : ''}`
+  const url = `${import.meta.env.VITE_API_BASE || '/api/v1'}${resolvedPath()}${queryParams.value ? '?' + queryParams.value : ''}`
   const config: any = {
     method: method.value.toLowerCase(),
     url,
@@ -82,6 +103,7 @@ onMounted(async () => {
     method.value = String(route.query.method || 'GET')
     const item = spec.value.find((s) => s.path === path.value && s.method === method.value)
     if (item) onSelect(item)
+    else extractParams(path.value)
   }
 })
 </script>
@@ -97,13 +119,33 @@ onMounted(async () => {
       <el-col :span="10">
         <div class="info-card">
           <h3 class="card-title">接口选择</h3>
-          <el-input v-model="path" placeholder="接口路径" clearable style="margin-bottom: 10px">
+          <el-input
+            v-model="path"
+            placeholder="接口路径"
+            clearable
+            style="margin-bottom: 10px"
+            @change="extractParams(path)"
+          >
             <template #prepend>
               <el-select v-model="method" style="width: 100px">
                 <el-option v-for="m in methods" :key="m" :label="m" :value="m" />
               </el-select>
             </template>
           </el-input>
+          <template v-if="pathParams.length">
+            <div style="font-size: 12px; color: #909399; margin-bottom: 4px">路径参数（{xxx} 占位符）</div>
+            <el-input
+              v-for="p in pathParams"
+              :key="p"
+              v-model="pathParamValues[p]"
+              :placeholder="`{${p}} 填写实际值`"
+              clearable
+              size="small"
+              style="margin-bottom: 6px"
+            >
+              <template #prepend>{{ p }}</template>
+            </el-input>
+          </template>
           <el-input
             v-model="queryParams"
             placeholder="查询参数（可选，如 page=1&size=10）"

@@ -170,8 +170,16 @@ onMounted(load)
   <div class="page-container">
     <div class="page-header">
       <h1>模型训练与评估</h1>
-      <p>多元统计评分卡：IV 特征筛选 → WOE 编码 → Logistic 回归 → 0-1000 分刻度</p>
+      <p>数据层评分卡（多元统计参考模型）训练与评估；线上评估由动态专家引擎执行</p>
     </div>
+
+    <el-alert type="info" :closable="false" style="margin-bottom: 16px">
+      <div class="form-tip">
+        <b>模型体系说明：</b>线上评估主路径为「动态专家引擎」（四层动态指标体系 → 专家评分 → 混合经营加权，含一票否决红线）；
+        本页管理的数据层评分卡为多元统计参考模型（IV 特征筛选 → WOE 编码 → Logistic 回归），用于模型对比与答辩演示，
+        不在线上评估链路中直接打分。
+      </div>
+    </el-alert>
 
     <div class="info-card" style="margin-bottom: 16px">
       <div class="toolbar">
@@ -190,7 +198,9 @@ onMounted(load)
         />
         <el-button type="primary" :loading="training" @click="doTrain">开始训练</el-button>
       </div>
-      <div class="form-tip">训练使用合成样本（违约率约 3%-5%），训练完成后自动切换为新模型并对评估接口即时生效</div>
+      <div class="form-tip">
+        训练使用合成样本（违约率约 3%-5%）；训练结果为数据层评分卡参考模型（SMOTE 过采样 + 5 折交叉验证），供模型对比与答辩演示。
+      </div>
     </div>
 
     <div class="metric-grid">
@@ -269,8 +279,11 @@ onMounted(load)
       </el-col>
       <el-col :span="12">
         <div class="info-card">
-          <h3 class="card-title">特征 IV 值（特征筛选）</h3>
+          <h3 class="card-title">评分卡特征 IV 值（特征筛选）</h3>
           <div ref="ivChartRef" style="width: 100%; height: 280px" />
+          <div class="form-tip">
+            IV 值为数据层评分卡入模特征（替代数据指标）的筛选依据：IV ≥ 0.1 强预测力、0.02~0.1 中等、&lt; 0.02 剔除。
+          </div>
         </div>
       </el-col>
     </el-row>
@@ -286,11 +299,11 @@ onMounted(load)
       />
       <div v-if="metrics?.cvScores" class="form-tip" style="margin-top: 8px">各折：{{ cvStr }}</div>
       <div v-if="metrics?.featureNames" class="form-tip">
-        入模特征（{{ metrics?.featureNames?.length }}）：{{ metrics?.featureNames?.join('，') }}
+        评分卡入模特征（{{ metrics?.featureNames?.length }} 项）：{{ metrics?.featureNames?.join('，') }}
       </div>
     </div>
 
-    <!-- 三组对比实验 -->
+    <!-- 三组对比实验（对齐计划书 3.3.3）-->
     <div v-for="ex in experiments" :key="ex.title" class="info-card" style="margin-top: 16px">
       <h3 class="card-title">{{ ex.title }}</h3>
       <div class="form-tip" style="margin-bottom: 10px">{{ ex.desc }}</div>

@@ -98,12 +98,6 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/monitor/HealthCheck.vue'),
         meta: { title: '健康检查', icon: 'FirstAidKit' },
       },
-      {
-        path: 'data/import',
-        name: 'DataImport',
-        component: () => import('@/views/data/DataImport.vue'),
-        meta: { title: '数据导入导出', icon: 'UploadFilled' },
-      },
     ],
   },
   { path: '/:pathMatch(.*)*', redirect: '/' },

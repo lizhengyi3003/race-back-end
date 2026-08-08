@@ -30,6 +30,7 @@ const levelTag: Record<string, string> = {
   大类: 'success',
   中类: 'warning',
   小类: 'info',
+  具体营业类型: 'danger',
 }
 
 async function load() {
@@ -184,7 +185,7 @@ async function toggleVeto(row: IndicatorItem) {
   <div class="page-container">
     <div class="page-header">
       <h1>指标管理</h1>
-      <p>动态指标体系（775 项）配置：层级权重 / 特色 / 一票否决 / 评分规则</p>
+      <p>动态指标体系配置：层级权重 / 特色 / 一票否决 / 评分规则</p>
     </div>
 
     <!-- 统计卡片 -->
@@ -224,11 +225,12 @@ async function toggleVeto(row: IndicatorItem) {
           style="width: 220px"
           @keyup.enter="search"
         />
-        <el-select v-model="query.level" placeholder="层级" clearable style="width: 120px">
+        <el-select v-model="query.level" placeholder="层级" clearable style="width: 140px">
           <el-option label="基本项" value="基本项" />
           <el-option label="大类" value="大类" />
           <el-option label="中类" value="中类" />
           <el-option label="小类" value="小类" />
+          <el-option label="具体营业类型" value="具体营业类型" />
         </el-select>
         <el-select v-model="query.indicatorType" placeholder="指标类型" clearable style="width: 120px">
           <el-option v-for="t in typeOptions" :key="t" :label="t" :value="t" />
@@ -368,6 +370,9 @@ async function toggleVeto(row: IndicatorItem) {
 
 <style scoped>
 .stat-row {
+  margin-bottom: 16px;
+}
+.stat-row .el-col {
   margin-bottom: 16px;
 }
 .stat-card {

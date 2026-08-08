@@ -78,11 +78,11 @@ onMounted(async () => {
           </template>
         </el-table-column>
         <el-table-column prop="summary" label="说明" min-width="200" />
-        <el-table-column label="鉴权" width="80">
+        <el-table-column label="鉴权" width="90">
           <template #default="{ row }">
-            <el-tag :type="row.authRequired ? 'warning' : 'info'" size="small">{{
-              row.authRequired ? '需登录' : '公开'
-            }}</el-tag>
+            <el-tag v-if="row.authMode === 'required'" type="warning" size="small">需登录</el-tag>
+            <el-tag v-else-if="row.authMode === 'optional'" type="info" size="small">公开可选</el-tag>
+            <el-tag v-else type="success" size="small" effect="plain">公开</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="100" fixed="right">

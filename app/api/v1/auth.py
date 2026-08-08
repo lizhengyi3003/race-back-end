@@ -14,7 +14,7 @@ from app.services import auth_service
 router = APIRouter(prefix="/auth", tags=["认证"])
 
 
-@router.post("/login", response_model=ApiResponse[LoginResponse])
+@router.post("/login", response_model=ApiResponse[LoginResponse], summary="用户登录")
 def login(req: LoginRequest, db: Session = Depends(get_db)):
     user = auth_service.authenticate(db, req.username, req.password)
     auth_service.update_last_login(db, user)
@@ -22,6 +22,6 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
     return ok(LoginResponse(token=token, user=UserOut.model_validate(user)))
 
 
-@router.get("/me", response_model=ApiResponse[UserOut])
+@router.get("/me", response_model=ApiResponse[UserOut], summary="当前用户信息")
 def me(user: User = Depends(get_current_user)):
     return ok(UserOut.model_validate(user))

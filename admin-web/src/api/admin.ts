@@ -11,22 +11,6 @@ export interface AssessmentRecord {
   id: number
   enterpriseName: string
   businessType: string
-  productType: string
-  landConfirmedArea?: number
-  landTransferYears?: number
-  landTransferStability?: string
-  blackSoilProtection?: number
-  grainSubsidy?: number
-  machinerySubsidy?: number
-  grainScaleSubsidy?: number
-  specialtyCropSubsidy?: number
-  insuranceYears?: number
-  claimCount?: number
-  facilityInsurance?: string
-  yearsOperating?: number
-  purchaseOrder?: string
-  annualRevenue?: number
-  creditRecord?: string
   score: number
   probability: number
   level: string
@@ -34,6 +18,10 @@ export interface AssessmentRecord {
   suggestedRate: number
   assessorName?: string
   createdAt?: string
+  completeness?: number
+  veto?: string
+  mixedBusiness?: Record<string, number>
+  indicatorValues?: { code: string; name: string; level: string; unit: string; value: string | null; quality: string }[]
   input?: any
   result?: any
 }
@@ -126,6 +114,7 @@ export interface ApiSpecItem {
   summary: string
   tags: string[]
   authRequired: boolean
+  authMode: 'required' | 'optional' | 'none'
   parameters: { name: string; in: string; required: boolean }[]
   requestBodyExample?: any
 }

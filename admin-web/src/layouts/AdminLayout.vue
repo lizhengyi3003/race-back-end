@@ -56,7 +56,6 @@ const menus = [
       { path: '/monitor/health', title: '健康检查', icon: 'FirstAidKit' },
     ],
   },
-  { path: '/data/import', title: '数据导入导出', icon: 'UploadFilled' },
 ]
 </script>
 
