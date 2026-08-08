@@ -88,7 +88,7 @@ onMounted(load)
       </div>
 
       <div class="table-scroll">
-        <el-table v-loading="loading" :data="records" stripe style="min-width: 1160px">
+        <el-table v-loading="loading" :data="records" stripe style="min-width: 1180px">
           <el-table-column prop="id" label="ID" width="70" />
           <el-table-column prop="enterpriseName" label="企业名称" min-width="170" show-overflow-tooltip />
           <el-table-column prop="businessType" label="经营类型" width="100" />
@@ -103,7 +103,7 @@ onMounted(load)
               >
             </template>
           </el-table-column>
-          <el-table-column label="风险等级" width="120">
+          <el-table-column label="风险等级" width="140">
             <template #default="{ row }">
               <el-tag :type="levelTag(row.level)" size="small">{{ row.level }}</el-tag>
             </template>

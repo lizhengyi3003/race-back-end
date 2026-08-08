@@ -6,6 +6,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.models.assessment import AssessmentRecord
+from app.models.indicator import IndicatorCategory
 from app.schemas.dashboard import DashboardStats, IndustryItem, ScoreDistItem, TrendItem
 
 
@@ -37,6 +38,14 @@ def stats(db: Session) -> DashboardStats:
 
 
 def industry_distribution(db: Session) -> list[IndustryItem]:
+    # 大类编码 → 名称映射（来自指标类别树 level=大类；MIXED 为混合经营特殊处理）
+    name_map = {
+        c: n
+        for c, n in db.query(IndicatorCategory.code, IndicatorCategory.name)
+        .filter(IndicatorCategory.level == "大类")
+        .all()
+    }
+    name_map["MIXED"] = "混合经营"
     rows = (
         db.query(
             AssessmentRecord.business_type,
@@ -46,12 +55,12 @@ def industry_distribution(db: Session) -> list[IndustryItem]:
         .all()
     )
     items = []
-    for name, cnt in rows:
-        label = name or "未填写"
+    for code, cnt in rows:
+        label = name_map.get(code) or (code or "未填写")
         # 统计该行业各风险等级数，取占比最高者作为行业风险标签
         level_cnt = {
             lv: db.query(func.count(AssessmentRecord.id))
-            .filter(AssessmentRecord.business_type == name, AssessmentRecord.level == lv)
+            .filter(AssessmentRecord.business_type == code, AssessmentRecord.level == lv)
             .scalar()
             or 0
             for lv in ("低风险", "中等风险", "高风险")
