@@ -26,7 +26,5 @@ def indicator_config(
     db: Session = Depends(get_db),
 ) -> ApiResponse[IndicatorConfigOut]:
     """渐进式表单配置：基本项 + 按所选类别逐级追加指标字段。"""
-    cfg = indicator_service.get_indicator_config(
-        db, business_type, middle_type, small_type, specific_type
-    )
+    cfg = indicator_service.get_indicator_config(db, business_type, middle_type, small_type, specific_type)
     return ok(cfg)

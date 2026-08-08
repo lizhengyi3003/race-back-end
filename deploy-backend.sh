@@ -1,38 +1,40 @@
 #!/bin/bash
 # ============================================================
-# GitHub Actions 受限部署入口（通过 authorized_keys command= 调用）
-# 功能：对齐远端代码 → 构建镜像 → 按新配置重建/更新全部服务
-# 支持分支：通过 $SSH_ORIGINAL_COMMAND 传入，例如 "deploy-backend.sh dev"
-#          （未传则默认 main；仅允许 main / dev 两个受信分支）
-# 服务器端构建依赖国内镜像源（/etc/docker/daemon.json registry-mirrors）
-# 及已缓存的基础镜像（python:3.13-slim / node:22-alpine），否则构建很慢。
+# GitHub Actions 鍙楅檺閮ㄧ讲鍏ュ彛锛堥€氳繃 authorized_keys command= 璋冪敤锛?# 鍔熻兘锛氭寜鍒嗘敮瀵归綈浠ｇ爜 -> 鏋勫缓闀滃儚 -> 閲嶅缓鏈嶅姟
+#   main -> /root/race-back-end       (race-backend,      绔彛 8000)
+#   dev  -> /root/race-back-end-dev   (race-backend-dev,  绔彛 8081)
+# 浠呭厑璁?main / dev 涓や釜鍙椾俊鍒嗘敮
 # ============================================================
 set -e
-cd /root/race-back-end
 
-# 解析分支参数：
-# 1) 受限密钥路径（GitHub Actions）：原始命令放入 $SSH_ORIGINAL_COMMAND，
-#    形如 "deploy-backend.sh dev"；
-# 2) 手动测试路径：命令行参数 $1（ssh root@server /root/deploy-backend.sh dev）
-BRANCH="main"
+# 瑙ｆ瀽鍒嗘敮鍙傛暟锛圙itHub Actions 璧?$SSH_ORIGINAL_COMMAND锛涙墜鍔ㄨ蛋 $1锛?BRANCH="main"
 if [[ -n "$SSH_ORIGINAL_COMMAND" ]] && [[ "$SSH_ORIGINAL_COMMAND" =~ deploy-backend\.sh[[:space:]]+([A-Za-z0-9_./-]+) ]]; then
   BRANCH="${BASH_REMATCH[1]}"
 elif [[ -n "$1" ]] && [[ "$1" != *"deploy-backend.sh"* ]]; then
   BRANCH="$1"
 fi
 if [[ "$BRANCH" != "main" && "$BRANCH" != "dev" ]]; then
-  echo "[deploy] 拒绝非受信分支: $BRANCH"
+  echo "[deploy] 鎷掔粷闈炲彈淇″垎鏀? $BRANCH"
   exit 1
 fi
 
-echo "[deploy] $(date '+%F %T') 开始部署分支: $BRANCH"
+if [[ "$BRANCH" == "dev" ]]; then
+  DIR="/root/race-back-end-dev"
+  COMPOSE_ARGS="-f docker-compose.dev.yml"
+else
+  DIR="/root/race-back-end"
+  COMPOSE_ARGS=""
+fi
+
+echo "[deploy] $(date '+%F %T') 寮€濮嬮儴缃插垎鏀? $BRANCH -> $DIR"
+cd "$DIR"
 git fetch origin
 git reset --hard "origin/$BRANCH"
-echo "[deploy] 代码已对齐 origin/$BRANCH ($(git rev-parse --short HEAD))"
+echo "[deploy] 浠ｇ爜宸插榻?origin/$BRANCH ($(git rev-parse --short HEAD))"
 
-docker compose build backend
-docker compose up -d --remove-orphans
-echo "[deploy] 服务已按新配置更新"
-docker compose ps --format 'table {{.Name}}\t{{.Status}}'
+docker compose $COMPOSE_ARGS build backend
+docker compose $COMPOSE_ARGS up -d --remove-orphans
+echo "[deploy] 鏈嶅姟宸叉寜鏂伴厤缃洿鏂?
+docker compose $COMPOSE_ARGS ps --format 'table {{.Name}}\t{{.Status}}'
 
-echo "[deploy] 完成 $(date '+%F %T')"
+echo "[deploy] 瀹屾垚 $(date '+%F %T')"

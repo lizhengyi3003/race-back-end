@@ -5,9 +5,10 @@
 
 本仓库为项目**后端 + 完整可视化后台管理平台**，包含：
 
-- **信用评分卡引擎**：IV 特征筛选 → WOE 编码 → VIF 共线性诊断 → Logistic 回归 → 0-1000 分评分卡（参考 `toad`/`optbinning`/`scorecardpy` 方法自研实现，Python 开源生态）
+- **动态专家引擎**（生产主路径）：四层动态指标体系（基本项 + 大类→中类→小类→具体营业类型），逐指标 0-100 分加权合成 0-1000 分，叠加一票否决红线与混合经营协同因子
+- **数据层评分卡参考模型**：IV 特征筛选 → WOE 编码 → VIF 共线性诊断 → Logistic 回归 → 0-1000 分评分卡（答辩/演示用，线上评估走专家引擎）
 - **后端 API 服务**：FastAPI + SQLAlchemy 2.0 + MySQL 8.0
-- **后台管理平台**（`admin-web/`，Vue3 + Element Plus）：登录、系统概览、数据管理、模型训练与评估、API 管理（列表/日志/测试控制台）、系统监控（服务器/数据库/健康检查）、数据导入导出
+- **后台管理平台**（`admin-web/`，Vue3 + Element Plus）：登录、系统概览、数据管理、模型训练与评估、API 管理（列表/日志/测试控制台）、系统监控（服务器/数据库/健康检查）
 - **竞赛前端对接**：`fore-end/`（同级目录）已从模拟模型切换为调用本后端真实 API
 
 ---
@@ -22,15 +23,15 @@ back-end/
 │   ├── db/                 # SQLAlchemy 引擎与会话、初始化
 │   ├── models/             # User / AssessmentRecord / ModelVersion / SystemConfig / ApiLog
 │   ├── schemas/            # Pydantic 模型（对齐前端契约）
-│   ├── api/v1/             # auth / risk / dashboard / model / data / admin / monitor
+│   ├── api/v1/             # auth / risk / dashboard / model / admin / monitor / indicator
 │   ├── services/           # 业务逻辑层
-│   ├── ml/                 # ★ 评分卡核心：分箱WOE/IV、评分卡、评估、预测、种子数据
+│   ├── ml/                 # ★ 专家引擎 + 数据层评分卡（WOE/IV、Logistic、种子数据）
 │   └── middleware/         # API 请求日志中间件
 ├── admin-web/              # 后台管理平台前端（Vue3 + Element Plus + ECharts）
-├── scripts/                # init_db / seed_data / train_model / import_csv
-├── data/                   # 数据库文件、模型文件、合成样本
-│   └── 数据集/             # 竞赛研究数据集（CFPS/CHFS/CMES，**Git LFS 托管**，克隆需 `git lfs pull`）
-├── tests/                  # pytest 测试（26 项）
+├── scripts/                # init_db / import_indicators / seed_* / train_* / 迁移脚本
+├── data/                   # 模型文件、合成样本
+│   └── 数据集/             # 竞赛研究数据集（CFPS/CHFS/CMES，Git LFS 托管）
+├── tests/                  # pytest 测试（25 项）
 ├── Dockerfile              # 多阶段构建（前端 + 后端）
 └── docker-compose.yml      # backend + MySQL 一键启动
 ```
@@ -131,26 +132,31 @@ DATABASE_URL=mysql+pymysql://root:你的密码@localhost:3306/race?charset=utf8m
 
 ---
 
-## 信用评分卡技术方案
+## 动态专家引擎 + 数据层评分卡技术方案
 
 对齐商业计划书 3.3 节技术路线：
 
 ```
-15项替代数据指标（四大维度：土地经营/农业补贴/农业保险/产销经营，文档 3.3.2）
-  → WOE 分箱（分位数初分箱 + 低频箱合并 + 坏账率单调性校正）
-  → IV 值特征筛选（IV < 0.02 剔除）+ VIF 共线性诊断（>10 剔除）
-  → Logistic 回归（class_weight 平衡违约样本）
-  → 评分卡刻度：B = PDO/ln2，Score = 600 + Σ(-B·βᵢ·(WOEᵢ - meanᵢ))（评分中心 A=600）
-  → 业务阈值分级：≥700 低风险 / 500-700 中等 / <500 高风险（可在管理平台调整）
+线上评估（生产主路径）：
+  动态指标体系（基本项 + 大类→中类→小类→具体营业类型，700+ 指标按经营自动加载）
+    → 逐指标评分（数值分箱 / 枚举档位 / 布尔映射）
+    → 层级基础权重 + 星级归一 + 特色/区域加成
+    → 加权合成 0-1000 分，业务阈值分级：≥700 低风险 / 500-700 中等 / <500 高风险
+    → 一票否决红线（失信被执行人等）命中即拒贷并提示人工复核
+    → 混合经营按占比加权 + 协同因子（种养结合/产销一体）
+
+数据层评分卡参考模型（答辩/演示，管理端可训练）：
+  15项替代数据指标 → WOE 分箱 → IV 特征筛选 + VIF 共线性诊断
+    → Logistic 回归（class_weight + SMOTE 平衡）→ 0-1000 分评分卡
+    → 模型监控：PSI 群体稳定性 / 客群迁移预警
 ```
 
 模型验证：AUC / KS / 混淆矩阵 / 召回率 / 5 折交叉验证 / PSI，训练指标在管理平台可视化展示（ROC 曲线、KS 曲线、IV 条形图、混淆矩阵热力图）。
 
 小样本与极端场景应对（对齐商业计划书 3.3.1）：
 - **SMOTE 过采样**：对违约样本合成扩增（仅训练集，避免数据泄漏），缓解违约率 3%-5% 的样本不平衡
-- **兜底规则**：连续两年绝收、土地大面积荒芜、重大自然灾害等极端客户，无论模型评分如何，强制标记高风险并提示人工复核
+- **一票否决红线**：失信被执行人、重大税收违法、连三累六等红线指标，命中即拒贷并提示人工复核
 - **模型监控**：PSI 群体稳定性监控（训练分布 vs 实际客群），样本不足或显著偏移时触发再校准预警
-- **业务仿真验证**：模拟干旱减产、粮价下跌、补贴退坡、突发灾情等极端场景，量化客群风险迁移
 - **三组对比实验**：替代数据 vs 传统信用数据、原始变量/WOE/分组PCA 特征方案、涉农专属 vs 通用模型
 
 合成样本由 `app/ml/seed.py` 按农业业务规则生成（土地面积/补贴/保险/经营年限分布 + 违约标签，违约率约 3%-5%），用于竞赛演示阶段模型训练与验证。
@@ -162,13 +168,11 @@ DATABASE_URL=mysql+pymysql://root:你的密码@localhost:3306/race?charset=utf8m
 | 模块 | 功能 |
 |---|---|
 | 系统概览 | 统计卡片（用户/记录/模型/API调用）、服务健康、评估趋势、评分分布、行业分布 |
-| 数据管理 | 评估记录（搜索/筛选/详情/删除/导出）、用户管理（CRUD/重置密码/角色）、系统配置（阈值/利率） |
+| 数据管理 | 评估记录（搜索/筛选/详情/删除）、用户管理（CRUD/重置密码/角色）、系统配置（阈值/利率） |
 | 模型管理 | 训练评分卡（SMOTE 过采样 + 样本量可选）、指标看板（AUC/KS/混淆矩阵/ROC/KS曲线/IV图/5折CV）、**三组对比实验**（替代数据vs传统/WOE vs 分组PCA/涉农专属vs通用）、模型版本历史 |
 | 模型监控 | PSI 群体稳定性、实际客群评分分布、客群迁移预警、模型再校准触发提示 |
-| 业务仿真验证 | 极端场景模拟（干旱减产/粮价下跌/补贴退坡/突发灾情），观察评分与风险等级迁移 |
 | API 管理 | 接口列表（OpenAPI 聚合）、接口日志（耗时/状态/请求响应）、接口测试控制台 |
 | 系统监控 | 服务器状态（CPU/内存/磁盘实时曲线）、数据库状态（表/容量）、健康检查探针 |
-| 数据管理工具 | CSV 模板下载、批量导入自动评估、评估记录导出 |
 
 ---
 
@@ -177,11 +181,11 @@ DATABASE_URL=mysql+pymysql://root:你的密码@localhost:3306/race?charset=utf8m
 | 模块 | 接口 | 说明 | 鉴权 |
 |---|---|---|---|
 | 认证 | `POST /auth/login` / `GET /auth/me` | 登录 / 当前用户 | 公开 / 需登录 |
-| 风险评估 | `POST /risk/assess` | 提交评估（评分卡输出） | 公开 |
+| 风险评估 | `POST /risk/assess-dynamic` | 动态指标体系评估（专家引擎，支持混合经营） | 公开 |
 | 评估记录 | `GET /risk/records` `GET/DELETE /risk/records/{id}` | 记录管理 | 需登录 |
 | 数据看板 | `GET /dashboard/stats` `/industry-distribution` `/score-distribution` `/trend` | 统计 | 公开 |
-| 模型管理 | `GET /model/info` `POST /model/train` `GET /model/versions` `GET /model/metrics` `GET /model/thresholds` `GET /model/monitor` `GET /model/simulate` | 信息/训练/版本/监控/仿真与阈值 | 需登录 |
-| 数据管理 | `GET /data/template` `POST /data/import` `GET /data/export` | 导入导出 | 需登录 |
+| 指标体系 | `GET /indicators/tree` | 指标树（基本项 + 大类→中类→小类） | 需登录 |
+| 模型管理 | `GET /model/info` `POST /model/train` `GET /model/versions` `GET /model/metrics` `GET /model/thresholds` `GET /model/monitor` | 信息/训练/版本/监控/阈值 | 需登录 |
 | 管理平台 | `GET /admin/stats` `/users` `/api-logs` `/api-spec` `/configs` | 系统管理 | 需登录 |
 | 系统监控 | `GET /monitor/server` `/database` `/health` | 服务器/数据库/健康 | 需登录 |
 
@@ -196,7 +200,7 @@ cd back-end
 .venv\Scripts\python.exe -m pytest tests -v
 ```
 
-覆盖：认证、风险评估契约（对齐前端契约，15 项指标）、模型训练指标、监控与管理接口（26 项用例）。
+覆盖：认证、动态评估契约（专家引擎）、模型训练指标、监控与管理接口（25 项用例）。
 
 ---
 
@@ -231,8 +235,8 @@ docker compose up -d --build
 
 | 服务 | 地址 |
 |---|---|
-| 竞赛前端（fore-end） | https://intellicoretech.cn （Cloudflare Pages，Hash 路由） |
-| 后端 API | https://api.intellicoretech.cn （Cloudflare 回源到服务器 8000） |
+| 竞赛前端（fore-end） | https://intellicoretech.cn （Cloudflare Workers 静态资源，Hash 路由） |
+| 后端 API | https://api.intellicoretech.cn （Cloudflare Worker 网关 → 隧道 → 服务器 8000） |
 | 管理平台 | https://backend.intellicoretech.cn/admin |
 
 ### 3. CI/CD 自动部署（GitHub Actions）

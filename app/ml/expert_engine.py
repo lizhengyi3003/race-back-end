@@ -1,4 +1,4 @@
-﻿"""专家规则评分引擎：基于指标体系『评分规则 + 建议权重』的动态评分。
+"""专家规则评分引擎：基于指标体系『评分规则 + 建议权重』的动态评分。
 
 权重模型（与用户确认）：
 - 层级基础权重：基本项 > 大类 > 中类 > 小类（business_type_config 可配，默认 0.35/0.28/0.22/0.15）
@@ -187,22 +187,31 @@ def expert_assess(
     codes = list(indicators.keys())
     if not codes:
         return {
-            "score": 0, "probability": 1.0, "level": "高风险",
-            "suggestedAmount": 0.0, "suggestedRate": 0.0,
-            "contributions": [], "deductions": [], "advice": "未填写任何指标，无法评估",
-            "overrides": [], "veto": None, "completeness": 0.0,
+            "score": 0,
+            "probability": 1.0,
+            "level": "高风险",
+            "suggestedAmount": 0.0,
+            "suggestedRate": 0.0,
+            "contributions": [],
+            "deductions": [],
+            "advice": "未填写任何指标，无法评估",
+            "overrides": [],
+            "veto": None,
+            "completeness": 0.0,
         }
-    configs = {
-        c.code: c for c in db.query(IndicatorConfig).filter(IndicatorConfig.code.in_(codes)).all()
-    }
+    configs = {c.code: c for c in db.query(IndicatorConfig).filter(IndicatorConfig.code.in_(codes)).all()}
 
     # 一票否决
     veto_hit = _check_veto(indicators, configs)
     if veto_hit:
         return {
-            "score": 200, "probability": 0.9, "level": "高风险",
-            "suggestedAmount": 0.0, "suggestedRate": 0.0,
-            "contributions": [], "deductions": [],
+            "score": 200,
+            "probability": 0.9,
+            "level": "高风险",
+            "suggestedAmount": 0.0,
+            "suggestedRate": 0.0,
+            "contributions": [],
+            "deductions": [],
             "advice": f"【一票否决】命中『{veto_hit}』，不予授信。",
             "overrides": [f"veto:{veto_hit}"],
             "veto": veto_hit,
@@ -221,10 +230,16 @@ def expert_assess(
 
     if not scored:
         return {
-            "score": 300, "probability": 0.8, "level": "高风险",
-            "suggestedAmount": 0.0, "suggestedRate": 0.0,
-            "contributions": [], "deductions": [], "advice": "缺少可计分指标，暂按高风险处理",
-            "overrides": [], "veto": None,
+            "score": 300,
+            "probability": 0.8,
+            "level": "高风险",
+            "suggestedAmount": 0.0,
+            "suggestedRate": 0.0,
+            "contributions": [],
+            "deductions": [],
+            "advice": "缺少可计分指标，暂按高风险处理",
+            "overrides": [],
+            "veto": None,
             "completeness": _completeness(db, business_type, indicators, configs, selected_categories),
         }
 
@@ -259,9 +274,7 @@ def expert_assess(
         blended, dl_info = data_layer_score(db, indicators, score)
         if blended is not None:
             score = blended
-            overrides.append(
-                f"data_layer:score={dl_info['dataScore']}({dl_info['features']})"
-            )
+            overrides.append(f"data_layer:score={dl_info['dataScore']}({dl_info['features']})")
     except Exception:  # noqa: BLE001
         # 数据层异常不阻断主流程
         pass
@@ -305,38 +318,30 @@ def expert_assess(
 
 
 def _completeness(
-    db: Session, business_type: str, indicators: dict, configs: dict,
+    db: Session,
+    business_type: str,
+    indicators: dict,
+    configs: dict,
     selected_categories: list[str] | None = None,
 ) -> float:
     """数据完整度：相对期望指标集（基本项 + 大类 + 勾选叶子路径上的各级指标）计算已填比例。"""
     from sqlalchemy import or_
+
     conds: list = [IndicatorConfig.level == "基本项"]
     if business_type:
-        conds.append(
-            (IndicatorConfig.level == "大类") & (IndicatorConfig.category_code == business_type)
-        )
+        conds.append((IndicatorConfig.level == "大类") & (IndicatorConfig.category_code == business_type))
     # 勾选的具体营业类型叶子 → 其路径（大类/中类/小类/具体营业类型）上的指标纳入期望
     sel = selected_categories or []
     if sel:
         small_codes = [c.split("_")[0] for c in sel if "_" in c]
         mid_codes = sorted({s[:3] for s in small_codes})
         big_codes = sorted({s[:2] for s in small_codes})
-        conds.append(
-            IndicatorConfig.category_code.in_(list(sel) + small_codes + mid_codes + big_codes)
-        )
-    expected = (
-        db.query(IndicatorConfig.code)
-        .filter(or_(*conds))
-        .all()
-    )
+        conds.append(IndicatorConfig.category_code.in_(list(sel) + small_codes + mid_codes + big_codes))
+    expected = db.query(IndicatorConfig.code).filter(or_(*conds)).all()
     expected_codes = [c[0] for c in expected]
     if not expected_codes:
         return 0.0
-    filled = sum(
-        1
-        for code in expected_codes
-        if code in indicators and indicators[code] not in (None, "")
-    )
+    filled = sum(1 for code in expected_codes if code in indicators and indicators[code] not in (None, ""))
     return round(filled / len(expected_codes), 2)
 
 

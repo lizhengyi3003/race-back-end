@@ -26,9 +26,9 @@ def _parse_options(value_range: str) -> list[str]:
         if sep in v:
             parts = [p.strip() for p in v.split(sep) if p.strip()]
             # 过滤明显不是选项的描述性短语（含数字区间/大于小于/年月等）
-            filtered = [p for p in parts if not any(
-                c in p for c in ("≥", "≤", ">", "<", "0-", "%", "年", "月", "小时", "亩")
-            )]
+            filtered = [
+                p for p in parts if not any(c in p for c in ("≥", "≤", ">", "<", "0-", "%", "年", "月", "小时", "亩"))
+            ]
             return filtered or parts
     return [v] if v and len(v) <= 12 else []
 
@@ -101,11 +101,7 @@ def get_indicator_tree(db: Session) -> IndicatorTree:
     counts = _indicator_counts(db)
 
     def build_node(cat: IndicatorCategory) -> CategoryNode:
-        children = [
-            build_node(child)
-            for child in cats
-            if child.parent_code == cat.code
-        ]
+        children = [build_node(child) for child in cats if child.parent_code == cat.code]
         children.sort(key=lambda n: n.code)
         # 该节点自身层级的指标字段（用于 el-tree 勾选后直接展示）
         node_indicators = [
@@ -193,6 +189,7 @@ def get_indicator_config(
 
 # ---------- 管理平台 ----------
 
+
 def _to_admin(c: IndicatorConfig) -> IndicatorAdminOut:
     options = _parse_options(c.value_range) if c.indicator_type == "枚举" else []
     return IndicatorAdminOut.from_model(c, options)
@@ -213,9 +210,7 @@ def list_indicators(
     query = db.query(IndicatorConfig)
     if keyword:
         like = f"%{keyword}%"
-        query = query.filter(
-            or_(IndicatorConfig.name.like(like), IndicatorConfig.code.like(like))
-        )
+        query = query.filter(or_(IndicatorConfig.name.like(like), IndicatorConfig.code.like(like)))
     if level:
         query = query.filter(IndicatorConfig.level == level)
     if category_code:
@@ -230,10 +225,7 @@ def list_indicators(
 
     total = query.count()
     items = (
-        query.order_by(IndicatorConfig.display_order, IndicatorConfig.code)
-        .offset((page - 1) * size)
-        .limit(size)
-        .all()
+        query.order_by(IndicatorConfig.display_order, IndicatorConfig.code).offset((page - 1) * size).limit(size).all()
     )
     return PageData(
         total=total,
