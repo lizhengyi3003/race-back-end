@@ -80,7 +80,8 @@ def backtest_stats(
         oc = r.outcome or "pending"
         by_outcome[oc] = by_outcome.get(oc, 0) + 1
         by_level[r.level] = by_level.get(r.level, 0) + 1
-        cross.setdefault(r.level, {})[oc] = cross[r.level].get(oc, 0) + 1
+        cell = cross.setdefault(r.level, {})
+        cell[oc] = cell.get(oc, 0) + 1
 
     high = by_level.get("高风险", 0)
     overdue = by_outcome.get("overdue", 0)
