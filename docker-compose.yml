@@ -37,11 +37,21 @@ services:
       SEED_SAMPLES: ${SEED_SAMPLES:-3000}
       # 运行环境：production 时 FastAPI 关闭 /docs、/redoc（生产不暴露接口契约）
       ENV: ${ENV:-development}
+      # 行为验证码服务（compose 内网服务名）
+      CAPTCHA_SERVICE_URL: ${CAPTCHA_SERVICE_URL:-http://go-captcha-service:8080}
     ports:
       - "8000:8000"
     volumes:
       - model_data:/app/data/models
       - sample_data:/app/data/samples
+
+  # 行为验证码服务（go-captcha-service，官方 Go 服务）：仅回环绑定，不暴露公网
+  go-captcha-service:
+    image: wenlng/go-captcha-service:1.0.5
+    container_name: race-gocaptcha
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9090:8080"
 
 volumes:
   mysql_data:

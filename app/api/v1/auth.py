@@ -6,6 +6,8 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
+from app.api.v1.captcha import check_captcha_status
+from app.core.config import settings
 from app.core.exceptions import BizException
 from app.core.response import ApiResponse, ok
 from app.core.security import create_access_token
@@ -43,6 +45,9 @@ def _record_login_success(ip: str) -> None:
 
 @router.post("/login", response_model=ApiResponse[LoginResponse], summary="用户登录")
 def login(req: LoginRequest, request: Request, db: Session = Depends(get_db)):
+    # 行为验证码强制校验：登录前必须已完成点选验证（服务端状态，不可绕过）
+    if settings.CAPTCHA_ENABLED and not check_captcha_status(req.captchaKey):
+        raise BizException("请先完成安全验证", 400)
     ip = request.client.host if request.client else "unknown"
     _check_login_lock(ip)
     try:

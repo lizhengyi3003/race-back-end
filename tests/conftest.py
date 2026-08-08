@@ -43,6 +43,8 @@ os.environ["DATABASE_URL"] = (
 os.environ["AUTO_TRAIN_ON_STARTUP"] = "false"
 os.environ["MODEL_DIR"] = f"{_tmpdir}/models"
 os.environ["SAMPLE_DIR"] = f"{_tmpdir}/samples"
+# 测试环境跳过行为验证码（登录等接口不被验证码阻断）
+os.environ["CAPTCHA_ENABLED"] = "false"
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 

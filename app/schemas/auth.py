@@ -8,6 +8,8 @@ from pydantic import BaseModel, ConfigDict
 class LoginRequest(BaseModel):
     username: str
     password: str
+    # 行为验证码：登录前需先完成点选校验（后端强制，防止绕过）
+    captchaKey: str = ""
 
 
 class UserOut(BaseModel):

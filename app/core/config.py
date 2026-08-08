@@ -67,6 +67,12 @@ class Settings(BaseSettings):
     # ---------- API 日志 ----------
     API_LOG_RETENTION_DAYS: int = 30
 
+    # ---------- 行为验证码（go-captcha-service 独立服务）----------
+    # 本地开发默认 http://127.0.0.1:9090；生产 docker-compose 内置 go-captcha-service 服务
+    CAPTCHA_ENABLED: bool = True
+    CAPTCHA_SERVICE_URL: str = "http://127.0.0.1:9090"
+    CAPTCHA_ID: str = "click-default-ch"
+
     @property
     def cors_origin_list(self) -> list[str]:
         if self.CORS_ORIGINS.strip() == "*":

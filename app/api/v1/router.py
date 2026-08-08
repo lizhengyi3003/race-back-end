@@ -2,10 +2,11 @@
 
 from fastapi import APIRouter
 
-from app.api.v1 import admin, auth, dashboard, indicator, model, monitor, risk
+from app.api.v1 import admin, auth, captcha, dashboard, indicator, model, monitor, risk
 
 api_router = APIRouter()
 api_router.include_router(auth.router)
+api_router.include_router(captcha.router)
 api_router.include_router(risk.router)
 api_router.include_router(dashboard.router)
 api_router.include_router(model.router)
