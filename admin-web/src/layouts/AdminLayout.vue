@@ -117,8 +117,8 @@ const menus = [
 
     <!-- 移动端抽屉菜单 -->
     <el-drawer v-model="mobileMenuOpen" direction="ltr" size="220px" :with-header="false" class="mobile-drawer">
-      <div class="logo">
-        <el-icon :size="22" color="#4c956c"><Grid /></el-icon>
+      <div class="aside-header mobile-drawer-header">
+        <el-icon :size="22" color="#fff"><Grid /></el-icon>
         <span class="logo-text">风控管理平台</span>
       </div>
       <el-menu

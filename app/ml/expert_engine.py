@@ -159,14 +159,26 @@ def _check_veto(indicators: dict[str, Any], configs: dict[str, IndicatorConfig])
 
 
 def _level_weights(db: Session, business_type: str) -> dict[str, float]:
-    cfg = (
-        db.query(BusinessTypeConfig)
-        .filter(BusinessTypeConfig.business_type_code == business_type, BusinessTypeConfig.active.is_(True))
-        .first()
-    )
-    if cfg and cfg.level_weights:
-        return {**DEFAULT_LEVEL_WEIGHTS, **cfg.level_weights}
-    return dict(DEFAULT_LEVEL_WEIGHTS)
+    """层级基础权重：优先按具体营业类型（国标 4+4 位叶子）配置，其次回退其所属大类配置，最后默认。
+
+    支持 business_type_config 中按具体营业类型（8 位 code）独立配置权重；
+    未配置叶子的场景回退大类配置，保证向后兼容。
+    """
+    base = dict(DEFAULT_LEVEL_WEIGHTS)
+    codes: list[str] = []
+    if business_type:
+        codes.append(business_type)
+        if "_" in business_type:
+            codes.append(business_type.split("_")[0][:2])  # 叶子 → 所属大类
+    for code in codes:
+        cfg = (
+            db.query(BusinessTypeConfig)
+            .filter(BusinessTypeConfig.business_type_code == code, BusinessTypeConfig.active.is_(True))
+            .first()
+        )
+        if cfg and cfg.level_weights:
+            return {**base, **cfg.level_weights}
+    return base
 
 
 def _adjustment(indicator: IndicatorConfig, business_type: str, level_weights: dict) -> float:
@@ -334,7 +346,9 @@ def _completeness(
 
     conds: list = [IndicatorConfig.level == "基本项"]
     if business_type:
-        conds.append((IndicatorConfig.level == "大类") & (IndicatorConfig.category_code == business_type))
+        # 传具体营业类型（8 位叶子）时，大类期望集取其所属大类
+        big = business_type.split("_")[0][:2] if "_" in business_type else business_type
+        conds.append((IndicatorConfig.level == "大类") & (IndicatorConfig.category_code == big))
     # 勾选的具体营业类型叶子 → 其路径（大类/中类/小类/具体营业类型）上的指标纳入期望
     sel = selected_categories or []
     if sel:

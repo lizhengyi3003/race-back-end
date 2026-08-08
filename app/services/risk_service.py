@@ -28,13 +28,16 @@ def _combine_mixed(sub_results: dict[str, tuple[float, dict]], db: Session | Non
             .first()
         )
         factors = (cfg.synergy_factors or {}) if cfg else {}
-        codes = sorted(sub_results.keys())
+        # 协同因子按「大类组合」匹配（sub_results 的 key 为具体营业类型 8 位叶子，取前 2 位大类）
+        big_sets: set[str] = set()
+        big_codes = sorted({c[:2] for c in sub_results.keys()})
+        for i in range(len(big_codes)):
+            for j in range(i + 1, len(big_codes)):
+                big_sets.add(f"{big_codes[i]}+{big_codes[j]}")
         synergy_hits = []
-        for i in range(len(codes)):
-            for j in range(i + 1, len(codes)):
-                key = f"{codes[i]}+{codes[j]}"
-                if key in factors:
-                    synergy_hits.append((key, float(factors[key]["factor"]), factors[key].get("name", key)))
+        for key in sorted(big_sets):
+            if key in factors:
+                synergy_hits.append((key, float(factors[key]["factor"]), factors[key].get("name", key)))
         if synergy_hits:
             # 取最大协同加成（v1：不叠加多个因子，避免过度乐观）
             key, factor, name = max(synergy_hits, key=lambda x: x[1])

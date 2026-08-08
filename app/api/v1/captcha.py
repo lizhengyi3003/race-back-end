@@ -32,6 +32,14 @@ _TYPE_ID_MAP = dict(CAPTCHA_TYPES)
 
 # 内存记录 captchaKey → 类型（go-captcha-service 校验时需对应配置 id）
 _KEY_TYPES: dict[str, str] = {}
+_KEY_TYPES_MAX = 1000  # 上限，超出后清理最旧记录，避免长期运行内存增长
+
+
+def _remember_key(captcha_key: str, captcha_type: str) -> None:
+    """记录 captchaKey→类型；超上限时删除最旧记录（dict 保持插入顺序）。"""
+    _KEY_TYPES[captcha_key] = captcha_type
+    while len(_KEY_TYPES) > _KEY_TYPES_MAX:
+        _KEY_TYPES.pop(next(iter(_KEY_TYPES)))
 
 
 class CaptchaCheckRequest(BaseModel):
@@ -87,7 +95,7 @@ def get_captcha():
         raise BizException("验证码服务暂不可用，请稍后重试", 500)
     d = data["data"]
     captcha_key = d.get("captcha_key", "")
-    _KEY_TYPES[captcha_key] = captcha_type
+    _remember_key(captcha_key, captcha_type)
     return ok(
         {
             "type": captcha_type,

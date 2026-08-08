@@ -1,8 +1,11 @@
 <template>
+  <RouteProgress />
   <router-view />
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import RouteProgress from '@/components/RouteProgress.vue'
+</script>
 
 <style>
 html,
