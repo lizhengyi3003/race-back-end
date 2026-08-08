@@ -161,25 +161,38 @@ def test_assess_dynamic_veto(client):
 
 
 def test_mixed_synergy(client):
-    """混合经营 01+02 命中协同因子 → overrides 记录 synergy:01+02。"""
+    """混合经营按具体营业类型（叶子）加权：0111（属 01）与 0211（属 02）命中协同因子 01+02。"""
     data = _assess(
         client,
         {"BASIC_003": "10", "BASIC_008": "300", "01_05": "1500"},
         business_type="MIXED",
-        mixed={"01": 0.6, "02": 0.4},
+        mixed={"0111_0101": 0.6, "0211_0101": 0.4},
     )
     assert any(o.startswith("synergy:01+02") for o in data["overrides"])
 
 
 def test_mixed_no_synergy(client):
-    """混合经营 05+06（无协同配置）→ 无 synergy override。"""
+    """混合经营 0511/0611（属 05/06 无协同配置）→ 无 synergy override。"""
     data = _assess(
         client,
         {"BASIC_003": "10", "BASIC_008": "300", "01_05": "1500"},
         business_type="MIXED",
-        mixed={"05": 0.7, "06": 0.3},
+        mixed={"0511_0101": 0.7, "0611_0101": 0.3},
     )
     assert not any(o.startswith("synergy:") for o in data["overrides"])
+
+
+def test_mixed_same_big_leaf(client):
+    """同一大类内多具体营业类型（0111/0112）→ 按叶子加权，单大类不触发协同，评估正常。"""
+    data = _assess(
+        client,
+        {"BASIC_003": "10", "BASIC_008": "300", "01_05": "1500"},
+        business_type="MIXED",
+        mixed={"0111_0101": 0.6, "0111_0102": 0.4},
+    )
+    assert 0 <= data["score"] <= 1000
+    assert not any(o.startswith("synergy:") for o in data["overrides"])
+    assert data["level"] in ("低风险", "中等风险", "高风险")
 
 
 def test_indicator_admin_api(client, auth_headers):

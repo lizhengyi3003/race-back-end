@@ -19,7 +19,7 @@ class DynamicRiskInput(BaseModel):
     smallType: str = ""  # 小类编码（可选，兼容旧渐进式）
     specificType: str = ""  # 具体营业类型编码（可选，兼容旧渐进式）
     selectedCategories: list[str] = []  # el-tree 勾选的具体营业类型叶子编码列表
-    mixedBusiness: dict[str, float] = {}  # 混合经营比例 {大类编码: 0~1}
+    mixedBusiness: dict[str, float] = {}  # 混合经营比例 {具体营业类型(8位)或大类编码: 0~1}
     indicators: dict[str, str] = {}  # 动态指标值 {指标编码: 值}
 
     # ---------- 服务端安全校验（防止超长输入 / 非法编码 / 非法比例）----------
@@ -52,10 +52,11 @@ class DynamicRiskInput(BaseModel):
     @field_validator("mixedBusiness")
     @classmethod
     def _check_mixed(cls, v: dict[str, float]) -> dict[str, float]:
-        if len(v) > 10:
-            raise ValueError("混合经营组成不能超过 10 类")
+        if len(v) > 50:
+            raise ValueError("混合经营组成不能超过 50 类")
         for code, ratio in v.items():
-            if not _BUSINESS_TYPE_RE.match(code):
+            # key 支持具体营业类型（8 位叶子）或大类编码
+            if not _CODE_RE.match(code):
                 raise ValueError(f"混合经营类型编码不合法：{code}")
             if ratio < 0 or ratio > 1:
                 raise ValueError(f"混合经营比例 {code} 需在 0~1 之间")
