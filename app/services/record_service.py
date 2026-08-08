@@ -8,6 +8,50 @@ from app.models.indicator import IndicatorConfig, IndicatorValue
 from app.schemas.common import PageData
 from app.schemas.record import AssessmentRecordOut, IndicatorValueOut
 
+# 15 项传统评估（v1.0 表单）字段元数据：input_json 键 → 名称/层级/单位
+LEGACY_15_FIELDS: list[tuple[str, str, str, str]] = [
+    ("landConfirmedArea", "确权耕地总面积", "维度一：土地经营", "亩"),
+    ("landTransferYears", "土地流转合同年限", "维度一：土地经营", "年"),
+    ("landTransferStability", "土地流转稳定性", "维度一：土地经营", ""),
+    ("blackSoilProtection", "黑土地保护性耕作面积", "维度一：土地经营", "亩"),
+    ("grainSubsidy", "耕地地力保护补贴", "维度二：农业补贴", "元"),
+    ("machinerySubsidy", "大型农机购置补贴", "维度二：农业补贴", "元"),
+    ("grainScaleSubsidy", "粮食规模种植专项补贴", "维度二：农业补贴", "元"),
+    ("specialtyCropSubsidy", "特色经济作物补贴", "维度二：农业补贴", "元"),
+    ("insuranceYears", "农业保险连续投保年限", "维度三：农业保险", "年"),
+    ("claimCount", "历史保险理赔频次", "维度三：农业保险", "次"),
+    ("facilityInsurance", "设施农业附加保险", "维度三：农业保险", ""),
+    ("yearsOperating", "主体持续经营年限", "维度四：产销经营", "年"),
+    ("purchaseOrder", "长期农产品收购订单", "维度四：产销经营", ""),
+    ("annualRevenue", "农产品年稳定营收", "维度四：产销经营", "万元"),
+    ("creditRecord", "历年涉农信贷履约记录", "维度四：产销经营", ""),
+]
+
+
+def _legacy_indicator_values(input_json) -> list[IndicatorValueOut] | None:
+    """旧 15 项评估记录：从 input_json 快照解析原始表单明细（无动态指标明细时回退）。"""
+    if isinstance(input_json, str):
+        # 兼容历史字符串化 JSON 快照
+        try:
+            import json
+
+            input_json = json.loads(input_json)
+        except Exception:  # noqa: BLE001
+            return None
+    if not isinstance(input_json, dict):
+        return None
+    out = []
+    for key, name, level, unit in LEGACY_15_FIELDS:
+        v = input_json.get(key)
+        if v is None or v == "":
+            continue
+        out.append(
+            IndicatorValueOut(
+                code=key, name=name, level=level, unit=unit, value=str(v), quality="直接"
+            )
+        )
+    return out or None
+
 
 def _indicator_values(db: Session, record_id: int) -> list[IndicatorValueOut]:
     """加载一次评估的动态指标明细（code→名称/层级/单位）。"""
@@ -74,6 +118,9 @@ def get_record(db: Session, record_id: int, user_id: int | None = None) -> Asses
         raise BizException("记录不存在", 404)
     _check_owner(r, user_id)
     values = _indicator_values(db, record_id)
+    # 兼容旧 15 项评估：无动态指标明细时，从 input_json 快照解析原始表单
+    if not values:
+        values = _legacy_indicator_values(r.input_json)
     return AssessmentRecordOut.from_model(r, indicator_values=values or None)
 
 
