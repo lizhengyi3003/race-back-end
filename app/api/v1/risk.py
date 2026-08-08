@@ -12,7 +12,7 @@ from app.schemas.record import AssessmentRecordOut
 from app.schemas.risk import DynamicRiskInput, RiskResult
 from app.services import record_service, risk_service
 
-router = APIRouter(prefix="/risk", tags=["椋庨櫓璇勪及"])
+router = APIRouter(prefix="/risk", tags=["风险评估"])
 
 
 @router.post("/assess-dynamic", response_model=ApiResponse[RiskResult], summary="动态指标体系评估（专家引擎）")

@@ -31,9 +31,17 @@ http.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       const auth = useAuthStore()
-      auth.logout()
-      router.push('/login')
-      ElMessage.error('登录已过期，请重新登录')
+      if (router.currentRoute.value.path !== '/login') {
+        // 登录过期：提示后 3 秒自动返回登录页
+        ElMessage.warning('登录已过期，请重新登录')
+        setTimeout(() => {
+          auth.logout()
+          router.push('/login')
+        }, 3000)
+      } else {
+        // 登录页自身失败：直接提示，不延迟跳转
+        ElMessage.error('用户名或密码错误')
+      }
     } else {
       ElMessage.error(error.message || '网络错误')
     }
