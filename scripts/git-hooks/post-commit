@@ -1,0 +1,33 @@
+#!/bin/sh
+# ============================================================
+# git post-commit hook - 提交后自动本地 Docker 部署
+# 与云端 GitHub Actions (deploy.yml) 逻辑对齐：
+#   - 仅当本次提交涉及后端相关文件时才触发本地重建
+#   - 避免文档/无关改动也触发耗时的镜像构建
+#
+# 启用方式（已由项目配置 core.hooksPath 指向本目录）：
+#   git config core.hooksPath scripts/git-hooks
+# 停用方式：
+#   git config core.hooksPath ""   （恢复默认 .git/hooks）
+# ============================================================
+set -e
+
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
+
+# 本次提交涉及的文件列表
+FILES="$(git diff-tree --no-commit-id --name-only -r HEAD 2>/dev/null)"
+
+# 与 .github/workflows/deploy.yml 的 paths 保持一致
+if ! echo "$FILES" | grep -Eq '^(app/|scripts/|admin-web/|Dockerfile|docker-compose|requirements|\.github/workflows/deploy\.yml)'; then
+  echo "[autodeploy] 本次提交未涉及后端代码，跳过本地 Docker 部署"
+  exit 0
+fi
+
+echo "[autodeploy] 检测到后端代码变更，开始本地 Docker 重建 ($(date '+%F %T')) ..."
+if ! docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build backend; then
+  echo "[autodeploy] 构建失败！请手动排查: docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build" >&2
+  exit 1
+fi
+echo "[autodeploy] 本地部署完成 OK"
+docker compose -f docker-compose.yml -f docker-compose.local.yml ps --format 'table {{.Name}}\t{{.Status}}'

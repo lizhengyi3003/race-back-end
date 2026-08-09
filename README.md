@@ -258,6 +258,28 @@ graph LR
 - GitHub Secrets：`SERVER_HOST` / `SERVER_USER` / `DEPLOY_SSH_KEY`（Settings → Secrets and variables → Actions）
 - 服务器 `.env` 等未跟踪文件不受影响；模型/样本在持久卷中，重启不会触发 AUTO_TRAIN 覆盖
 
+### 4. 本地自动部署（git post-commit hook）
+
+与云端 CI 逻辑对齐：本地每次 `git commit` 后，若本次提交涉及后端相关文件，自动执行本地 `docker compose` 重建（backend 容器），无需手动部署即可本地测试。
+
+- 钩子脚本：`scripts/git-hooks/post-commit`（随仓库分发）
+- 启用（一次性配置，指向仓库内 hooks 目录）：
+
+  ```bash
+  cd back-end
+  git config core.hooksPath scripts/git-hooks
+  ```
+
+- 停用：
+
+  ```bash
+  git config core.hooksPath ""
+  ```
+
+- 触发范围与云端 `deploy.yml` 的 `paths` 一致（`app/**`、`scripts/**`、`admin-web/**`、`Dockerfile`、`docker-compose*`、`requirements*.txt`），文档等无关改动不会触发
+- 执行内容：`docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build backend`
+- 说明：hook 只在**本机**生效（`core.hooksPath` 为本地 git 配置），提交不会把"已启用状态"同步给其他开发者，克隆仓库后需各自执行上面的启用命令
+
 ---
 
 ## 代码风格与质量检查
