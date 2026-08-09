@@ -46,10 +46,14 @@ services:
       - sample_data:/app/data/samples
 
   # 行为验证码服务（go-captcha-service，官方 Go 服务）：仅回环绑定，不暴露公网
+  # 注意：镜像 1.0.5 自带健康检查是坏的（CMD-SHELL 但镜像无 /bin/sh，且 -health-check
+  # 参数必失败），服务本身功能正常 → 显式禁用健康检查，容器显示 running 而非 unhealthy
   go-captcha-service:
     image: wenlng/go-captcha-service:1.0.5
     container_name: race-gocaptcha
     restart: unless-stopped
+    healthcheck:
+      disable: true
     ports:
       - "127.0.0.1:9090:8080"
 
