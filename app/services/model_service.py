@@ -105,7 +105,23 @@ def get_metrics(db: Session) -> dict | None:
     mv = db.query(ModelVersion).filter(ModelVersion.status == "active").order_by(ModelVersion.id.desc()).first()
     if not mv or not mv.metrics_json:
         return None
-    return mv.metrics_json
+    metrics = dict(mv.metrics_json)
+    # 补全 ROC/KS 曲线数据：部分历史模型（如 v20260809011325 经 SQL 注册）的 metrics_json
+    # 未存曲线，但模型文件 scorecard.metrics 中有。曲线缺失时从 pkl 补全，前端曲线图才能渲染。
+    if (not metrics.get("rocCurve")) or (not metrics.get("ksCurve")):
+        try:
+            from app.ml import model_artifact
+
+            model = model_artifact.load_scorecard(mv.artifact_path) if mv.artifact_path else None
+            if model is not None and getattr(model, "metrics", None):
+                m = model.metrics
+                if m.get("rocCurve"):
+                    metrics["rocCurve"] = m["rocCurve"]
+                if m.get("ksCurve"):
+                    metrics["ksCurve"] = m["ksCurve"]
+        except Exception:
+            pass
+    return metrics
 
 
 def train(db: Session, n_samples: int | None, trained_by: str | None) -> dict:
