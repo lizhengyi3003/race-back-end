@@ -67,11 +67,15 @@ def _fused_feature_cols(df: pd.DataFrame, max_missing: float = 0.95) -> list[str
 
 
 def _source_iv_keep(df: pd.DataFrame, feats: list[str], target: str = "default", min_iv: float = 0.02) -> list[str]:
-    """源内 IV 准入：候选特征在其数据最全的数据源内部计算 IV，≥min_iv 保留。
+    """IV 准入：全量 IV 与各数据源内 IV 取最大值，任一 ≥min_iv 即保留。
 
-    数据源：CMES（小微企业）、CHFS（家庭金融）、CFPS（家庭追踪）。多数特征为"源专属"，
-    全量融合后缺失率/IV 会因其它源贡献 0 而虚高/失真。改为在特征数据最全的源内
-    用合成标签分箱算 IV，保留有真实区分力的特征（如 CMES 经营年限 IV≈0.51）。
+    数据源：CMES（小微企业）、CHFS（家庭金融）、CFPS（家庭追踪）。特征多带"源专属"属性：
+    - 全量 IV：反映特征在整体融合样本上的区分力（缺失会被其它源稀释）
+    - 源内 IV：反映特征在其数据充足的源内的真实区分力（如 CMES 经营年限 IV≈0.51）
+    取两者最大值判定，避免两类误杀：
+    - 只看全量 IV：CMES 专属特征因源样本占比小而 IV≈0 被误杀
+    - 只看单一"数据最全源"源内 IV：BASIC_019 贷款在 CHFS/CFPS 源内 IV≈0、
+      但全量 IV=0.19、CMES 源内 IV=2.76，会被误杀
     """
     from app.ml.binning import WOEBinner
 
@@ -79,28 +83,31 @@ def _source_iv_keep(df: pd.DataFrame, feats: list[str], target: str = "default",
     for f in feats:
         if f not in df.columns:
             continue
-        # 特征数据最全的数据源（源内缺失率最低）
-        best_src, best_miss = None, 1.0
+
+        def _iv(sub: pd.DataFrame) -> float | None:
+            if sub[f].notna().sum() < 500 or sub[target].sum() < 30:
+                return None
+            binner = WOEBinner(f, is_categorical=False, max_bins=5, min_bin_pct=0.05)
+            try:
+                binner.fit(sub[f], sub[target])
+                return float(binner.iv_)
+            except Exception:
+                return None
+
+        # 全量 IV
+        full_iv = _iv(df)
+        if full_iv is not None and full_iv >= min_iv:
+            keep.append(f)
+            continue
+        # 各源内 IV（任一个达到 min_iv 即保留）
         for src in ("CMES", "CHFS", "CFPS"):
             sub = df[df["source"] == src]
             if f not in sub.columns:
                 continue
-            miss = sub[f].isna().mean()
-            if miss < best_miss:
-                best_src, best_miss = src, miss
-        if best_src is None or best_miss > 0.95:
-            continue
-        sub = df[df["source"] == best_src]
-        # 源内非空样本足够（≥500）且违约样本足够（≥30）才有意义
-        if sub[f].notna().sum() < 500 or sub[target].sum() < 30:
-            continue
-        binner = WOEBinner(f, is_categorical=False, max_bins=5, min_bin_pct=0.05)
-        try:
-            binner.fit(sub[f], sub[target])
-        except Exception:
-            continue
-        if binner.iv_ >= min_iv:
-            keep.append(f)
+            src_iv = _iv(sub)
+            if src_iv is not None and src_iv >= min_iv:
+                keep.append(f)
+                break
     return keep
 
 
