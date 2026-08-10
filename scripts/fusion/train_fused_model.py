@@ -188,28 +188,37 @@ def train(version: str, subset: str, register: bool) -> None:
 
 
 def register_model(scorecard, subset: str, version: str, artifact: str) -> None:
-    """注册 data_layer 模型版本（inactive 附加模型）。"""
+    """注册数据层模型版本（active：替换当前激活模型，供管理平台展示/线上混合使用）。"""
     import json
 
     from app.core.config import settings
     from app.db.session import SessionLocal
-    from app.models.model import ModelVersion
+    from app.models.model_version import ModelVersion
 
     db = SessionLocal()
     try:
+        # 旧版本置为非激活
+        db.query(ModelVersion).filter(ModelVersion.status == "active").update({"status": "inactive"})
+        metrics = dict(scorecard.metrics)
+        metrics["model_type"] = "data_layer"
+        metrics["trainSource"] = "fused_real_survey"
         rec = ModelVersion(
             version=scorecard.version,
-            model_type="data_layer",
-            status="inactive",
-            trained_by="fused-pipeline",
+            status="active",
+            n_samples=scorecard.n_samples,
+            n_features=len(scorecard.feature_names),
+            auc=metrics.get("auc"),
+            ks=metrics.get("ks"),
+            recall=metrics.get("recall"),
+            precision=metrics.get("precision"),
+            f1=metrics.get("f1"),
+            metrics_json=metrics,
             artifact_path=str(artifact),
-            params_json=json.dumps({"subset": subset, "source_version": version}),
-            metrics_json=json.dumps({"features": scorecard.feature_names}),
-            is_active=False,
+            trained_by="fused-pipeline",
         )
         db.add(rec)
         db.commit()
-        print(f"已注册模型版本: {rec.version} (model_type=data_layer, inactive)")
+        print(f"已注册模型版本: {rec.version} (active, data_layer)")
     finally:
         db.close()
 

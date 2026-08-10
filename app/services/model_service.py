@@ -109,8 +109,16 @@ def get_metrics(db: Session) -> dict | None:
 
 
 def train(db: Session, n_samples: int | None, trained_by: str | None) -> dict:
-    result = run_training(n_samples=n_samples, db=db, trained_by=trained_by)
-    return result
+    """训练：优先真实调查数据融合管道（CHFS+CMES+CFPS），融合数据缺失时回退合成样本。
+
+    自 2026-08 起主训练已迁移至真实调查数据（scripts/fusion/），合成样本仅作兜底安全网。
+    """
+    from app.ml.training import run_fused_training, run_training
+
+    result = run_fused_training(db=db, trained_by=trained_by)
+    if result is not None:
+        return result
+    return run_training(n_samples=n_samples, db=db, trained_by=trained_by)
 
 
 # ---------------------------------------------------------------

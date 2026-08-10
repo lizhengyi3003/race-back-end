@@ -214,8 +214,9 @@ onBeforeUnmount(() => {
         <el-button type="primary" :loading="training" @click="doTrain">开始训练</el-button>
       </div>
       <div class="form-tip">
-        训练使用合成样本（违约率约 3%-5%）；训练结果为数据层评分卡参考模型（SMOTE 过采样 + 5
-        折交叉验证），供模型对比与答辩演示。
+        训练数据：真实微观调查数据融合（CHFS + CMES + CFPS，约 9.3 万样本）→ 可解释风险因子合成违约标签（违约率约 5%，
+        A+B 双标签：A 主标签入模、B 真实负面信号做排序一致性验证）；训练流程为 IV 特征筛选 → WOE 编码 → SMOTE
+        过采样 → Logistic 回归 + 5 折交叉验证。
       </div>
     </div>
 
@@ -225,7 +226,7 @@ onBeforeUnmount(() => {
         :value="metrics?.auc != null ? metrics.auc.toFixed(4) : '-'"
         icon="TrendCharts"
         color="#2c6e49"
-        desc="排序区分度：0.5=随机、1=完美。基于合成标签偏乐观。参考价值：中"
+        desc="排序区分度：0.5=随机、1=完美。违约标签为合成，指标偏乐观；真实区分力参考 B 验证（真实负面信号 Spearman 一致性）。参考价值：中"
       />
       <StatCard
         title="KS"
