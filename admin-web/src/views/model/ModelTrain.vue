@@ -65,6 +65,12 @@ function factorLabel(code: string): string {
   return FACTOR_LABELS[code] || code
 }
 
+// IV 图高度随特征数自适应：每个特征约 30px + 上下留白，避免特征多时标签重叠/截断
+const ivChartHeight = computed(() => {
+  const n = metrics.value?.ivTable?.length || 0
+  return Math.max(280, n * 30 + 40)
+})
+
 // 混淆矩阵（HTML 网格展示，避免 heatmap 渲染问题）
 const cmDisplay = computed(() => {
   const cm = metrics.value?.confusionMatrix
@@ -168,8 +174,12 @@ function renderCharts() {
         },
       },
       grid: { top: 20, right: 40, bottom: 20, left: 150 },
-      xAxis: { type: 'value', name: 'IV' },
-      yAxis: { type: 'category', data: sorted.map((d) => factorLabel(d.factor)) },
+      xAxis: { type: 'value', name: 'IV', nameLocation: 'middle', nameGap: 25 },
+      yAxis: {
+        type: 'category',
+        data: sorted.map((d) => factorLabel(d.factor)),
+        axisLabel: { fontSize: 12, interval: 0, width: 140, overflow: 'truncate' },
+      },
       series: [
         {
           type: 'bar',
@@ -360,7 +370,7 @@ onBeforeUnmount(() => {
       <el-col :xs="24" :md="12">
         <div class="info-card">
           <h3 class="card-title">评分卡特征 IV 值（特征筛选）</h3>
-          <div ref="ivChartRef" style="width: 100%; height: 280px" />
+          <div ref="ivChartRef" :style="{ width: '100%', height: ivChartHeight + 'px' }" />
           <div class="form-tip">
             IV 值为数据层评分卡入模特征（替代数据指标）的筛选依据：IV ≥ 0.1 强预测力、0.02~0.1 中等、&lt; 0.02 剔除。
           </div>
