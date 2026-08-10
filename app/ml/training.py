@@ -111,6 +111,40 @@ def _source_iv_keep(df: pd.DataFrame, feats: list[str], target: str = "default",
     return keep
 
 
+def _display_iv_table(
+    df: pd.DataFrame, feats: list[str], target: str = "default", base_iv: list[dict] | None = None
+) -> list[dict]:
+    """IV 展示值：取「全量 IV 与各源内 IV 的最大值」，避免源专属特征在全量图上显示为 0。
+
+    base_iv: Scorecard 计算的全量 ivTable（含 nBins），用于保留分箱数等信息。
+    返回按原顺序的 ivTable，iv 字段替换为展示值。
+    """
+    from app.ml.binning import WOEBinner
+
+    # 收集每个特征的全量/各源 IV 最大值
+    best_iv: dict[str, float] = {}
+    for f in feats:
+        if f not in df.columns:
+            continue
+
+        def _iv(sub: pd.DataFrame) -> float | None:
+            if sub[f].notna().sum() < 500 or sub[target].sum() < 30:
+                return None
+            binner = WOEBinner(f, is_categorical=False, max_bins=5, min_bin_pct=0.05)
+            try:
+                binner.fit(sub[f], sub[target])
+                return float(binner.iv_)
+            except Exception:
+                return None
+
+        values = [v for v in [_iv(df)] + [_iv(df[df["source"] == s]) for s in ("CMES", "CHFS", "CFPS")] if v is not None]
+        best_iv[f] = max(values) if values else 0.0
+
+    if base_iv:
+        return [dict(x, iv=round(best_iv.get(x.get("factor", ""), x.get("iv", 0.0)), 6)) for x in base_iv]
+    return [{"factor": f, "iv": round(best_iv.get(f, 0.0), 6), "nBins": 2} for f in feats]
+
+
 def run_fused_training(
     db=None,
     trained_by: str | None = None,
@@ -190,6 +224,12 @@ def run_fused_training(
 
     artifact_path = model_artifact.save_scorecard(scorecard)
     metrics = dict(scorecard.metrics)
+
+    # IV 图展示优化：全量 IV 会把 CMES 源内特征（经营年限/从业/贷款/民间借款）显示成 0，
+    # 因为它们在 CHFS/CFPS 大样本上无数据被稀释。改为展示「全量 IV 与各源内 IV 的最大值」，
+    # 让每个特征反映其实际可用于建模的预测力（与 _source_iv_keep 准入口径一致）。
+    metrics["ivTable"] = _display_iv_table(df, feats, target="default", base_iv=metrics.get("ivTable"))
+
     metrics["model_type"] = "data_layer"
     metrics["trainSource"] = "fused_real_survey"
     result = {
