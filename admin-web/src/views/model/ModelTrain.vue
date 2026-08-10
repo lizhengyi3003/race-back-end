@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import * as echarts from 'echarts'
 import StatCard from '@/components/StatCard.vue'
@@ -149,7 +149,14 @@ function renderCharts() {
 async function load() {
   info.value = await getModelInfo()
   metrics.value = await getModelMetrics()
+  // 等待 DOM 与布局完成：图表容器位于 el-col 中，宽度依赖布局计算，
+  // 缺 nextTick 时 echarts.init 可能以 0 宽初始化，导致 ROC/KS 曲线图空白
+  await nextTick()
   renderCharts()
+}
+
+function resizeCharts() {
+  charts.forEach((c) => c.resize())
 }
 
 async function doTrain() {
@@ -163,7 +170,14 @@ async function doTrain() {
   }
 }
 
-onMounted(load)
+onMounted(() => {
+  window.addEventListener('resize', resizeCharts)
+  load()
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', resizeCharts)
+  disposeCharts()
+})
 </script>
 
 <template>
@@ -211,7 +225,7 @@ onMounted(load)
         :value="metrics?.auc != null ? metrics.auc.toFixed(4) : '-'"
         icon="TrendCharts"
         color="#2c6e49"
-        desc="排序区分度：0.5=随机、1=完美，0.78 中等偏上。基于合成标签偏乐观，真实区分力看下方 B 验证。参考价值：中"
+        desc="排序区分度：0.5=随机、1=完美。基于合成标签偏乐观。参考价值：中"
       />
       <StatCard
         title="KS"
@@ -225,21 +239,21 @@ onMounted(load)
         :value="metrics?.recall != null ? (metrics.recall * 100).toFixed(1) + '%' : '-'"
         icon="CircleCheck"
         color="#67c23a"
-        desc="真实违约户中被识别出的比例（53%）。依赖分类阈值，换阈值即变，且基于合成标签。参考价值：低"
+        desc="真实违约户中被识别出的比例。依赖分类阈值，换阈值即变，且基于合成标签。参考价值：低"
       />
       <StatCard
         title="精确率"
         :value="metrics?.precision != null ? (metrics.precision * 100).toFixed(1) + '%' : '-'"
         icon="Aim"
         color="#e76f51"
-        desc="判为违约的客群中确违约的比例（49%），远超 5% 整体违约率、有甄别力。依赖阈值。参考价值：低-中"
+        desc="判为违约的客群中确违约的比例，远超整体违约率即有甄别力。依赖阈值。参考价值：低-中"
       />
       <StatCard
         title="F1"
         :value="metrics?.f1 != null ? metrics.f1.toFixed(4) : '-'"
         icon="Star"
         color="#9b5de5"
-        desc="召回与精确的调和平均（0.51），兼顾抓全与抓准，中等水平。依赖阈值。参考价值：低"
+        desc="召回与精确的调和平均，兼顾抓全与抓准。依赖阈值。参考价值：低"
       />
       <StatCard
         title="PSI"
