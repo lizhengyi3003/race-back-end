@@ -40,10 +40,13 @@ def _fused_samples_path() -> Path | None:
     return p if p.exists() else None
 
 
-def _fused_feature_cols(df: pd.DataFrame) -> list[str]:
+def _fused_feature_cols(df: pd.DataFrame, max_missing: float = 0.95) -> list[str]:
     """融合样本入模特征：排除内部列（source/*_wave/_*）与标签，仅保留数值指标列。
 
-    与 scripts/fusion/mappings.MODEL_FEATURES 对齐（按列是否存在过滤，缺失率<0.9）。
+    与 scripts/fusion/mappings.MODEL_FEATURES 对齐（按列是否存在过滤，缺失率<max_missing）。
+    阈值 0.95（而非 0.9）：多数特征是"源专属"（CMES 经营年限/从业/贷款、CHFS 负债率、
+    CFPS 民间借贷），融合后整体缺失率虚高是因为其它源对该字段贡献 0，而非数据质量差；
+    过严阈值（0.9）会把有业务价值的 CMES 特征误杀。IV/VIF 会进一步剔除弱特征。
     """
     MODEL_FEATURES = [
         "BASIC_003", "BASIC_004", "BASIC_005", "BASIC_008", "BASIC_009", "BASIC_019",
@@ -58,9 +61,47 @@ def _fused_feature_cols(df: pd.DataFrame) -> list[str]:
     for c in MODEL_FEATURES:
         if c not in df.columns:
             continue
-        if df[c].isna().mean() <= 0.9:
+        if df[c].isna().mean() <= max_missing:
             feats.append(c)
     return feats
+
+
+def _source_iv_keep(df: pd.DataFrame, feats: list[str], target: str = "default", min_iv: float = 0.02) -> list[str]:
+    """源内 IV 准入：候选特征在其数据最全的数据源内部计算 IV，≥min_iv 保留。
+
+    数据源：CMES（小微企业）、CHFS（家庭金融）、CFPS（家庭追踪）。多数特征为"源专属"，
+    全量融合后缺失率/IV 会因其它源贡献 0 而虚高/失真。改为在特征数据最全的源内
+    用合成标签分箱算 IV，保留有真实区分力的特征（如 CMES 经营年限 IV≈0.51）。
+    """
+    from app.ml.binning import WOEBinner
+
+    keep: list[str] = []
+    for f in feats:
+        if f not in df.columns:
+            continue
+        # 特征数据最全的数据源（源内缺失率最低）
+        best_src, best_miss = None, 1.0
+        for src in ("CMES", "CHFS", "CFPS"):
+            sub = df[df["source"] == src]
+            if f not in sub.columns:
+                continue
+            miss = sub[f].isna().mean()
+            if miss < best_miss:
+                best_src, best_miss = src, miss
+        if best_src is None or best_miss > 0.95:
+            continue
+        sub = df[df["source"] == best_src]
+        # 源内非空样本足够（≥500）且违约样本足够（≥30）才有意义
+        if sub[f].notna().sum() < 500 or sub[target].sum() < 30:
+            continue
+        binner = WOEBinner(f, is_categorical=False, max_bins=5, min_bin_pct=0.05)
+        try:
+            binner.fit(sub[f], sub[target])
+        except Exception:
+            continue
+        if binner.iv_ >= min_iv:
+            keep.append(f)
+    return keep
 
 
 def run_fused_training(
@@ -123,6 +164,12 @@ def run_fused_training(
     beta = (lo + hi) / 2
     df["default"] = (rng.random(len(df)) < (1.0 / (1.0 + np.exp(alpha * z_std + beta)))).astype(int)
 
+    # 源内 IV 准入：候选特征在其数据最全的数据源内部计算 IV（≥0.02 保留）。
+    # 原因：全量融合训练时，CMES 特征（经营年限/从业/贷款/民间借款）因 CMES 仅占 5.9%、
+    # 且合成标签由 CHFS/CFPS 大样本驱动，全量 IV≈0 被 Scorecard 剔除；但源内 IV 很高
+    # （如 BASIC_003 经营年限 IV=0.51），是有业务价值的特征，不应被"淹没"。
+    feats = _source_iv_keep(df, feats, target="default")
+
     version = version or f"v{datetime.now():%Y%m%d%H%M%S}"
     scorecard = Scorecard(
         version=version,
@@ -130,6 +177,7 @@ def run_fused_training(
         feature_cols=feats,
         categorical_cols=[],
         eval_threshold_mode="default_rate",
+        skip_iv_filter=True,  # 特征已由源内 IV 准入，跳过全量 IV 二次剔除（避免 CMES 特征被误杀）
     )
     scorecard.fit(df[feats + ["default"]], target_col="default")
 

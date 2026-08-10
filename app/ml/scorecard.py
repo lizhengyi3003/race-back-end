@@ -33,6 +33,7 @@ class Scorecard:
         feature_cols: list[str] | None = None,
         categorical_cols: list[str] | None = None,
         eval_threshold_mode: str = "business",
+        skip_iv_filter: bool = False,
     ):
         self.version = version
         self.max_bins = max_bins
@@ -43,6 +44,10 @@ class Scorecard:
         self.base_score = base_score
         self.random_state = random_state
         self.use_smote = use_smote
+        # 数据层融合训练：特征已由"源内 IV 准入"筛选（见 training._source_iv_keep），
+        # 全量 IV 会因源样本不平衡把 CMES 特征误杀 → 置 True 跳过全量 IV 二次剔除，
+        # 仅用 VIF 控制共线性（min_iv 仍用于 iv_table 展示，不影响入模）。
+        self.skip_iv_filter = skip_iv_filter
         # 特征列可配置（默认 15 项合成指标；数据层可传指标编码特征）
         self._features: list[str] = list(feature_cols) if feature_cols else list(INDICATOR_ORDER)
         self._categorical: set[str] = set(categorical_cols) if categorical_cols else set(CATEGORICAL_FIELDS)
@@ -111,10 +116,15 @@ class Scorecard:
         self.iv_table = [
             {"factor": f, "iv": round(iv_scores[f], 6), "nBins": len(self.binners[f].bins_)} for f in self._features
         ]
-        keep = [f for f in self._features if iv_scores[f] >= self.min_iv]
-        if not keep:
-            # 极端兜底：全部 IV 过低时保留 IV 最高的 3 个
-            keep = sorted(self._features, key=lambda f: iv_scores[f], reverse=True)[:3]
+        if self.skip_iv_filter:
+            # 数据层融合训练：特征已由"源内 IV 准入"筛选（源内 IV≥min_iv 才传入），
+            # 全量 IV 会因源样本不平衡误杀 CMES 特征 → 全部保留，交由 VIF 控制共线性
+            keep = list(self._features)
+        else:
+            keep = [f for f in self._features if iv_scores[f] >= self.min_iv]
+            if not keep:
+                # 极端兜底：全部 IV 过低时保留 IV 最高的 3 个
+                keep = sorted(self._features, key=lambda f: iv_scores[f], reverse=True)[:3]
 
         # 5) WOE 转换（训练集）
         woe_train = self._woe_frame(df_train, keep)
@@ -241,7 +251,10 @@ class Scorecard:
             vifs = []
             for i in range(X.shape[1]):
                 try:
-                    vifs.append(float(variance_inflation_factor(X, i)))
+                    v = float(variance_inflation_factor(X, i))
+                    # WOE 列含缺失/常数列时 statsmodels 可能返回 NaN/Inf，
+                    # 视为无共线性问题（VIF=1），避免把有业务价值的特征误杀
+                    vifs.append(v if np.isfinite(v) else 1.0)
                 except Exception:
                     vifs.append(1.0)
             if max(vifs) <= self.vif_threshold:

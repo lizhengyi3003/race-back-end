@@ -32,6 +32,39 @@ const rocChartRef = ref<HTMLElement>()
 const ksChartRef = ref<HTMLElement>()
 const ivChartRef = ref<HTMLElement>()
 
+// 指标代码 → 中文名（数据层评分卡入模特征，来自 scripts/fusion/mappings.py）
+const FACTOR_LABELS: Record<string, string> = {
+  BASIC_003: '注册成立年限',
+  BASIC_004: '实际经营年限',
+  BASIC_005: '从业人员数',
+  BASIC_008: '年营业收入（万元）',
+  BASIC_009: '资产负债率',
+  BASIC_019: '待偿贷款金额（万元）',
+  '01_05': '土地经营面积',
+  '0111_01': '谷物播种面积',
+  '0111_05': '玉米面积',
+  '0111_08': '粳稻面积',
+  '0112_04': '大豆面积',
+  '1041_02': '最大贷款金额（万元）',
+  _cmes_had_loan: '是否有未还贷款',
+  _cmes_profit: '是否有利润',
+  _cmes_credit: '是否有未还民间借款',
+  _cmes_purchase_credit: '农资赊销/借款',
+  _chfs_agri: '是否涉农家庭',
+  _chfs_income: '家庭总收入',
+  _cfps_agri: '是否从事种植/林业',
+  _cfps_livestock: '是否养牲畜/水产品',
+  _cfps_hus_input: '牲畜水产投入',
+  _cfps_private_debt: '待偿民间借贷',
+  _cfps_income: '全部家庭纯收入',
+  _cfps_assets: '全部经营总资产',
+  _total_asset: '家庭总/净资产',
+  _hh_size: '家庭成员人口数',
+}
+function factorLabel(code: string): string {
+  return FACTOR_LABELS[code] || code
+}
+
 // 混淆矩阵（HTML 网格展示，避免 heatmap 渲染问题）
 const cmDisplay = computed(() => {
   const cm = metrics.value?.confusionMatrix
@@ -124,10 +157,19 @@ function renderCharts() {
     charts.push(chart)
     const sorted = [...metrics.value.ivTable].sort((a, b) => a.iv - b.iv)
     chart.setOption({
-      tooltip: { trigger: 'axis' },
-      grid: { top: 20, right: 30, bottom: 20, left: 120 },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' },
+        formatter: (params: any) => {
+          const p = params?.[0]
+          if (!p) return ''
+          const d = sorted[p.dataIndex]
+          return `${factorLabel(d.factor)}（${d.factor}）<br/>IV=${d.iv}`
+        },
+      },
+      grid: { top: 20, right: 40, bottom: 20, left: 150 },
       xAxis: { type: 'value', name: 'IV' },
-      yAxis: { type: 'category', data: sorted.map((d) => d.factor) },
+      yAxis: { type: 'category', data: sorted.map((d) => factorLabel(d.factor)) },
       series: [
         {
           type: 'bar',

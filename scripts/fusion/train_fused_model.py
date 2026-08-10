@@ -98,7 +98,9 @@ def real_risk_signal(df: pd.DataFrame, exclude: set[str] | None = None) -> pd.Se
     return sig.where(any_signal)  # 无任何负面字段的样本为 NaN（不参与验证）
 
 
-def select_features(df: pd.DataFrame, max_missing: float = 0.9) -> list[str]:
+def select_features(df: pd.DataFrame, max_missing: float = 0.95) -> list[str]:
+    """候选特征筛选：缺失率阈值 0.95（多数特征为源专属，融合后整体缺失率虚高，
+    过严阈值会误杀有业务价值的 CMES 特征；IV/VIF 会进一步剔除弱特征）。"""
     feats = []
     for c in MODEL_FEATURES:
         if c not in df.columns:
@@ -126,11 +128,17 @@ def train(version: str, subset: str, register: bool) -> None:
     print(f"子集: {subset}, 样本 {len(df)} 行")
 
     feats = select_features(df)
-    print(f"入模特征（缺失率<0.9）: {feats}")
+    print(f"候选特征（缺失率<0.95）: {feats}")
 
     # A 标签
     df["default"] = synth_label(df)
     print(f"A 标签违约率: {df['default'].mean():.4f}")
+
+    # 源内 IV 准入：特征在其数据最全的数据源内 IV≥0.02 才保留（避免 CMES 特征被全量标签淹没）
+    from app.ml.training import _source_iv_keep
+
+    feats = _source_iv_keep(df, feats, target="default")
+    print(f"源内 IV 准入后特征: {feats}")
 
     # 训练
     sv = f"v{time.strftime('%Y%m%d%H%M%S')}"
@@ -140,6 +148,7 @@ def train(version: str, subset: str, register: bool) -> None:
         feature_cols=feats,
         categorical_cols=[],
         eval_threshold_mode="default_rate",
+        skip_iv_filter=True,  # 特征已由源内 IV 准入，跳过全量 IV 二次剔除
     )
     scorecard.fit(df[feats + ["default"]], target_col="default")
 
